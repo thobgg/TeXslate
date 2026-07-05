@@ -3,7 +3,7 @@
 > **Dieses Dokument ist der vollständige Projektkontext.** Es entstand aus einer
 > Planungs-Session und enthält alles Nötige: Motivation, Architektur, Milestones,
 > Risiken und Release-Strategie. Verwende es als Grundlage
-> für die Entwicklung mit Claude Code — es gibt keinen weiteren Kontext.
+> für die Weiterentwicklung — es gibt keinen weiteren Kontext.
 
 ---
 
@@ -40,8 +40,8 @@ externe Tastatur, Stift), Phone als sekundäres Layout.
 - **Motivations-Prinzip (verbindlich):** Keine wochenlange Arbeit ohne
   sichtbares Ergebnis. **Jede Arbeitssession endet mit etwas, das auf
   Emulator oder Tablet läuft und sichtbar mehr kann als vorher.**
-  Die Milestones sind darum in kleine "Quick Wins" unterteilt — Claude Code
-  soll Aufgaben immer so schneiden, dass am Sessionende ein demonstrierbares
+  Die Milestones sind darum in kleine "Quick Wins" unterteilt — Aufgaben
+  sind immer so zu schneiden, dass am Sessionende ein demonstrierbares
   Zwischenergebnis steht, das die Realisierbarkeit bestätigt.
 
 ## 2. Architektur
@@ -156,14 +156,14 @@ Erfolgserlebnis gibt:
 - Stift-Input für Formel-Skizzen, später evtl. Handwriting-to-LaTeX.
   **Nicht in M0–M6 ziehen** — Scope-Disziplin.
 
-## 4. Arbeitsweise mit Claude Code
+## 4. Arbeitsweise & Branch-Strategie
 
 - **Oberste Regel:** Aufgaben immer entlang der Quick Wins schneiden. Wenn
   eine Session endet, muss das "🎉 Sichtbar:"-Kriterium des aktuellen QW
   erfüllt sein — lieber einen QW sauber abschließen als zwei anreißen.
   Niemals mehrere Tage "unsichtbare" Infrastruktur bauen.
 - Ein Milestone = ein Branch; erst mergen, wenn alle QW-Checkboxen erfüllt
-  sind. Ein QW = typischerweise eine Claude-Code-Session + ein Commit.
+  sind. Ein QW = typischerweise eine Arbeitssession + ein Commit.
 - M0 als isolierten Spike behandeln: separates Repo/Verzeichnis ist ok,
   Ergebnis dann ins Hauptprojekt übernehmen.
 - Bei M0-Blockern (NDK/Rust-Linking): zuerst prüfen, ob es fertige
