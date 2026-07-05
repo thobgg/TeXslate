@@ -1,0 +1,51 @@
+# ─────────────────────────────────────────────────────────────
+# Android / Gradle
+# ─────────────────────────────────────────────────────────────
+*.iml
+.gradle/
+/build
+/app/build
+/captures
+.externalNativeBuild
+.cxx/
+local.properties
+/local.properties
+.DS_Store
+*.apk
+*.aab
+*.ap_
+*.dex
+release/
+
+# Android Studio / IntelliJ (teilbare Configs bleiben getrackt)
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deploymentTargetDropDown.xml
+.kotlin/
+*.hprof
+
+# Keystore / Signing — NIEMALS committen!
+*.jks
+*.keystore
+keystore.properties
+
+# ─────────────────────────────────────────────────────────────
+# Rust / Cargo (spätere Tectonic-Bindung via cargo-ndk)
+# ─────────────────────────────────────────────────────────────
+target/
+**/*.rs.bk
+*.pdb
+# Kompilierte native Libs werden beim Build erzeugt, nicht committen:
+app/src/main/jniLibs/**/*.so
+
+# ─────────────────────────────────────────────────────────────
+# Sonstiges
+# ─────────────────────────────────────────────────────────────
+*.log
+.env
+.env.local
