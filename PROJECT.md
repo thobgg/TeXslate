@@ -86,9 +86,11 @@ Erfolgserlebnis gibt:
       Kotlin aufrufen, Ergebnis in der App anzeigen.
       🎉 Sichtbar: "2+3=5, berechnet in Rust" auf dem Bildschirm —
       die kritische Rust↔Kotlin-Brücke steht, ganz ohne Tectonic-Komplexität.
-- [ ] **QW 0.3 (~2–4 Std.):** Tectonic für `arm64-v8a` (zuerst nur dieses ABI!)
-      cross-compilen und einbinden.
-      🎉 Sichtbar: App-Log zeigt Tectonic-Versionsstring vom Gerät.
+- [x] **QW 0.3 (~2–4 Std.):** Tectonic cross-compilen und einbinden.
+      Statt `arm64-v8a` zuerst **`x86_64`** (der Emulator ist x86_64) — C-Stack via
+      vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` steht noch aus.
+      🎉 Sichtbar: App zeigt „Tectonic-Engine eingebettet ✓ / XeTeX format serial: 33"
+      auf dem Gerät.
 - [ ] **QW 0.4 (~1–2 Std.):** Button kompiliert fest einprogrammiertes
       Mini-`.tex`, Ausgabepfad + Dateigröße des PDFs anzeigen.
       🎉 Sichtbar: **Erstes PDF, lokal auf Android erzeugt** —

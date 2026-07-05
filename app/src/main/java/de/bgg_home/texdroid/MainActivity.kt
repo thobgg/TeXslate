@@ -40,7 +40,8 @@ fun RustDemo(modifier: Modifier = Modifier) {
     // statt die App abstürzen zu lassen.
     val line: String = try {
         val sum = RustBridge.add(2, 3)
-        "2 + 3 = $sum\nberechnet in Rust 🦀"
+        val tectonic = RustBridge.tectonicVersion()
+        "2 + 3 = $sum · berechnet in Rust 🦀\n\n$tectonic"
     } catch (t: Throwable) {
         "Rust-Bibliothek nicht geladen:\n${t.message}"
     }

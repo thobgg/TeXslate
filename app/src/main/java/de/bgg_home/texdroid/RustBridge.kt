@@ -18,4 +18,7 @@ object RustBridge {
     }
 
     external fun add(a: Int, b: Int): Int
+
+    /** Liefert einen Nachweis, dass die native Tectonic/XeTeX-Engine eingebettet ist. */
+    external fun tectonicVersion(): String
 }

@@ -14,3 +14,9 @@ crate-type = ["cdylib"]
 # JNI-Bindings: liefert die C-kompatiblen Typen (jint, JNIEnv, JClass ...).
 # Gleicher Mechanismus, den wir später für Tectonic (Strings/Pfade) brauchen.
 jni = "0.21"
+
+# Der LaTeX/XeTeX-Compiler. native-tls-vendored baut OpenSSL für Android mit.
+# Die C-Abhängigkeiten (ICU, HarfBuzz, FreeType, fontconfig ...) kommen über
+# vcpkg — Build braucht daher: TECTONIC_DEP_BACKEND=vcpkg, VCPKGRS_TRIPLET,
+# VCPKG_ROOT gesetzt (siehe build-native.sh).
+tectonic = { version = "0.16", features = ["native-tls-vendored"] }

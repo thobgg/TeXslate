@@ -4,7 +4,7 @@
 // Später hängt an genau diesem Mechanismus der Tectonic-Compiler.
 
 use jni::objects::JClass;
-use jni::sys::jint;
+use jni::sys::{jint, jstring};
 use jni::JNIEnv;
 
 // ─────────────────────────────────────────────────────────────
@@ -29,4 +29,23 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_add(
     b: jint,
 ) -> jint {
     a + b
+}
+
+// QW 0.3: beweist, dass die native Tectonic/XeTeX-Engine wirklich eingebettet
+// ist. FORMAT_SERIAL ist eine Konstante direkt aus der XeTeX-Engine — sie hier
+// auf dem Gerät auszulesen ist der Nachweis, dass Tectonic für Android gebaut
+// und gelinkt wurde. Rückgabe: ein Java-String (jstring).
+#[no_mangle]
+pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicVersion<'a>(
+    mut env: JNIEnv<'a>,
+    _class: JClass<'a>,
+) -> jstring {
+    let msg = format!(
+        "Tectonic-Engine eingebettet ✓\nXeTeX format serial: {}",
+        tectonic::FORMAT_SERIAL
+    );
+    match env.new_string(msg) {
+        Ok(s) => s.into_raw(),
+        Err(_) => std::ptr::null_mut(),
+    }
 }

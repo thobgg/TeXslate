@@ -42,6 +42,47 @@ proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
 - [ ] **M4** — Projektverwaltung (Multi-File)
 - [ ] **M5** — F-Droid-Release
 
+## Native Build (Tectonic)
+
+Die native Bibliothek (`rust/` → `libtexdroid_native.so`) bettet den Tectonic-Compiler
+ein. Tectonic braucht einen für Android cross-kompilierten C-Stack (ICU, HarfBuzz,
+FreeType, graphite2, libpng, fontconfig) — dafür nutzen wir **vcpkg** als
+`TECTONIC_DEP_BACKEND`.
+
+**Einmalige Einrichtung:**
+
+```bash
+# Rust + Android-Targets + cargo-ndk
+rustup target add x86_64-linux-android aarch64-linux-android
+cargo install cargo-ndk
+
+# NDK: via Android Studio → SDK Manager → SDK Tools → "NDK (Side by side)"
+
+# Host-Tools (Debian/Ubuntu)
+sudo apt install -y cmake ninja-build pkg-config autoconf automake \
+  libtool libtool-bin bison gperf autoconf-archive
+
+# vcpkg + C-Stack für das gewünschte Android-Triplet (Beispiel: Emulator = x64-android)
+git clone https://github.com/microsoft/vcpkg ~/vcpkg && ~/vcpkg/bootstrap-vcpkg.sh
+ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> ~/vcpkg/vcpkg install --triplet x64-android \
+  "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
+# für echte Tablets zusätzlich: --triplet arm64-android
+```
+
+**Bauen:**
+
+```bash
+./build-native.sh                    # x86_64 (Emulator)
+./build-native.sh x86_64 arm64-v8a   # beide (arm64 braucht den arm64-android-Stack)
+./gradlew :app:installDebug
+```
+
+Das Skript legt `libtexdroid_native.so` **und** `libc++_shared.so` in
+`app/src/main/jniLibs/<abi>/` ab (HarfBuzz/ICU sind C++ und brauchen die NDK-Laufzeit).
+
+> **Status:** Bisher nur `x86_64` (Emulator) gebaut/getestet. `arm64-v8a` (echte Tablets)
+> ist offen — gleicher vcpkg-Stack für `arm64-android` nötig.
+
 ## Lizenz
 
 [GNU General Public License v3.0](./LICENSE) (GPLv3). Kompatibel mit Tectonic (MIT).
