@@ -1,0 +1,15 @@
+{
+  "languages": [
+    {
+      "name": "latex",
+      "scopeName": "text.tex.latex",
+      "grammar": "textmate/latex/LaTeX.tmLanguage.json",
+      "languageConfiguration": "textmate/latex/language-configuration.json"
+    },
+    {
+      "name": "tex",
+      "scopeName": "text.tex",
+      "grammar": "textmate/latex/TeX.tmLanguage.json"
+    }
+  ]
+}

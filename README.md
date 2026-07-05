@@ -88,6 +88,26 @@ Das Skript legt `libtexdroid_native.so` **und** `libc++_shared.so` in
 [GNU General Public License v3.0](./LICENSE) (GPLv3). Kompatibel mit Tectonic (MIT).
 Der Quellcode bleibt frei; Play-Store-Distribution bleibt erlaubt.
 
+### Drittanbieter / mitgelieferte Assets
+
+- **LaTeX-/TeX-TextMate-Grammatik** (`app/src/main/assets/textmate/latex/`):
+  `LaTeX.tmLanguage.json`, `TeX.tmLanguage.json` und `language-configuration.json`
+  stammen aus **[jlelong/vscode-latex-basics](https://github.com/jlelong/vscode-latex-basics)**
+  und stehen unter der **MIT-Lizenz**.
+  Copyright © jlelong/vscode-latex-basics contributors.
+  Vollständiger Lizenztext: [`app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt`](./app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt).
+  Minimale Anpassung (von der MIT-Lizenz gedeckt): In `TeX.tmLanguage.json` wurde
+  das Muster `(?<=^\s*)` (variable-length Look-behind in den `\if…\fi`-Regeln)
+  entfernt, weil die von sora-editor genutzte `joni`-Regex-Engine (Java-Oniguruba-Port)
+  — anders als Oniguruma in VS Code — kein variables Look-behind unterstützt und
+  sonst die gesamte Syntax-Hervorhebung ausfällt.
+- **sora-editor** (Editor-View) ist als Dependency eingebunden (LGPL v2.1),
+  **ohne Modifikation der Bibliothek** – LGPL-konform.
+- **Editor-Farbschemata** (`app/src/main/assets/textmate/themes/`): „Quiet Light"
+  (hell) und „Darcula" (dunkel) stammen aus den Beispiel-Assets von sora-editor
+  bzw. den zugrundeliegenden VS-Code-Themes und werden im TextMate-JSON-Format
+  geladen.
+
 ---
 
 _Nicht verwechseln mit der gleichnamigen, inaktiven Render-Library `hansihe/TexDroid` —
