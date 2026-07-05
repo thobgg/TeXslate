@@ -1,5 +1,8 @@
 package de.bgg_home.texdroid.ui
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -41,6 +45,7 @@ import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
 import de.bgg_home.texdroid.pdf.PdfPreview
+import de.bgg_home.texdroid.storage.DocumentStore
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.launch
 import java.io.File
@@ -94,6 +99,62 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var errors by remember { mutableStateOf<List<CompileError>>(emptyList()) }
     var selectedTab by remember { mutableStateOf(Tab.Editor) }
 
+    // Aktuell geöffnete Datei (SAF): Uri, Anzeigename und ob wir zurückschreiben dürfen.
+    var currentUri by remember { mutableStateOf<Uri?>(null) }
+    var currentName by remember { mutableStateOf<String?>(null) }
+    var canWrite by remember { mutableStateOf(false) }
+
+    // SAF: Datei öffnen (ACTION_OPEN_DOCUMENT).
+    val openLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) {
+            canWrite = DocumentStore.takePersistablePermission(context, uri)
+            scope.launch {
+                val text = DocumentStore.read(context, uri)
+                editor?.setText(text)
+                currentUri = uri
+                currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
+                snackbarHostState.showSnackbar("Geöffnet: $currentName")
+            }
+        }
+    }
+
+    // SAF: „Speichern unter…" (ACTION_CREATE_DOCUMENT).
+    val saveAsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/plain"),
+    ) { uri ->
+        val text = editor?.text?.toString()
+        if (uri != null && text != null) {
+            canWrite = DocumentStore.takePersistablePermission(context, uri)
+            scope.launch {
+                DocumentStore.write(context, uri, text)
+                currentUri = uri
+                currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
+                snackbarHostState.showSnackbar("Gespeichert: $currentName")
+            }
+        }
+    }
+
+    fun openDocument() {
+        // */* – .tex meldet je nach Gerät text/plain, text/x-tex oder octet-stream.
+        openLauncher.launch(arrayOf("*/*"))
+    }
+
+    fun saveDocument() {
+        val text = editor?.text?.toString() ?: return
+        val uri = currentUri
+        if (uri != null && canWrite) {
+            scope.launch {
+                DocumentStore.write(context, uri, text)
+                snackbarHostState.showSnackbar("Gespeichert: ${currentName ?: "Dokument"}")
+            }
+        } else {
+            // Noch keine (beschreibbare) Datei → „Speichern unter…".
+            saveAsLauncher.launch(currentName ?: "dokument.tex")
+        }
+    }
+
     fun runCompile() {
         val source = editor?.text?.toString()
         if (source == null || compiling) return
@@ -114,7 +175,15 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { AppHeader(compiling = compiling, onCompile = ::runCompile) },
+        topBar = {
+            AppHeader(
+                fileName = currentName,
+                compiling = compiling,
+                onOpen = ::openDocument,
+                onSave = ::saveDocument,
+                onCompile = ::runCompile,
+            )
+        },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding).fillMaxSize()) {
@@ -171,7 +240,13 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 }
 
 @Composable
-private fun AppHeader(compiling: Boolean, onCompile: () -> Unit) {
+private fun AppHeader(
+    fileName: String?,
+    compiling: Boolean,
+    onOpen: () -> Unit,
+    onSave: () -> Unit,
+    onCompile: () -> Unit,
+) {
     Surface(color = MaterialTheme.colorScheme.primaryContainer) {
         Row(
             modifier = Modifier
@@ -180,22 +255,35 @@ private fun AppHeader(compiling: Boolean, onCompile: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            // Titel + aktueller Dateiname (falls eine Datei geöffnet ist).
             Text(
-                text = "TexDroid",
+                text = if (fileName != null) "TexDroid — $fileName" else "TexDroid",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
-            Button(onClick = onCompile, enabled = !compiling) {
-                if (compiling) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(end = 8.dp),
-                        strokeWidth = 2.dp,
-                    )
-                    Text("Kompiliere …")
-                } else {
-                    Text("Kompilieren")
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+                TextButton(onClick = onOpen, enabled = !compiling) { Text("Öffnen") }
+                TextButton(onClick = onSave, enabled = !compiling) { Text("Speichern") }
+                CompileButton(compiling = compiling, onCompile = onCompile)
             }
+        }
+    }
+}
+
+@Composable
+private fun CompileButton(compiling: Boolean, onCompile: () -> Unit) {
+    Button(onClick = onCompile, enabled = !compiling) {
+        if (compiling) {
+            CircularProgressIndicator(
+                modifier = Modifier.padding(end = 8.dp),
+                strokeWidth = 2.dp,
+            )
+            Text("Kompiliere …")
+        } else {
+            Text("Kompilieren")
         }
     }
 }
