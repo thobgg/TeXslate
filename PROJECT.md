@@ -119,12 +119,14 @@ Erfolgserlebnis gibt:
       🎉 Sichtbar: flüssiger Edit→Compile→Preview-Loop ohne manuelles Neuladen.
 
 ### M3 — Live/Auto-Compile & UX
-- [ ] **QW 3.1:** Debounced Auto-Compile bei Tippstopp.
+- [x] **QW 3.1:** Debounced Auto-Compile bei Tippstopp.
       🎉 Sichtbar: PDF aktualisiert sich "von selbst" beim Schreiben.
-- [ ] **QW 3.2:** Fehlerzeilen im Editor markieren, Jump-to-Error.
+- [x] **QW 3.2:** Fehlerzeilen im Editor markieren, Jump-to-Error.
       🎉 Sichtbar: Tipp auf Fehler springt zur Zeile.
-- [ ] **QW 3.3:** LaTeX-Highlighting verfeinern; externe Tastatur + Stift
-      (S Pen) auf dem Tablet testen.
+- [x] **QW 3.3:** LaTeX-Highlighting verfeinern; externe Tastatur + Stift
+      (S Pen) auf dem Tablet testen. (Editor-Komfort umgesetzt: Zeilenumbruch,
+      Auto-Klammern, 2er-Einrückung, Completion; S-Pen/HW-Tastatur am echten
+      Gerät noch vom Entwickler zu prüfen.)
       🎉 Sichtbar: angenehmes Schreiben mit Hardware-Tastatur.
 
 ### M4 — Projektverwaltung

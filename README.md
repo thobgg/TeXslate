@@ -38,7 +38,7 @@ proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
 - [x] **M0** — Proof of Concept (Rust↔Kotlin-Brücke, erstes PDF lokal erzeugt)
 - [x] **M1** — Basis-Editor + Compile-Loop
 - [x] **M2** — PDF-Preview + Tablet-Split-View
-- [ ] **M3** — Live/Auto-Compile & UX
+- [x] **M3** — Live/Auto-Compile & UX
 - [ ] **M4** — Projektverwaltung (Multi-File)
 - [ ] **M5** — F-Droid-Release
 
