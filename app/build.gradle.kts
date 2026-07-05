@@ -32,6 +32,18 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    // Pro ABI eine eigene APK statt einer fetten Universal-APK. Jede native
+    // Tectonic-Lib ist ~60 MB – so bleibt die Tablet-APK (arm64-v8a) halb so groß.
+    // installDebug installiert automatisch die zum Gerät passende Variante.
+    splits {
+        abi {
+            isEnable = true
+            reset()
+            include("arm64-v8a", "x86_64")
+            isUniversalApk = false
+        }
+    }
+
     buildFeatures {
         compose = true
     }

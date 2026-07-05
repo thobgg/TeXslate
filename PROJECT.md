@@ -86,7 +86,9 @@ Erfolgserlebnis gibt:
       die kritische Rust↔Kotlin-Brücke steht, ganz ohne Tectonic-Komplexität.
 - [x] **QW 0.3:** Tectonic cross-compilen und einbinden.
       Statt `arm64-v8a` zuerst **`x86_64`** (der Emulator ist x86_64) — C-Stack via
-      vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` steht noch aus.
+      vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` inzwischen
+      ebenfalls gebaut (via ABI-Splits eigene Tablet-APK), aber noch nicht auf
+      echtem Gerät getestet.
       🎉 Sichtbar: App zeigt „Tectonic-Engine eingebettet ✓ / XeTeX format serial: 33"
       auf dem Gerät.
 - [x] **QW 0.4:** Fest einprogrammiertes Mini-`.tex` wird beim App-Start
