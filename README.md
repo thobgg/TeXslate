@@ -74,14 +74,21 @@ ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> ~/vcpkg/vcpkg install --triplet x64
 ```bash
 ./build-native.sh                    # x86_64 (Emulator)
 ./build-native.sh x86_64 arm64-v8a   # beide (arm64 braucht den arm64-android-Stack)
-./gradlew :app:installDebug
+./gradlew :app:assembleDebug         # baut je ABI eine eigene APK (ABI-Splits)
+./gradlew :app:installDebug          # installiert die zum Gerät passende Variante
 ```
 
 Das Skript legt `libtexdroid_native.so` **und** `libc++_shared.so` in
 `app/src/main/jniLibs/<abi>/` ab (HarfBuzz/ICU sind C++ und brauchen die NDK-Laufzeit).
 
-> **Status:** Bisher nur `x86_64` (Emulator) gebaut/getestet. `arm64-v8a` (echte Tablets)
-> ist offen — gleicher vcpkg-Stack für `arm64-android` nötig.
+Über **ABI-Splits** entstehen getrennte APKs pro Architektur (jede native
+Tectonic-Lib ist ~60 MB), z.B. `app-arm64-v8a-debug.apk` (~80 MB, fürs Tablet)
+und `app-x86_64-debug.apk` (fürs Emulator) unter `app/build/outputs/apk/debug/`.
+
+> **Status:** `x86_64` (Emulator) und `arm64-v8a` (echte Tablets) sind gebaut.
+> Der x86_64-Build ist auf dem Emulator getestet; der arm64-Build ist gebaut und
+> verifiziert (Symbol + `libc++_shared.so` in der APK), aber noch nicht auf einem
+> echten Gerät gelaufen. `armeabi-v7a` weiterhin offen.
 
 ## Lizenz
 
