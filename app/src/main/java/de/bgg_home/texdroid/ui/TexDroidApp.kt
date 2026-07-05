@@ -3,6 +3,7 @@ package de.bgg_home.texdroid.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +47,8 @@ import androidx.compose.ui.unit.dp
 import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
+import de.bgg_home.texdroid.editor.jumpToErrorLine
+import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import io.github.rosemoe.sora.widget.CodeEditor
@@ -191,6 +194,18 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         runCompile()
     }
 
+    // QW 3.2: Fehlerzeilen im Editor markieren, sobald sich die Fehlerliste ändert.
+    LaunchedEffect(errors, editor) {
+        editor?.showErrorDiagnostics(errors)
+    }
+
+    // QW 3.2: Tipp auf einen Fehler → Sprung zur Zeile (auf dem Phone zuerst
+    // zum Editor-Tab wechseln, damit man den Cursor sieht).
+    val onErrorClick: (CompileError) -> Unit = { err ->
+        selectedTab = Tab.Editor
+        err.line?.let { editor?.jumpToErrorLine(it) }
+    }
+
     val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     Scaffold(
@@ -217,6 +232,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                         darkTheme = darkTheme,
                         onEditorCreated = { editor = it },
                         onTextChanged = { textVersion++ },
+                        onErrorClick = onErrorClick,
                         modifier = Modifier.weight(1f).fillMaxSize(),
                     )
                     VerticalDivider()
@@ -248,6 +264,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             darkTheme = darkTheme,
                             onEditorCreated = { editor = it },
                             onTextChanged = { textVersion++ },
+                            onErrorClick = onErrorClick,
                             modifier = Modifier.fillMaxSize(),
                         )
                         Tab.Preview -> PreviewPane(
@@ -323,6 +340,7 @@ private fun EditorPane(
     darkTheme: Boolean,
     onEditorCreated: (CodeEditor) -> Unit,
     onTextChanged: () -> Unit,
+    onErrorClick: (CompileError) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -334,13 +352,13 @@ private fun EditorPane(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         if (errors.isNotEmpty()) {
-            ErrorPanel(errors)
+            ErrorPanel(errors, onErrorClick)
         }
     }
 }
 
 @Composable
-private fun ErrorPanel(errors: List<CompileError>) {
+private fun ErrorPanel(errors: List<CompileError>, onErrorClick: (CompileError) -> Unit) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         modifier = Modifier.fillMaxWidth(),
@@ -353,7 +371,7 @@ private fun ErrorPanel(errors: List<CompileError>) {
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             Text(
-                text = "Fehler (${errors.size})",
+                text = "Fehler (${errors.size}) – zum Springen antippen",
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onErrorContainer,
             )
@@ -363,8 +381,11 @@ private fun ErrorPanel(errors: List<CompileError>) {
                     text = "• $prefix${err.message}",
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                     color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onErrorClick(err) } // QW 3.2: Sprung zur Fehlerzeile
+                        .padding(vertical = 2.dp),
                 )
-                // TODO(M3): Tap auf Fehler → Sprung zur Zeile im Editor (via SyncTeX / setSelection).
             }
         }
     }
