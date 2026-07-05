@@ -9,7 +9,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -43,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
@@ -294,15 +300,23 @@ private fun AppHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                // Edge-to-edge: nicht hinter Statusleiste / Kamera-Notch rutschen.
+                .windowInsetsPadding(
+                    WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
+                )
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Titel + aktueller Dateiname (falls eine Datei geöffnet ist).
+            // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
+            // damit die Buttons rechts IMMER sichtbar bleiben (nie aus dem Bild geschoben).
             Text(
                 text = if (fileName != null) "TexDroid — $fileName" else "TexDroid",
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
             )
             Row(
                 verticalAlignment = Alignment.CenterVertically,
