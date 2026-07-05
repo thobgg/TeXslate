@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -30,6 +31,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -47,8 +49,12 @@ import de.bgg_home.texdroid.editor.LatexEditor
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+
+/** Wartezeit nach dem letzten Tastendruck, bevor automatisch kompiliert wird. */
+private const val AUTO_COMPILE_DEBOUNCE_MS = 800L
 
 /** Beispiel-Dokument beim ersten Start – zeigt alle gehighlighteten Elemente. */
 private val SAMPLE_TEX = """
@@ -98,6 +104,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var reloadToken by remember { mutableIntStateOf(0) }
     var errors by remember { mutableStateOf<List<CompileError>>(emptyList()) }
     var selectedTab by remember { mutableStateOf(Tab.Editor) }
+
+    // Auto-Compile (QW 3.1): zählt Editor-Änderungen; ein LaunchedEffect debounced darauf.
+    var autoCompile by remember { mutableStateOf(true) }
+    var textVersion by remember { mutableIntStateOf(0) }
 
     // Aktuell geöffnete Datei (SAF): Uri, Anzeigename und ob wir zurückschreiben dürfen.
     var currentUri by remember { mutableStateOf<Uri?>(null) }
@@ -171,6 +181,16 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         }
     }
 
+    // QW 3.1: Debounce – nach der letzten Änderung kurz warten, dann kompilieren.
+    // Da der Effekt bei jedem textVersion-Wechsel neu startet, wird ein noch
+    // wartender Auto-Compile bei jedem weiteren Tastendruck verworfen (= entprellt).
+    LaunchedEffect(textVersion, autoCompile) {
+        if (!autoCompile || textVersion == 0) return@LaunchedEffect
+        delay(AUTO_COMPILE_DEBOUNCE_MS)
+        while (compiling) delay(150) // läuft gerade ein Compile? kurz warten.
+        runCompile()
+    }
+
     val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     Scaffold(
@@ -179,6 +199,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             AppHeader(
                 fileName = currentName,
                 compiling = compiling,
+                autoCompile = autoCompile,
+                onAutoCompileChange = { autoCompile = it },
                 onOpen = ::openDocument,
                 onSave = ::saveDocument,
                 onCompile = ::runCompile,
@@ -194,6 +216,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                         errors = errors,
                         darkTheme = darkTheme,
                         onEditorCreated = { editor = it },
+                        onTextChanged = { textVersion++ },
                         modifier = Modifier.weight(1f).fillMaxSize(),
                     )
                     VerticalDivider()
@@ -224,6 +247,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             errors = errors,
                             darkTheme = darkTheme,
                             onEditorCreated = { editor = it },
+                            onTextChanged = { textVersion++ },
                             modifier = Modifier.fillMaxSize(),
                         )
                         Tab.Preview -> PreviewPane(
@@ -243,6 +267,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 private fun AppHeader(
     fileName: String?,
     compiling: Boolean,
+    autoCompile: Boolean,
+    onAutoCompileChange: (Boolean) -> Unit,
     onOpen: () -> Unit,
     onSave: () -> Unit,
     onCompile: () -> Unit,
@@ -265,6 +291,9 @@ private fun AppHeader(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
+                // Auto-Compile-Schalter (QW 3.1).
+                Text("Auto", style = MaterialTheme.typography.labelLarge)
+                Switch(checked = autoCompile, onCheckedChange = onAutoCompileChange)
                 TextButton(onClick = onOpen, enabled = !compiling) { Text("Öffnen") }
                 TextButton(onClick = onSave, enabled = !compiling) { Text("Speichern") }
                 CompileButton(compiling = compiling, onCompile = onCompile)
@@ -293,6 +322,7 @@ private fun EditorPane(
     errors: List<CompileError>,
     darkTheme: Boolean,
     onEditorCreated: (CodeEditor) -> Unit,
+    onTextChanged: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -300,6 +330,7 @@ private fun EditorPane(
             initialText = SAMPLE_TEX,
             darkTheme = darkTheme,
             onEditorCreated = onEditorCreated,
+            onTextChanged = onTextChanged,
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         if (errors.isNotEmpty()) {

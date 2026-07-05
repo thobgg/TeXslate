@@ -7,6 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
+import io.github.rosemoe.sora.event.ContentChangeEvent
 import io.github.rosemoe.sora.langs.textmate.TextMateColorScheme
 import io.github.rosemoe.sora.langs.textmate.TextMateLanguage
 import io.github.rosemoe.sora.langs.textmate.registry.FileProviderRegistry
@@ -67,14 +68,16 @@ private object TextMateAssets {
  * [AndroidView]. Über [onEditorCreated] reicht er die konkrete Editor-Instanz nach
  * oben (damit der Compile-Button den aktuellen Text lesen kann).
  *
- * @param initialText  Startinhalt (wird nur beim ersten Erzeugen gesetzt).
- * @param darkTheme    hell/dunkel – schaltet das TextMate-Theme um.
+ * @param initialText   Startinhalt (wird nur beim ersten Erzeugen gesetzt).
+ * @param darkTheme     hell/dunkel – schaltet das TextMate-Theme um.
+ * @param onTextChanged wird bei jeder Inhaltsänderung gerufen (für Auto-Compile, QW 3.1).
  */
 @Composable
 fun LatexEditor(
     initialText: String,
     darkTheme: Boolean,
     onEditorCreated: (CodeEditor) -> Unit,
+    onTextChanged: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -97,6 +100,9 @@ fun LatexEditor(
                 //    Niemals im update-Block erneut – das würde die laufende Analyse
                 //    abbrechen und nur die erste Zeile gefärbt zurücklassen.
                 setEditorLanguage(TextMateLanguage.create(LATEX_SCOPE, true))
+                // 4) Inhaltsänderungen melden (Auto-Compile). Nach dem initialen
+                //    setText registriert – die Startbelegung löst also nichts aus.
+                subscribeEvent(ContentChangeEvent::class.java) { _, _ -> onTextChanged() }
                 onEditorCreated(this)
             }
         },
