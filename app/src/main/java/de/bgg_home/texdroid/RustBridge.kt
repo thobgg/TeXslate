@@ -28,4 +28,18 @@ object RustBridge {
      * für Tectonics Paket-Bundle. Blockiert (Netzwerk!) → nur vom Hintergrund-Thread rufen.
      */
     external fun tectonicCompile(cacheDir: String): String
+
+    /**
+     * M1/M2: kompiliert [texSource] (der aktuelle Editor-Inhalt) und legt PDF, Log
+     * und SyncTeX als Dateien in [jobDir] ab. [jobDir] muss beschreibbar sein
+     * (z.B. ein Unterordner von `context.filesDir`) und dient zugleich als
+     * Tectonic-Cache-Verzeichnis.
+     *
+     * Rückgabe: ein JSON-String
+     *   {"ok":Boolean,"pdfPath":String,"synctexPath":String,"log":String,"error":String}
+     * → auf Kotlin-Seite von [de.bgg_home.texdroid.compile.CompileResult.fromJson] geparst.
+     *
+     * Blockiert (Compile + evtl. Netzwerk) → nur vom Hintergrund-Thread rufen.
+     */
+    external fun tectonicCompileToFile(texSource: String, jobDir: String): String
 }

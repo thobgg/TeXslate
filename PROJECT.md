@@ -100,24 +100,24 @@ Erfolgserlebnis gibt:
 - `armeabi-v7a` erst nach M0 nachziehen — nicht am Anfang doppelt kämpfen.
 
 ### M1 — Basis-Editor + Compile-Loop  ⏱ 1 Woche (6–8 Std.)
-- [ ] **QW 1.1:** `sora-editor` einbinden, Beispieltext editierbar.
+- [x] **QW 1.1:** `sora-editor` einbinden, Beispieltext editierbar.
       🎉 Sichtbar: Editor mit Syntax-Highlighting in der eigenen App.
-- [ ] **QW 1.2:** `.tex` über SAF öffnen/speichern.
+- [x] **QW 1.2:** `.tex` über SAF öffnen/speichern.
       🎉 Sichtbar: echte eigene Datei vom Tablet-Speicher laden und ändern.
-- [ ] **QW 1.3:** Compile-Button → Tectonic → Fehlerausgabe im Log-Fenster.
+- [x] **QW 1.3:** Compile-Button → Tectonic → Fehlerausgabe im Log-Fenster.
       🎉 Sichtbar: eigener, live getippter LaTeX-Code wird kompiliert;
       absichtlicher Fehler erzeugt lesbare Fehlermeldung.
 - Noch kein PDF-Viewer — nur Erfolg/Fehler sichtbar machen.
 
 ### M2 — PDF-Preview + Tablet-Layout  ⏱ 1–1,5 Wochen (8–10 Std.)
-- [ ] **QW 2.1:** `PdfRenderer` zeigt das kompilierte PDF (eigener Screen reicht).
+- [x] **QW 2.1:** `PdfRenderer` zeigt das kompilierte PDF (eigener Screen reicht).
       🎉 Sichtbar: Tippen → Kompilieren → eigenes PDF in der eigenen App sehen.
       **Ab hier ist die App bereits täglich nutzbar** — guter Zeitpunkt, sie
       selbst für echte kleine Dokumente einzusetzen (Dogfooding = Motivation).
-- [ ] **QW 2.2:** Split-View (Tablet) / Tab-Fallback (Phone) via `WindowSizeClass`.
+- [x] **QW 2.2:** Split-View (Tablet) / Tab-Fallback (Phone) via `WindowSizeClass`.
       🎉 Sichtbar: Editor und PDF nebeneinander auf dem Tablet — der
       "Overleaf-Moment".
-- [ ] **QW 2.3:** PDF nach Compile automatisch neu laden, Scroll-Position halten.
+- [x] **QW 2.3:** PDF nach Compile automatisch neu laden, Scroll-Position halten.
       🎉 Sichtbar: flüssiger Edit→Compile→Preview-Loop ohne manuelles Neuladen.
 
 ### M3 — Live/Auto-Compile & UX  ⏱ 1 Woche (6–8 Std.)
