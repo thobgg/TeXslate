@@ -76,12 +76,12 @@ Reihenfolge innerhalb eines Milestones einhalten; nach jedem QW committen.
 entsteht. Bewusst so geschnitten, dass es schon nach der ersten Stunde ein
 Erfolgserlebnis gibt:
 
-- [ ] **QW 0.1 (~1 Std.):** GitHub-Repo (thobgg, öffentlich) + leere
+- [x] **QW 0.1 (~1 Std.):** GitHub-Repo (thobgg, öffentlich) + leere
       Compose-App "TexDroid" in Android Studio anlegen, auf Emulator/Tablet
       starten, erster Push.
       🎉 Sichtbar: eigene App mit Namen und Hello-Screen läuft auf dem Gerät,
       Projekt ist ab Minute 1 auf GitHub.
-- [ ] **QW 0.2 (~1–2 Std.):** Rust-Toolchain + `cargo-ndk` auf Xubuntu
+- [x] **QW 0.2 (~1–2 Std.):** Rust-Toolchain + `cargo-ndk` auf Xubuntu
       einrichten; Mini-Rust-Lib ("add(a,b)") als `.so` bauen, per JNI aus
       Kotlin aufrufen, Ergebnis in der App anzeigen.
       🎉 Sichtbar: "2+3=5, berechnet in Rust" auf dem Bildschirm —

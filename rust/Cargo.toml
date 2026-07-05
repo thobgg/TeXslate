@@ -1,0 +1,16 @@
+[package]
+name = "texdroid_native"
+version = "0.1.0"
+edition = "2021"
+description = "Native Rust-Bibliothek für TexDroid (JNI-Brücke; später Tectonic)"
+license = "GPL-3.0-or-later"
+
+[lib]
+# cdylib = dynamische Bibliothek (.so), die Android/JNI laden kann.
+name = "texdroid_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+# JNI-Bindings: liefert die C-kompatiblen Typen (jint, JNIEnv, JClass ...).
+# Gleicher Mechanismus, den wir später für Tectonic (Strings/Pfade) brauchen.
+jni = "0.21"
