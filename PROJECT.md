@@ -1,8 +1,8 @@
 # Projekt: TexDroid — Nativer LaTeX/XeTeX-Editor für Android (Tablet-first)
 
 > **Dieses Dokument ist der vollständige Projektkontext.** Es entstand aus einer
-> Planungs-Session und enthält alles Nötige: Motivation, Architektur, Milestones
-> mit Zeitschätzung, Risiken und Release-Strategie. Verwende es als Grundlage
+> Planungs-Session und enthält alles Nötige: Motivation, Architektur, Milestones,
+> Risiken und Release-Strategie. Verwende es als Grundlage
 > für die Entwicklung mit Claude Code — es gibt keinen weiteren Kontext.
 
 ---
@@ -63,35 +63,33 @@ externe Tastatur, Stift), Phone als sekundäres Layout.
 
 ## 3. Milestones
 
-Zeitangaben: Hobby-Tempo (wenige Std./Woche) mit Claude Code als Unterstützung.
-Gesamt ca. **6–8 Wochen**, realistisch bis zu 3 Monate.
 **Pro Milestone eine eigene Session/Branch.**
 
-Jeder Milestone ist in kurze **Quick Wins (QW)** von je ca. 1–3 Std. zerlegt.
+Jeder Milestone ist in kurze **Quick Wins (QW)** zerlegt.
 Jeder QW endet mit einem **sichtbaren, demonstrierbaren Ergebnis** ("🎉 Sichtbar:").
 Reihenfolge innerhalb eines Milestones einhalten; nach jedem QW committen.
 
-### M0 — Proof of Concept  ⏱ 1–2 Wochenenden (5–10 Std.)
+### M0 — Proof of Concept
 **Höchstes Risiko des Projekts** — als isolierter Spike, bevor App-Architektur
 entsteht. Bewusst so geschnitten, dass es schon nach der ersten Stunde ein
 Erfolgserlebnis gibt:
 
-- [x] **QW 0.1 (~1 Std.):** GitHub-Repo (thobgg, öffentlich) + leere
+- [x] **QW 0.1:** GitHub-Repo (thobgg, öffentlich) + leere
       Compose-App "TexDroid" in Android Studio anlegen, auf Emulator/Tablet
       starten, erster Push.
       🎉 Sichtbar: eigene App mit Namen und Hello-Screen läuft auf dem Gerät,
       Projekt ist ab Minute 1 auf GitHub.
-- [x] **QW 0.2 (~1–2 Std.):** Rust-Toolchain + `cargo-ndk` auf Xubuntu
+- [x] **QW 0.2:** Rust-Toolchain + `cargo-ndk` auf Xubuntu
       einrichten; Mini-Rust-Lib ("add(a,b)") als `.so` bauen, per JNI aus
       Kotlin aufrufen, Ergebnis in der App anzeigen.
       🎉 Sichtbar: "2+3=5, berechnet in Rust" auf dem Bildschirm —
       die kritische Rust↔Kotlin-Brücke steht, ganz ohne Tectonic-Komplexität.
-- [x] **QW 0.3 (~2–4 Std.):** Tectonic cross-compilen und einbinden.
+- [x] **QW 0.3:** Tectonic cross-compilen und einbinden.
       Statt `arm64-v8a` zuerst **`x86_64`** (der Emulator ist x86_64) — C-Stack via
       vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` steht noch aus.
       🎉 Sichtbar: App zeigt „Tectonic-Engine eingebettet ✓ / XeTeX format serial: 33"
       auf dem Gerät.
-- [x] **QW 0.4 (~1–2 Std.):** Fest einprogrammiertes Mini-`.tex` wird beim App-Start
+- [x] **QW 0.4:** Fest einprogrammiertes Mini-`.tex` wird beim App-Start
       kompiliert (Auto-Compile statt Button — Button folgt mit dem Editor), Dateigröße
       des PDFs angezeigt. Cache via `XDG_CACHE_HOME` aufs App-Verzeichnis, `INTERNET`-
       Permission fürs Bundle.
@@ -99,7 +97,7 @@ Erfolgserlebnis gibt:
       — Realisierbarkeit des Gesamtprojekts damit bewiesen. **M0 abgeschlossen.**
 - `armeabi-v7a` erst nach M0 nachziehen — nicht am Anfang doppelt kämpfen.
 
-### M1 — Basis-Editor + Compile-Loop  ⏱ 1 Woche (6–8 Std.)
+### M1 — Basis-Editor + Compile-Loop
 - [x] **QW 1.1:** `sora-editor` einbinden, Beispieltext editierbar.
       🎉 Sichtbar: Editor mit Syntax-Highlighting in der eigenen App.
 - [x] **QW 1.2:** `.tex` über SAF öffnen/speichern.
@@ -109,7 +107,7 @@ Erfolgserlebnis gibt:
       absichtlicher Fehler erzeugt lesbare Fehlermeldung.
 - Noch kein PDF-Viewer — nur Erfolg/Fehler sichtbar machen.
 
-### M2 — PDF-Preview + Tablet-Layout  ⏱ 1–1,5 Wochen (8–10 Std.)
+### M2 — PDF-Preview + Tablet-Layout
 - [x] **QW 2.1:** `PdfRenderer` zeigt das kompilierte PDF (eigener Screen reicht).
       🎉 Sichtbar: Tippen → Kompilieren → eigenes PDF in der eigenen App sehen.
       **Ab hier ist die App bereits täglich nutzbar** — guter Zeitpunkt, sie
@@ -120,7 +118,7 @@ Erfolgserlebnis gibt:
 - [x] **QW 2.3:** PDF nach Compile automatisch neu laden, Scroll-Position halten.
       🎉 Sichtbar: flüssiger Edit→Compile→Preview-Loop ohne manuelles Neuladen.
 
-### M3 — Live/Auto-Compile & UX  ⏱ 1 Woche (6–8 Std.)
+### M3 — Live/Auto-Compile & UX
 - [ ] **QW 3.1:** Debounced Auto-Compile bei Tippstopp.
       🎉 Sichtbar: PDF aktualisiert sich "von selbst" beim Schreiben.
 - [ ] **QW 3.2:** Fehlerzeilen im Editor markieren, Jump-to-Error.
@@ -129,7 +127,7 @@ Erfolgserlebnis gibt:
       (S Pen) auf dem Tablet testen.
       🎉 Sichtbar: angenehmes Schreiben mit Hardware-Tastatur.
 
-### M4 — Projektverwaltung  ⏱ 1,5–2 Wochen (10–12 Std.)
+### M4 — Projektverwaltung
 - [ ] **QW 4.1:** Dateibaum-Sidebar (Tablet), Datei-Wechsel per Tap.
       🎉 Sichtbar: Projektordner mit mehreren Dateien navigierbar.
 - [ ] **QW 4.2:** Multi-File-Compile: `\input` / `\include` funktionieren.
@@ -137,13 +135,13 @@ Erfolgserlebnis gibt:
 - [ ] **QW 4.3:** Bibliografie prüfen (biber, sofern Tectonic abdeckt —
       sonst als bekanntes Limit dokumentieren und verschieben).
 
-### M5 — F-Droid-Release  ⏱ 3–5 Tage (4–6 Std.)
+### M5 — F-Droid-Release
 - [ ] Reproducible Build, keine proprietären Abhängigkeiten
 - [ ] Lizenzcheck: Tectonic = MIT ✓; nachgeladene TeX-Pakete/Fonts (LPPL etc.)
       prüfen, v.a. falls gebündelt statt nachgeladen
 - [ ] F-Droid-Metadata, Screenshots (Tablet-Auflösung!), Submission
 
-### M6 — Play-Store-Release (optional)  ⏱ 1 Woche (5–7 Std.)
+### M6 — Play-Store-Release (optional)
 - [ ] Eigene Build-Variante (F-Droid-Build ohne Google-Services getrennt halten)
 - [ ] Entwicklerkonto (25 $ einmalig), Datenschutzerklärung (auch ohne
       Datensammlung erforderlich)
