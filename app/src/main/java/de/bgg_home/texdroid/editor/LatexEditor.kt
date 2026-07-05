@@ -90,6 +90,13 @@ fun LatexEditor(
             TextMateAssets.ensureLoaded(ctx)
             CodeEditor(ctx).apply {
                 typefaceText = Typeface.MONOSPACE
+                // QW 3.3: Schreibkomfort auf dem Tablet.
+                // Lange Prosa-Zeilen umbrechen, statt horizontal zu scrollen …
+                setWordwrap(true, /* antiWordBreaking = */ true)
+                // … und LaTeX-übliche 2er-Einrückung. Auto-Klammern ({}, [], $$),
+                // Auto-Einrückung und die Code-Vervollständigung kommen bereits aus
+                // der language-configuration bzw. TextMateLanguage.create(..., true).
+                setTabWidth(2)
                 // Reihenfolge ist wichtig:
                 // 1) Farbschema ZUERST – TextMateLanguage färbt seine Spans nur,
                 //    wenn beim Setzen der Sprache bereits ein TextMateColorScheme aktiv ist.
