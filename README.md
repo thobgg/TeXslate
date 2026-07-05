@@ -6,6 +6,10 @@ Schreibe LaTeX direkt auf dem Tablet und sieh live nebenan das PDF — ohne Term
 ohne Cloud-Zwang. TexDroid verbindet Editor, lokalen Compiler und PDF-Vorschau in
 einer nativen Android-Oberfläche.
 
+![TexDroid: Editor mit LaTeX-Syntax-Highlighting links, Live-PDF-Vorschau rechts, Auto-Compile](./docs/screenshot-splitview.jpg)
+
+_Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, Live-PDF-Vorschau rechts — lokal via Tectonic kompiliert._
+
 ## Ziel (v1.0)
 
 Eine Person mit Android-Tablet kann: App aus F-Droid installieren → Projektordner

@@ -49,3 +49,10 @@ app/src/main/jniLibs/**/*.so
 *.log
 .env
 .env.local
+
+# Lose Screenshots / generierte Bilder im Repo-Root (nicht committen).
+# Bewusst gepflegte Bilder liegen unter docs/ und bleiben getrackt.
+/Bildschirmfoto_*.png
+/Screenshot_*.jpg
+/Screenshot_*.png
+/Gemini_Generated_Image_*.png
