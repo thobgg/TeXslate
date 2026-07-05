@@ -91,10 +91,12 @@ Erfolgserlebnis gibt:
       vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` steht noch aus.
       🎉 Sichtbar: App zeigt „Tectonic-Engine eingebettet ✓ / XeTeX format serial: 33"
       auf dem Gerät.
-- [ ] **QW 0.4 (~1–2 Std.):** Button kompiliert fest einprogrammiertes
-      Mini-`.tex`, Ausgabepfad + Dateigröße des PDFs anzeigen.
-      🎉 Sichtbar: **Erstes PDF, lokal auf Android erzeugt** —
-      Realisierbarkeit des Gesamtprojekts damit bewiesen.
+- [x] **QW 0.4 (~1–2 Std.):** Fest einprogrammiertes Mini-`.tex` wird beim App-Start
+      kompiliert (Auto-Compile statt Button — Button folgt mit dem Editor), Dateigröße
+      des PDFs angezeigt. Cache via `XDG_CACHE_HOME` aufs App-Verzeichnis, `INTERNET`-
+      Permission fürs Bundle.
+      🎉 Sichtbar: **Erstes PDF, lokal auf Android erzeugt** („PDF erzeugt ✓ 8281 Bytes")
+      — Realisierbarkeit des Gesamtprojekts damit bewiesen. **M0 abgeschlossen.**
 - `armeabi-v7a` erst nach M0 nachziehen — nicht am Anfang doppelt kämpfen.
 
 ### M1 — Basis-Editor + Compile-Loop  ⏱ 1 Woche (6–8 Std.)

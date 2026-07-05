@@ -21,4 +21,11 @@ object RustBridge {
 
     /** Liefert einen Nachweis, dass die native Tectonic/XeTeX-Engine eingebettet ist. */
     external fun tectonicVersion(): String
+
+    /**
+     * Kompiliert ein fest eingebautes Mini-.tex zu PDF und gibt "PDF erzeugt ✓ N Bytes"
+     * bzw. eine Fehlermeldung zurück. [cacheDir] = beschreibbares App-Cache-Verzeichnis
+     * für Tectonics Paket-Bundle. Blockiert (Netzwerk!) → nur vom Hintergrund-Thread rufen.
+     */
+    external fun tectonicCompile(cacheDir: String): String
 }
