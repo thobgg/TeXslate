@@ -14,6 +14,9 @@ sealed interface AiResult {
     data class Failure(val message: String) : AiResult
 }
 
+/** Eine Nachricht im Gesprächsverlauf. [role] ist "user" oder "assistant". */
+data class AiMessage(val role: String, val content: String)
+
 /**
  * Provider-agnostischer KI-Aufruf (QW A2). Kapselt die drei REST-Chat-APIs
  * (Anthropic Messages · OpenAI Chat Completions · Gemini generateContent) hinter
@@ -29,13 +32,13 @@ object AiClient {
         model: String,
         apiKey: String,
         systemPrompt: String,
-        userPrompt: String,
+        messages: List<AiMessage>,
     ): AiResult = withContext(Dispatchers.IO) {
         try {
             when (provider) {
-                AiProvider.ANTHROPIC -> anthropic(model, apiKey, systemPrompt, userPrompt)
-                AiProvider.OPENAI -> openai(model, apiKey, systemPrompt, userPrompt)
-                AiProvider.GEMINI -> gemini(model, apiKey, systemPrompt, userPrompt)
+                AiProvider.ANTHROPIC -> anthropic(model, apiKey, systemPrompt, messages)
+                AiProvider.OPENAI -> openai(model, apiKey, systemPrompt, messages)
+                AiProvider.GEMINI -> gemini(model, apiKey, systemPrompt, messages)
             }
         } catch (e: IOException) {
             AiResult.Failure("Keine Verbindung – bitte Internet prüfen.")
@@ -46,11 +49,13 @@ object AiClient {
 
     // --- Provider-Adapter -----------------------------------------------------
 
-    private fun anthropic(model: String, key: String, system: String, user: String): AiResult {
+    private fun anthropic(model: String, key: String, system: String, messages: List<AiMessage>): AiResult {
+        val arr = JSONArray()
+        messages.forEach { arr.put(JSONObject().put("role", it.role).put("content", it.content)) }
         val body = JSONObject()
             .put("model", model)
             .put("max_tokens", 1500)
-            .put("messages", JSONArray().put(JSONObject().put("role", "user").put("content", user)))
+            .put("messages", arr)
         if (system.isNotBlank()) body.put("system", system)
         val res = post(
             "https://api.anthropic.com/v1/messages",
@@ -70,13 +75,13 @@ object AiClient {
         return AiResult.Success(text.trim())
     }
 
-    private fun openai(model: String, key: String, system: String, user: String): AiResult {
-        val messages = JSONArray()
+    private fun openai(model: String, key: String, system: String, messages: List<AiMessage>): AiResult {
+        val arr = JSONArray()
         if (system.isNotBlank()) {
-            messages.put(JSONObject().put("role", "system").put("content", system))
+            arr.put(JSONObject().put("role", "system").put("content", system))
         }
-        messages.put(JSONObject().put("role", "user").put("content", user))
-        val body = JSONObject().put("model", model).put("messages", messages)
+        messages.forEach { arr.put(JSONObject().put("role", it.role).put("content", it.content)) }
+        val body = JSONObject().put("model", model).put("messages", arr)
         val res = post(
             "https://api.openai.com/v1/chat/completions",
             mapOf("Authorization" to "Bearer $key", "content-type" to "application/json"),
@@ -89,15 +94,18 @@ object AiClient {
         return AiResult.Success(text.trim())
     }
 
-    private fun gemini(model: String, key: String, system: String, user: String): AiResult {
-        val body = JSONObject().put(
-            "contents",
-            JSONArray().put(
+    private fun gemini(model: String, key: String, system: String, messages: List<AiMessage>): AiResult {
+        val contents = JSONArray()
+        messages.forEach {
+            // Gemini nennt die Assistenten-Rolle "model".
+            val role = if (it.role == "assistant") "model" else "user"
+            contents.put(
                 JSONObject()
-                    .put("role", "user")
-                    .put("parts", JSONArray().put(JSONObject().put("text", user))),
-            ),
-        )
+                    .put("role", role)
+                    .put("parts", JSONArray().put(JSONObject().put("text", it.content))),
+            )
+        }
+        val body = JSONObject().put("contents", contents)
         if (system.isNotBlank()) {
             body.put(
                 "systemInstruction",
