@@ -169,6 +169,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // LaTeX-Einfüge-Sheet (der „mehr"-Button der Favoriten-Leiste) + Tabellen-Wizard.
     var showInsertSheet by remember { mutableStateOf(false) }
     var showTableWizard by remember { mutableStateOf(false) }
+    var showDocumentWizard by remember { mutableStateOf(false) }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -443,6 +444,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 showInsertSheet = false
                 showTableWizard = true
             },
+            onOpenDocumentWizard = {
+                showInsertSheet = false
+                showDocumentWizard = true
+            },
             onDismiss = { showInsertSheet = false },
         )
     }
@@ -455,6 +460,21 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 editor?.requestFocus()
             },
             onDismiss = { showTableWizard = false },
+        )
+    }
+
+    // Dokument-Assistent (ersetzt den Editor-Inhalt = neues Dokument).
+    if (showDocumentWizard) {
+        DocumentWizardDialog(
+            onCreate = { text, line ->
+                editor?.setText(text)
+                editor?.setSelection(line, 0)
+                editor?.requestFocus()
+                currentUri = null
+                currentName = null
+                canWrite = false
+            },
+            onDismiss = { showDocumentWizard = false },
         )
     }
 

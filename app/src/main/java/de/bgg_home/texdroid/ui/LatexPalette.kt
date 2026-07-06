@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.AssistChip
@@ -177,6 +178,7 @@ fun LatexFavoritesBar(
 fun LatexInsertSheet(
     onInsert: (String, Int) -> Unit,
     onOpenTableWizard: () -> Unit,
+    onOpenDocumentWizard: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -202,11 +204,18 @@ fun LatexInsertSheet(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
             )
-            AssistChip(
-                onClick = onOpenTableWizard,
-                label = { Text("Tabellen-Assistent …") },
-                leadingIcon = { Icon(Icons.Filled.GridOn, contentDescription = null) },
-            )
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                AssistChip(
+                    onClick = onOpenDocumentWizard,
+                    label = { Text("Dokument-Assistent …") },
+                    leadingIcon = { Icon(Icons.Filled.Description, contentDescription = null) },
+                )
+                AssistChip(
+                    onClick = onOpenTableWizard,
+                    label = { Text("Tabellen-Assistent …") },
+                    leadingIcon = { Icon(Icons.Filled.GridOn, contentDescription = null) },
+                )
+            }
             CATEGORIES.forEach { category ->
                 Text(
                     category.name,
