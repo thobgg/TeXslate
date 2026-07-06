@@ -93,9 +93,11 @@ import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /** Wartezeit nach dem letzten Tastendruck, bevor automatisch kompiliert wird. */
@@ -170,6 +172,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var showInsertSheet by remember { mutableStateOf(false) }
     var showTableWizard by remember { mutableStateOf(false) }
     var showDocumentWizard by remember { mutableStateOf(false) }
+    var showTemplates by remember { mutableStateOf(false) }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -448,7 +451,32 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 showInsertSheet = false
                 showDocumentWizard = true
             },
+            onOpenTemplates = {
+                showInsertSheet = false
+                showTemplates = true
+            },
             onDismiss = { showInsertSheet = false },
+        )
+    }
+
+    // Offline-Vorlagen-Bibliothek (QW T1): Auswahl lädt die Vorlage in den Editor.
+    if (showTemplates) {
+        TemplatePickerSheet(
+            onPick = { template ->
+                showTemplates = false
+                scope.launch {
+                    val text = withContext(Dispatchers.IO) {
+                        context.assets.open(template.asset).bufferedReader().use { it.readText() }
+                    }
+                    editor?.setText(text)
+                    editor?.setSelection(0, 0)
+                    editor?.requestFocus()
+                    currentUri = null
+                    currentName = null
+                    canWrite = false
+                }
+            },
+            onDismiss = { showTemplates = false },
         )
     }
 

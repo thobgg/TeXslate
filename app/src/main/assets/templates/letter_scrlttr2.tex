@@ -1,0 +1,34 @@
+\documentclass[11pt]{scrlttr2}
+\usepackage[ngerman]{babel}
+
+% ---------- Absender ----------
+\setkomavar{fromname}{Absender Name}
+\setkomavar{fromaddress}{Straße 1\\12345 Stadt}
+\setkomavar{fromemail}{absender@example.com}
+\setkomavar{subject}{Betreff des Briefes}
+\setkomavar{signature}{Absender Name}
+\setkomavar{date}{\today}
+
+\begin{document}
+
+\begin{letter}{%
+    Empfänger Name\\
+    Empfänger Straße 2\\
+    54321 Empfängerstadt%
+}
+
+\opening{Sehr geehrte Damen und Herren,}
+
+hier steht der Brieftext. Absätze werden durch Leerzeilen getrennt und
+KOMA-Script setzt Anschrift, Betreff und Datum automatisch an die richtige
+Stelle.
+
+Mit freundlichen Grüßen
+
+\closing{Mit freundlichen Grüßen}
+
+\ps{PS: Ein Postskriptum ist optional.}
+
+\end{letter}
+
+\end{document}

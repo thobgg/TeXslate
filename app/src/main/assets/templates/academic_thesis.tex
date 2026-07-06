@@ -1,0 +1,49 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+
+\begin{document}
+
+% ---------- Titelseite ----------
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    {\Huge\bfseries Titel der Arbeit\par}
+    \vspace{1cm}
+    {\Large Untertitel\par}
+    \vspace{2cm}
+    {\large Vorname Nachname\par}
+    \vspace{0.5cm}
+    {\large Matrikelnummer: 000000\par}
+    \vfill
+    {\large Institution\par}
+    {\large \today\par}
+\end{titlepage}
+
+% ---------- Verzeichnisse ----------
+\tableofcontents
+
+% ---------- Kapitel ----------
+\chapter{Einleitung}
+\label{cha:einleitung}
+Hier beginnt die Einleitung. Auf Kapitel~\ref{cha:hauptteil} wird später
+verwiesen, und \cite{knuth1984} ist die Standardreferenz.
+
+\chapter{Hauptteil}
+\label{cha:hauptteil}
+Text des Hauptteils. Eine abgesetzte Formel:
+\[
+    a^2 + b^2 = c^2 .
+\]
+
+\chapter{Fazit}
+Zusammenfassung der Ergebnisse.
+
+% ---------- Literatur (offline, ohne biber/bibtex) ----------
+\begin{thebibliography}{9}
+    \bibitem{knuth1984}
+    Donald E.~Knuth. \emph{The \TeX book}. Addison-Wesley, 1984.
+\end{thebibliography}
+
+\end{document}

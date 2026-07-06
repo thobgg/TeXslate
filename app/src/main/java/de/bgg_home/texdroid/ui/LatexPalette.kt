@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.GridView
@@ -179,6 +180,7 @@ fun LatexInsertSheet(
     onInsert: (String, Int) -> Unit,
     onOpenTableWizard: () -> Unit,
     onOpenDocumentWizard: () -> Unit,
+    onOpenTemplates: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -205,6 +207,11 @@ fun LatexInsertSheet(
                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                AssistChip(
+                    onClick = onOpenTemplates,
+                    label = { Text("Vorlage …") },
+                    leadingIcon = { Icon(Icons.Filled.Dashboard, contentDescription = null) },
+                )
                 AssistChip(
                     onClick = onOpenDocumentWizard,
                     label = { Text("Dokument-Assistent …") },
