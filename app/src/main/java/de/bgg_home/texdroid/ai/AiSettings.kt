@@ -2,19 +2,11 @@ package de.bgg_home.texdroid.ai
 
 import android.content.Context
 
-/** Verfügbare Modelle für die KI-Assistenz (Anzeigename → API-Modell-ID). */
-val AI_MODELS = listOf(
-    "Sonnet 5" to "claude-sonnet-5",
-    "Opus 4.8" to "claude-opus-4-8",
-    "Haiku 4.5" to "claude-haiku-4-5-20251001",
-)
-
-const val DEFAULT_AI_MODEL = "claude-sonnet-5"
-
 /**
- * Einstellungen der KI-Assistenz. Flags/Modell liegen in normalen SharedPreferences,
- * der **API-Key** verschlüsselt über [SecureKeyStore]. Feature ist per Default
- * **deaktiviert** (Opt-in).
+ * Einstellungen der KI-Assistenz (multi-provider, BYOK). Flags/Provider/Modelle
+ * liegen in normalen SharedPreferences; die **API-Keys** verschlüsselt über
+ * [SecureKeyStore] — **je Provider** ein eigener Key, damit man ohne
+ * Neu-Eintippen wechseln kann. Feature per Default **deaktiviert** (Opt-in).
  */
 class AiSettings(context: Context) {
     private val prefs = context.applicationContext
@@ -24,24 +16,38 @@ class AiSettings(context: Context) {
         get() = prefs.getBoolean(KEY_ENABLED, false)
         set(value) = prefs.edit().putBoolean(KEY_ENABLED, value).apply()
 
-    var model: String
-        get() = prefs.getString(KEY_MODEL, DEFAULT_AI_MODEL) ?: DEFAULT_AI_MODEL
-        set(value) = prefs.edit().putString(KEY_MODEL, value).apply()
+    var provider: AiProvider
+        get() = AiProvider.fromId(prefs.getString(KEY_PROVIDER, null))
+        set(value) = prefs.edit().putString(KEY_PROVIDER, value.id).apply()
 
-    var apiKey: String
-        get() = prefs.getString(KEY_API_ENC, null)
+    fun keyFor(p: AiProvider): String =
+        prefs.getString(keyName(p), null)
             ?.let { runCatching { SecureKeyStore.decrypt(it) }.getOrDefault("") }
             ?: ""
-        set(value) = prefs.edit()
-            .putString(KEY_API_ENC, if (value.isBlank()) null else SecureKeyStore.encrypt(value))
-            .apply()
 
-    /** true, wenn Feature aktiv UND ein Key hinterlegt ist. */
-    val isReady: Boolean get() = enabled && apiKey.isNotBlank()
+    fun setKeyFor(p: AiProvider, value: String) = prefs.edit()
+        .putString(keyName(p), if (value.isBlank()) null else SecureKeyStore.encrypt(value))
+        .apply()
+
+    fun modelFor(p: AiProvider): String =
+        prefs.getString(modelName(p), null)?.takeIf { it.isNotBlank() } ?: p.defaultModel
+
+    fun setModelFor(p: AiProvider, value: String) = prefs.edit()
+        .putString(modelName(p), value.ifBlank { p.defaultModel })
+        .apply()
+
+    /** Key/Modell des aktuell gewählten Providers. */
+    val activeKey: String get() = keyFor(provider)
+    val activeModel: String get() = modelFor(provider)
+
+    /** true, wenn aktiv UND für den gewählten Provider ein Key hinterlegt ist. */
+    val isReady: Boolean get() = enabled && activeKey.isNotBlank()
+
+    private fun keyName(p: AiProvider) = "api_key_enc_${p.id}"
+    private fun modelName(p: AiProvider) = "model_${p.id}"
 
     private companion object {
         const val KEY_ENABLED = "enabled"
-        const val KEY_MODEL = "model"
-        const val KEY_API_ENC = "api_key_enc"
+        const val KEY_PROVIDER = "provider"
     }
 }
