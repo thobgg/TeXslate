@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  Monochrome-Ebene für themed Icons (Android 13+): dasselbe TeX-Monogramm,
-  einfarbig. Das System färbt es passend zum Nutzer-Theme ein.
+  TexDroid-Launcher-Vordergrund: das TeX-Monogramm (Latin Modern Roman /
+  Computer Modern – die klassische TeX-Schrift) als Vektor. Weiß, damit es auf
+  dem blauen Verlauf-Hintergrund (ic_launcher_background) steht. In der
+  Adaptive-Icon-Safe-Zone zentriert.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"

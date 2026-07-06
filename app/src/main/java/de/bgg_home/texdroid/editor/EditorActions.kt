@@ -23,6 +23,13 @@ fun CodeEditor.jumpToErrorLine(line1Based: Int) {
 }
 
 /**
+ * Springt zur (1-basierten) Zeile [line1Based] (Editor-Komfort „Gehe zu Zeile").
+ * Nutzt dieselbe Logik wie der Fehler-Sprung: Zeile sichtbar machen + Cursor an
+ * ihren Anfang.
+ */
+fun CodeEditor.goToLine(line1Based: Int) = jumpToErrorLine(line1Based)
+
+/**
  * Markiert die [errors] mit Zeilennummer als Fehler im Editor (rote
  * Unterschlängelung über die Diagnostics-API). Ohne Zeilennummer oder bei
  * leerer Liste werden die Markierungen zurückgesetzt.
