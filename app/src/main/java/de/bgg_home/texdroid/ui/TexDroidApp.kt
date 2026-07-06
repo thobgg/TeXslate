@@ -166,8 +166,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Split-View: Anteil des Editors an der Breite (per Trenner verschiebbar, 0.2–0.8).
     var splitFraction by remember { mutableFloatStateOf(0.5f) }
 
-    // LaTeX-Einfüge-Sheet (der „mehr"-Button der Favoriten-Leiste).
+    // LaTeX-Einfüge-Sheet (der „mehr"-Button der Favoriten-Leiste) + Tabellen-Wizard.
     var showInsertSheet by remember { mutableStateOf(false) }
+    var showTableWizard by remember { mutableStateOf(false) }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -438,7 +439,22 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 editor?.insertText(text, caret)
                 editor?.requestFocus()
             },
+            onOpenTableWizard = {
+                showInsertSheet = false
+                showTableWizard = true
+            },
             onDismiss = { showInsertSheet = false },
+        )
+    }
+
+    // Tabellen-Assistent (Wizard-Dialog).
+    if (showTableWizard) {
+        TableWizardDialog(
+            onInsert = { text, caret ->
+                editor?.insertText(text, caret)
+                editor?.requestFocus()
+            },
+            onDismiss = { showTableWizard = false },
         )
     }
 

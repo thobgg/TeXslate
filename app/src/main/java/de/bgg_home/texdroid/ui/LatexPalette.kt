@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
@@ -175,6 +176,7 @@ fun LatexFavoritesBar(
 @Composable
 fun LatexInsertSheet(
     onInsert: (String, Int) -> Unit,
+    onOpenTableWizard: () -> Unit,
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
@@ -192,6 +194,18 @@ fun LatexInsertSheet(
                 "LaTeX einfügen",
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp),
+            )
+            // Assistenten (Dialoge statt Syntax tippen).
+            Text(
+                "Assistenten",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+            )
+            AssistChip(
+                onClick = onOpenTableWizard,
+                label = { Text("Tabellen-Assistent …") },
+                leadingIcon = { Icon(Icons.Filled.GridOn, contentDescription = null) },
             )
             CATEGORIES.forEach { category ->
                 Text(
