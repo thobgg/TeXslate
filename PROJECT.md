@@ -155,6 +155,20 @@ Erfolgserlebnis gibt:
       biber-Binary) wird auf Android noch nicht unterstützt — Workaround:
       `backend=bibtex` setzen. Vollständiges biber = separates, größeres Vorhaben.
 
+### ME — Editor-Komfort & Branding
+- [x] **QW E.1:** Suchen & Ersetzen im Editor.
+      🎉 Sichtbar: Lupe in der Toolbar → Suchen mit Live-Markierung + Zähler,
+      Weiter/Zurück, Ersetzen/Alle, Groß/Klein (Aa) und Regex (.*).
+      (Bindet die Such-Engine von sora-editor an; ungültiges Regex → „Muster?".)
+- [x] **QW E.2:** Gehe zu Zeile.
+      🎉 Sichtbar: Kebab → „Gehe zu Zeile…" springt zur eingegebenen Zeile.
+- [x] **QW E.3:** Kommentar ein/aus.
+      🎉 Sichtbar: Kebab → „Kommentar ein/aus" (ent)kommentiert Zeile/Auswahl
+      mit `%` (ein Undo-Schritt).
+- [x] **Branding:** eigenes TeX-Icon (Latin Modern / Computer Modern) als reines
+      Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
+      Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.
+
 ### M5 — F-Droid-Release
 - [ ] Reproducible Build, keine proprietären Abhängigkeiten
 - [ ] Lizenzcheck: Tectonic = MIT ✓; nachgeladene TeX-Pakete/Fonts (LPPL etc.)

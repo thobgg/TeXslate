@@ -30,6 +30,53 @@ fun CodeEditor.jumpToErrorLine(line1Based: Int) {
 fun CodeEditor.goToLine(line1Based: Int) = jumpToErrorLine(line1Based)
 
 /**
+ * Kommentar ein/aus (Editor-Komfort) für die aktuelle Zeile bzw. alle Zeilen der
+ * Auswahl. Sind alle nicht-leeren Zeilen bereits mit `%` auskommentiert, werden
+ * sie ent-kommentiert – sonst werden alle mit `% ` auskommentiert. Leere Zeilen
+ * bleiben unberührt. Läuft in einem Batch-Edit (ein Undo-Schritt).
+ */
+fun CodeEditor.toggleLineComment() {
+    val c = cursor
+    val startLine = c.leftLine
+    // Endet die Auswahl am Zeilenanfang, gehört diese letzte Zeile nicht dazu.
+    var endLine = c.rightLine
+    if (endLine > startLine && c.rightColumn == 0) endLine--
+
+    val content = text
+    var anyNonBlank = false
+    var allCommented = true
+    for (line in startLine..endLine) {
+        val s = content.getLineString(line)
+        if (s.isBlank()) continue
+        anyNonBlank = true
+        if (!s.trimStart().startsWith("%")) {
+            allCommented = false
+            break
+        }
+    }
+    if (!anyNonBlank) return
+
+    content.beginBatchEdit()
+    try {
+        for (line in startLine..endLine) {
+            val s = content.getLineString(line)
+            if (s.isBlank()) continue
+            if (allCommented) {
+                val at = s.indexOfFirst { !it.isWhitespace() } // Position des '%'
+                var removeTo = at + 1
+                if (removeTo < s.length && s[removeTo] == ' ') removeTo++ // ein Leerzeichen mit
+                content.delete(line, at, line, removeTo)
+            } else {
+                content.insert(line, 0, "% ")
+            }
+        }
+    } finally {
+        content.endBatchEdit()
+    }
+    requestFocus()
+}
+
+/**
  * Markiert die [errors] mit Zeilennummer als Fehler im Editor (rote
  * Unterschlängelung über die Diagnostics-API). Ohne Zeilennummer oder bei
  * leerer Liste werden die Markierungen zurückgesetzt.

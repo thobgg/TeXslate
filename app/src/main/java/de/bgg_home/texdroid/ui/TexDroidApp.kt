@@ -42,6 +42,7 @@ import de.bgg_home.texdroid.R
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
@@ -122,6 +123,7 @@ import de.bgg_home.texdroid.editor.searchPrevious
 import de.bgg_home.texdroid.editor.selectedText
 import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.editor.stopSearch
+import de.bgg_home.texdroid.editor.toggleLineComment
 import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
@@ -584,6 +586,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onShare = { showShare = true },
                 onSearch = { if (showSearch) closeSearch() else showSearch = true },
                 onGoToLine = { showGoToLine = true },
+                onToggleComment = { editor?.toggleLineComment() },
                 onAi = { aiInitialQuestion = ""; showAi = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
@@ -885,6 +888,7 @@ private fun AppHeader(
     onShare: () -> Unit,
     onSearch: () -> Unit,
     onGoToLine: () -> Unit,
+    onToggleComment: () -> Unit,
     onAi: () -> Unit,
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
@@ -948,6 +952,7 @@ private fun AppHeader(
                     onShare = onShare,
                     onShowLog = onShowLog,
                     onGoToLine = onGoToLine,
+                    onToggleComment = onToggleComment,
                     onSettings = onSettings,
                     onAutoCompileChange = onAutoCompileChange,
                 )
@@ -1000,6 +1005,7 @@ private fun OverflowMenu(
     onShare: () -> Unit,
     onShowLog: () -> Unit,
     onGoToLine: () -> Unit,
+    onToggleComment: () -> Unit,
     onSettings: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
@@ -1037,6 +1043,11 @@ private fun OverflowMenu(
                 text = { Text("Gehe zu Zeile…") },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                 onClick = { expanded = false; onGoToLine() },
+            )
+            DropdownMenuItem(
+                text = { Text("Kommentar ein/aus") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = null) },
+                onClick = { expanded = false; onToggleComment() },
             )
             DropdownMenuItem(
                 text = { Text("Auto-Compile") },
