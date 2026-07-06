@@ -8,7 +8,8 @@
 
 Schreibe LaTeX direkt auf dem Tablet und sieh live nebenan das PDF — ohne Terminal,
 ohne Cloud-Zwang. TexDroid verbindet Editor, lokalen Compiler und PDF-Vorschau in
-einer nativen Android-Oberfläche.
+einer nativen Android-Oberfläche — mit deutscher Fehlerausgabe und einem
+**optionalen** KI-Assistenten (eigener API-Key, standardmäßig aus).
 
 ![TexDroid: Editor mit LaTeX-Syntax-Highlighting links, Live-PDF-Vorschau rechts, Auto-Compile](./docs/screenshot-splitview.jpg)
 
@@ -17,6 +18,30 @@ _Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, Live-PDF
 ![TexDroid: LaTeX-Einfüge-Palette als Bottom-Sheet mit Kategorien Struktur, Umgebungen, Mathe](./docs/screenshot-palette.jpg)
 
 _Touch-Palette: häufige Bausteine per Tap einfügen (Umgebungen, Mathe-Symbole, Struktur) — der Cursor landet automatisch an der richtigen Stelle._
+
+![TexDroid: KI-Assistent erklärt einen LaTeX-Compile-Fehler auf Deutsch](./docs/screenshot-ai.jpg)
+
+_Optionaler KI-Assistent (BYOK): der „Erklären"-Chip an jedem Fehler schickt Meldung + Dokument an einen selbst gewählten Anbieter (Anthropic · OpenAI · Gemini) und liefert Ursache und Korrektur auf Deutsch — erst nach ausdrücklicher Vorschau-Bestätigung._
+
+## Funktionen
+
+- **Editor** mit LaTeX-Syntaxhervorhebung (TextMate-Grammatik) und Touch-Palette
+  für häufige Bausteine, Umgebungen und Mathe-Symbole; Cursor landet automatisch
+  an der richtigen Stelle.
+- **Lokaler Compiler** (Tectonic/XeTeX) direkt auf dem Gerät — kein Terminal,
+  kein Cloud-Zwang. Optionaler **Auto-Compile** beim Tippen.
+- **PDF-Vorschau** nebenan (Tablet-Split-View mit verschiebbarem Trenner) bzw.
+  per Tab auf schmalen Displays.
+- **Fehler auf Deutsch**: die häufigsten TeX-Meldungen werden ins Deutsche
+  übersetzt; Tippen springt zur Fehlerzeile.
+- **Assistenten & Vorlagen**: Dokument- und Tabellen-Assistent, kuratierte
+  Vorlagen (Beamer, Thesis, Brief, Klausur).
+- **Teilen & Speichern**: PDF und/oder `.tex`-Quelle teilen, PDF exportieren,
+  Dateien via Storage Access Framework öffnen und speichern.
+- **KI-Assistent (optional, Opt-in)**: eigener API-Key (**BYOK**) für Anthropic,
+  OpenAI oder Google Gemini; Kontext wahlweise Markierung oder ganzes Dokument;
+  verpflichtender Vorschau-Dialog vor jedem Aufruf. Keys bleiben **verschlüsselt
+  lokal** (Android Keystore). Die Kern-App funktioniert **vollständig offline**.
 
 ## Ziel (v1.0)
 
@@ -39,7 +64,8 @@ proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
 | Editor       | [`sora-editor`](https://github.com/Rosemoe/sora-editor) — Syntax-Highlighting |
 | Compiler     | [Tectonic](https://tectonic-typesetting.github.io/) (Rust, MIT) via `cargo-ndk` als `.so`, JNI-Bindung Rust ↔ Kotlin |
 | PDF-Anzeige  | Android `PdfRenderer` (Bordmittel) |
-| Dateizugriff | Storage Access Framework (SAF) |
+| Dateizugriff | Storage Access Framework (SAF), Teilen via `FileProvider` |
+| KI-Assistent | optional, BYOK — Anthropic · OpenAI · Gemini über `HttpURLConnection` (keine Netzwerk-Dependency); Keys via Android Keystore verschlüsselt |
 
 **ABI-Targets:** `arm64-v8a`, `armeabi-v7a`.
 
@@ -51,8 +77,15 @@ proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
 - [x] **M1** — Basis-Editor + Compile-Loop
 - [x] **M2** — PDF-Preview + Tablet-Split-View
 - [x] **M3** — Live/Auto-Compile & UX
+- [x] **Extras** — Assistenten & Vorlagen, PDF/`.tex` teilen, deutsche Fehlermeldungen
+- [x] **KI-Assistent (Beta)** — optionaler BYOK-Assistent (Anthropic · OpenAI · Gemini), „Fehler erklären"
 - [ ] **M4** — Projektverwaltung (Multi-File)
 - [ ] **M5** — F-Droid-Release
+
+> Der KI-Assistent ist **standardmäßig aus** und rein optional. Nur wenn du ihn
+> aktivierst und einen eigenen API-Key hinterlegst, spricht die App mit einem
+> externen Dienst (F-Droid-Anti-Feature `NonFreeNetwork`). Ohne ihn bleibt
+> TexDroid vollständig offline und quelloffen nutzbar.
 
 ## Native Build (Tectonic)
 
