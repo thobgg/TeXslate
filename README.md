@@ -10,6 +10,10 @@ einer nativen Android-Oberfläche.
 
 _Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, Live-PDF-Vorschau rechts — lokal via Tectonic kompiliert._
 
+![TexDroid: LaTeX-Einfüge-Palette als Bottom-Sheet mit Kategorien Struktur, Umgebungen, Mathe](./docs/screenshot-palette.jpg)
+
+_Touch-Palette: häufige Bausteine per Tap einfügen (Umgebungen, Mathe-Symbole, Struktur) — der Cursor landet automatisch an der richtigen Stelle._
+
 ## Ziel (v1.0)
 
 Eine Person mit Android-Tablet kann: App aus F-Droid installieren → Projektordner
