@@ -206,6 +206,10 @@ fn compile_to_dir(source: &str, dir: &str) -> Result<CompileOk, CompileErr> {
         .bundle(bundle)
         .primary_input_buffer(source.as_bytes())
         .tex_input_name("document.tex")
+        // Dateisystem-Wurzel = Arbeitsverzeichnis, damit \input{...}/\include{...}
+        // auf die (von Kotlin dorthin kopierten) Projektdateien auflösen. Ohne dies
+        // sucht Tectonic bei Buffer-Eingabe im Prozess-CWD ("/") und findet nichts.
+        .filesystem_root(out_dir)
         .format_name("latex")
         .format_cache_path(format_cache)
         .output_format(OutputFormat::Pdf)

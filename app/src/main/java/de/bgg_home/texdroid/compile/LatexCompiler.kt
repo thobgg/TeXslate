@@ -1,7 +1,9 @@
 package de.bgg_home.texdroid.compile
 
 import android.content.Context
+import android.net.Uri
 import de.bgg_home.texdroid.RustBridge
+import de.bgg_home.texdroid.storage.ProjectStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -20,11 +22,22 @@ object LatexCompiler {
     /**
      * Kompiliert [source] und gibt das Ergebnis zurück. Läuft komplett auf
      * [Dispatchers.IO] – vom UI-Thread via `launch { compile(...) }` aufrufbar.
+     *
+     * Ist [projectTree] gesetzt (offenes Mehrdatei-Projekt, QW 4.2), werden vorher
+     * alle Projektdateien ins Arbeitsverzeichnis kopiert, damit `\input{...}` und
+     * `\include{...}` auf die Geschwisterdateien auflösen.
      */
-    suspend fun compile(context: Context, source: String): CompileResult =
+    suspend fun compile(
+        context: Context,
+        source: String,
+        projectTree: Uri? = null,
+    ): CompileResult =
         withContext(Dispatchers.IO) {
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
             try {
+                if (projectTree != null) {
+                    ProjectStore.syncToDir(context, projectTree, jobDir)
+                }
                 val json = RustBridge.tectonicCompileToFile(source, jobDir.absolutePath)
                 CompileResult.fromJson(json)
             } catch (t: UnsatisfiedLinkError) {

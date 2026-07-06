@@ -413,7 +413,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         compiling = true
         compileJob = scope.launch {
             try {
-                val result = LatexCompiler.compile(context, source)
+                val result = LatexCompiler.compile(context, source, projectTree)
                 lastLog = result.log.ifBlank { result.engineError }
                 errors = result.errors
                 errorIndex = 0
