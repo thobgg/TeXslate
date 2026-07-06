@@ -38,6 +38,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.FolderOpen
@@ -97,6 +98,7 @@ import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
 import de.bgg_home.texdroid.editor.jumpToErrorLine
+import de.bgg_home.texdroid.editor.selectedText
 import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
@@ -185,6 +187,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // KI-Assistenz (QW A1): Einstellungen (verschlüsselter Key, Opt-in).
     val aiSettings = remember { AiSettings(context) }
     var showSettings by remember { mutableStateOf(false) }
+    var showAi by remember { mutableStateOf(false) }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -397,6 +400,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onSave = ::saveDocument,
                 onExportPdf = ::exportPdf,
                 onShare = { showShare = true },
+                onAi = { showAi = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
@@ -571,6 +575,16 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     if (showSettings) {
         AiSettingsSheet(settings = aiSettings, onDismiss = { showSettings = false })
     }
+    if (showAi) {
+        AiAssistantSheet(
+            settings = aiSettings,
+            selection = editor?.selectedText() ?: "",
+            document = editor?.text?.toString() ?: "",
+            onInsert = { text -> editor?.insertText(text, text.length); editor?.requestFocus() },
+            onOpenSettings = { showSettings = true },
+            onDismiss = { showAi = false },
+        )
+    }
     if (showShare) {
         ShareDialog(
             hasText = !editor?.text?.toString().isNullOrEmpty(),
@@ -648,6 +662,7 @@ private fun AppHeader(
     onSave: () -> Unit,
     onExportPdf: () -> Unit,
     onShare: () -> Unit,
+    onAi: () -> Unit,
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
     canShowLog: Boolean,
@@ -688,6 +703,7 @@ private fun AppHeader(
                 ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
                 ToolbarSeparator(tint)
+                ToolbarIcon(Icons.Filled.AutoAwesome, "KI-Assistent", !compiling, tint, onAi)
                 CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
                 OverflowMenu(
                     tint = tint,

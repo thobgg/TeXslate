@@ -26,6 +26,12 @@ fun CodeEditor.jumpToErrorLine(line1Based: Int) {
  * Unterschlängelung über die Diagnostics-API). Ohne Zeilennummer oder bei
  * leerer Liste werden die Markierungen zurückgesetzt.
  */
+/** Der aktuell markierte Text – leer, wenn nichts selektiert ist. */
+fun CodeEditor.selectedText(): String {
+    val c = cursor
+    return if (c.isSelected) text.subSequence(c.left, c.right).toString() else ""
+}
+
 fun CodeEditor.showErrorDiagnostics(errors: List<CompileError>) {
     val content = text
     val container = DiagnosticsContainer()
