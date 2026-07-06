@@ -27,6 +27,8 @@ androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-te
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 # WindowSizeClass für adaptive Tablet-/Phone-Layouts. Version kommt aus der Compose-BOM.
 androidx-compose-material3-window-size = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+# Material-Icons (Neu/Öffnen/Speichern/Undo/Redo/Kompilieren …) für die Toolbar. Version aus der BOM.
+androidx-compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 
 # sora-editor: Code-Editor-View mit TextMate-Syntax-Highlighting (LGPL v2.1).
 # Wird NUR als Dependency eingebunden (keine Modifikation der Bibliothek) — LGPL-konform.

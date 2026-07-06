@@ -3,26 +3,46 @@ package de.bgg_home.texdroid.ui
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Redo
+import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.NoteAdd
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -32,13 +52,12 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +65,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
@@ -92,6 +113,15 @@ Willkommen bei \textbf{TexDroid}! Inline-Mathe: ${'$'}E = mc^2${'$'}.
 \end{document}
 """.trimIndent()
 
+/** Minimales Grundgerüst für „Neu". */
+private val NEW_DOC_TEMPLATE = """
+\documentclass{article}
+
+\begin{document}
+
+\end{document}
+""".trimIndent()
+
 /** Zustand des Compile-Laufs für die UI. */
 private enum class Tab { Editor, Preview }
 
@@ -117,6 +147,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Auto-Compile (QW 3.1): zählt Editor-Änderungen; ein LaunchedEffect debounced darauf.
     var autoCompile by remember { mutableStateOf(true) }
     var textVersion by remember { mutableIntStateOf(0) }
+
+    // Split-View: Anteil des Editors an der Breite (per Trenner verschiebbar, 0.2–0.8).
+    var splitFraction by remember { mutableFloatStateOf(0.5f) }
 
     // Aktuell geöffnete Datei (SAF): Uri, Anzeigename und ob wir zurückschreiben dürfen.
     var currentUri by remember { mutableStateOf<Uri?>(null) }
@@ -174,6 +207,13 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         }
     }
 
+    fun newDocument() {
+        editor?.setText(NEW_DOC_TEMPLATE)
+        currentUri = null
+        currentName = null
+        canWrite = false
+    }
+
     fun runCompile() {
         val source = editor?.text?.toString()
         if (source == null || compiling) return
@@ -222,8 +262,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 compiling = compiling,
                 autoCompile = autoCompile,
                 onAutoCompileChange = { autoCompile = it },
+                onNew = ::newDocument,
                 onOpen = ::openDocument,
                 onSave = ::saveDocument,
+                onUndo = { editor?.undo() },
+                onRedo = { editor?.redo() },
                 onCompile = ::runCompile,
             )
         },
@@ -231,23 +274,31 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     ) { innerPadding ->
         Box(Modifier.padding(innerPadding).fillMaxSize()) {
             if (isWide) {
-                // Tablet-Landscape: echte Split-View (Editor | Preview).
-                Row(Modifier.fillMaxSize()) {
-                    EditorPane(
-                        errors = errors,
-                        darkTheme = darkTheme,
-                        onEditorCreated = { editor = it },
-                        onTextChanged = { textVersion++ },
-                        onErrorClick = onErrorClick,
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                    )
-                    VerticalDivider()
-                    PreviewPane(
-                        pdfFile = pdfFile,
-                        reloadToken = reloadToken,
-                        compiling = compiling,
-                        modifier = Modifier.weight(1f).fillMaxSize(),
-                    )
+                // Tablet-Landscape: echte Split-View (Editor | Preview) mit
+                // verschiebbarem Trenner. splitFraction = Breitenanteil des Editors.
+                BoxWithConstraints(Modifier.fillMaxSize()) {
+                    val totalPx = constraints.maxWidth.toFloat()
+                    Row(Modifier.fillMaxSize()) {
+                        EditorPane(
+                            errors = errors,
+                            darkTheme = darkTheme,
+                            onEditorCreated = { editor = it },
+                            onTextChanged = { textVersion++ },
+                            onErrorClick = onErrorClick,
+                            modifier = Modifier.weight(splitFraction).fillMaxSize(),
+                        )
+                        SplitHandle(
+                            onDragDelta = { deltaPx ->
+                                splitFraction = (splitFraction + deltaPx / totalPx).coerceIn(0.2f, 0.8f)
+                            },
+                        )
+                        PreviewPane(
+                            pdfFile = pdfFile,
+                            reloadToken = reloadToken,
+                            compiling = compiling,
+                            modifier = Modifier.weight(1f - splitFraction).fillMaxSize(),
+                        )
+                    }
                 }
             } else {
                 // Phone / schmal: Tab-Umschaltung Editor ↔ Vorschau.
@@ -292,8 +343,11 @@ private fun AppHeader(
     compiling: Boolean,
     autoCompile: Boolean,
     onAutoCompileChange: (Boolean) -> Unit,
+    onNew: () -> Unit,
     onOpen: () -> Unit,
     onSave: () -> Unit,
+    onUndo: () -> Unit,
+    onRedo: () -> Unit,
     onCompile: () -> Unit,
 ) {
     Surface(color = MaterialTheme.colorScheme.primaryContainer) {
@@ -304,12 +358,12 @@ private fun AppHeader(
                 .windowInsetsPadding(
                     WindowInsets.systemBars.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                 )
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
-            // damit die Buttons rechts IMMER sichtbar bleiben (nie aus dem Bild geschoben).
+            // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
                 text = if (fileName != null) "TexDroid — $fileName" else "TexDroid",
                 style = MaterialTheme.typography.titleLarge,
@@ -318,31 +372,90 @@ private fun AppHeader(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
             )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                // Auto-Compile-Schalter (QW 3.1).
-                Text("Auto", style = MaterialTheme.typography.labelLarge)
+            // Kile-artige Icon-Toolbar: Datei-Aktionen · Undo/Redo · Auto · Kompilieren.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                val tint = MaterialTheme.colorScheme.onPrimaryContainer
+                ToolbarIcon(Icons.Filled.NoteAdd, "Neu", !compiling, tint, onNew)
+                ToolbarIcon(Icons.Filled.FolderOpen, "Öffnen", !compiling, tint, onOpen)
+                ToolbarIcon(Icons.Filled.Save, "Speichern", !compiling, tint, onSave)
+                ToolbarSeparator(tint)
+                ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
+                ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
+                ToolbarSeparator(tint)
+                Text("Auto", style = MaterialTheme.typography.labelLarge, color = tint)
                 Switch(checked = autoCompile, onCheckedChange = onAutoCompileChange)
-                TextButton(onClick = onOpen, enabled = !compiling) { Text("Öffnen") }
-                TextButton(onClick = onSave, enabled = !compiling) { Text("Speichern") }
+                Spacer(Modifier.width(8.dp))
                 CompileButton(compiling = compiling, onCompile = onCompile)
             }
         }
     }
 }
 
+/**
+ * Verschiebbarer Trenner zwischen Editor und Vorschau (nur Split-View).
+ * Ziehen nach links/rechts ändert das Breitenverhältnis; [onDragDelta] liefert
+ * die horizontale Verschiebung in Pixeln.
+ */
+@Composable
+private fun SplitHandle(onDragDelta: (Float) -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(12.dp)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta -> onDragDelta(delta) },
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        // Griff-Anzeige: kurzer abgerundeter Balken in der Mitte.
+        Box(
+            Modifier
+                .height(36.dp)
+                .width(4.dp)
+                .background(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(2.dp),
+                ),
+        )
+    }
+}
+
+@Composable
+private fun ToolbarIcon(
+    icon: ImageVector,
+    description: String,
+    enabled: Boolean,
+    tint: Color,
+    onClick: () -> Unit,
+) {
+    IconButton(onClick = onClick, enabled = enabled) {
+        Icon(imageVector = icon, contentDescription = description, tint = tint)
+    }
+}
+
+@Composable
+private fun ToolbarSeparator(tint: Color) {
+    Box(
+        Modifier
+            .padding(horizontal = 4.dp)
+            .height(24.dp)
+            .width(1.dp)
+            .background(tint.copy(alpha = 0.3f)),
+    )
+}
+
 @Composable
 private fun CompileButton(compiling: Boolean, onCompile: () -> Unit) {
     Button(onClick = onCompile, enabled = !compiling) {
         if (compiling) {
-            CircularProgressIndicator(
-                modifier = Modifier.padding(end = 8.dp),
-                strokeWidth = 2.dp,
-            )
+            CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            Spacer(Modifier.width(8.dp))
             Text("Kompiliere …")
         } else {
+            Icon(Icons.Filled.PlayArrow, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
             Text("Kompilieren")
         }
     }
