@@ -36,6 +36,7 @@ import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.NoteAdd
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
@@ -188,9 +189,33 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         }
     }
 
+    // SAF: kompiliertes PDF exportieren (ACTION_CREATE_DOCUMENT).
+    val exportPdfLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/pdf"),
+    ) { uri ->
+        val pdf = pdfFile
+        if (uri != null && pdf != null) {
+            scope.launch {
+                DocumentStore.exportFile(context, pdf, uri)
+                snackbarHostState.showSnackbar(
+                    "PDF gespeichert: ${DocumentStore.displayName(context, uri) ?: "PDF"}",
+                )
+            }
+        }
+    }
+
     fun openDocument() {
         // */* – .tex meldet je nach Gerät text/plain, text/x-tex oder octet-stream.
         openLauncher.launch(arrayOf("*/*"))
+    }
+
+    fun exportPdf() {
+        if (pdfFile == null) {
+            scope.launch { snackbarHostState.showSnackbar("Erst kompilieren – es gibt noch kein PDF.") }
+            return
+        }
+        val base = currentName?.removeSuffix(".tex") ?: "dokument"
+        exportPdfLauncher.launch("$base.pdf")
     }
 
     fun saveDocument() {
@@ -265,6 +290,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onNew = ::newDocument,
                 onOpen = ::openDocument,
                 onSave = ::saveDocument,
+                onExportPdf = ::exportPdf,
+                canExportPdf = pdfFile != null,
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
                 onCompile = ::runCompile,
@@ -346,6 +373,8 @@ private fun AppHeader(
     onNew: () -> Unit,
     onOpen: () -> Unit,
     onSave: () -> Unit,
+    onExportPdf: () -> Unit,
+    canExportPdf: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCompile: () -> Unit,
@@ -378,6 +407,7 @@ private fun AppHeader(
                 ToolbarIcon(Icons.Filled.NoteAdd, "Neu", !compiling, tint, onNew)
                 ToolbarIcon(Icons.Filled.FolderOpen, "Öffnen", !compiling, tint, onOpen)
                 ToolbarIcon(Icons.Filled.Save, "Speichern", !compiling, tint, onSave)
+                ToolbarIcon(Icons.Filled.PictureAsPdf, "PDF speichern", canExportPdf && !compiling, tint, onExportPdf)
                 ToolbarSeparator(tint)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)

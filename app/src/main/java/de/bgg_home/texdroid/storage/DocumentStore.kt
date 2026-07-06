@@ -6,6 +6,7 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 
 /**
  * Dünne Hilfsschicht über dem Storage Access Framework (SAF).
@@ -33,6 +34,16 @@ object DocumentStore {
         val mode = runCatching { resolver.openOutputStream(uri, "wt") }.getOrNull()
         val stream = mode ?: resolver.openOutputStream(uri, "w")
         stream?.use { it.write(bytes) }
+    }
+
+    /**
+     * Kopiert eine App-interne Datei [source] (z.B. das kompilierte PDF) an die
+     * vom Nutzer gewählte SAF-[target] (Export „Speichern unter…").
+     */
+    suspend fun exportFile(context: Context, source: File, target: Uri) = withContext(Dispatchers.IO) {
+        context.contentResolver.openOutputStream(target, "wt")?.use { out ->
+            source.inputStream().use { it.copyTo(out) }
+        }
     }
 
     /** Fragt den Anzeigenamen (Dateiname) der [uri] ab, falls verfügbar. */
