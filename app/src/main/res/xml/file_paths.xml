@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Temporäre, nett benannte Kopie fürs Teilen (context.cacheDir/shared/). -->
+    <cache-path name="shared" path="shared/" />
+    <!-- Das direkte Arbeits-PDF (context.filesDir/job/). -->
+    <files-path name="job" path="job/" />
+</paths>

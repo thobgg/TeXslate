@@ -2,7 +2,9 @@ package de.bgg_home.texdroid.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Intent
 import android.net.Uri
+import androidx.core.content.FileProvider
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -47,8 +49,11 @@ import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -67,6 +72,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
@@ -183,6 +189,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
     var showLog by remember { mutableStateOf(false) }
+    var showShare by remember { mutableStateOf(false) }
     var compileJob by remember { mutableStateOf<Job?>(null) }
     var errorIndex by remember { mutableIntStateOf(0) }
 
@@ -250,6 +257,47 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         }
         val base = currentName?.removeSuffix(".tex") ?: "dokument"
         exportPdfLauncher.launch("$base.pdf")
+    }
+
+    // Teilt TeX-Quelle und/oder PDF in einem Zug. Für sinnvolle Dateinamen im
+    // Share-Sheet (statt „document.*") werden nett benannte Cache-Kopien via
+    // content:// (FileProvider) gereicht. Bei zwei Dateien: ACTION_SEND_MULTIPLE.
+    fun shareSelected(includeTex: Boolean, includePdf: Boolean) {
+        val source = editor?.text?.toString()
+        val pdf = pdfFile
+        val base = currentName?.removeSuffix(".tex") ?: "dokument"
+        scope.launch {
+            val uris = withContext(Dispatchers.IO) {
+                val dir = File(context.cacheDir, "shared").apply { mkdirs() }
+                val list = ArrayList<Uri>()
+                if (includeTex && source != null) {
+                    val f = File(dir, "$base.tex").apply { writeText(source) }
+                    list += FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", f)
+                }
+                if (includePdf && pdf != null) {
+                    val f = File(dir, "$base.pdf").also { pdf.copyTo(it, overwrite = true) }
+                    list += FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", f)
+                }
+                list
+            }
+            if (uris.isEmpty()) {
+                snackbarHostState.showSnackbar("Nichts zum Teilen ausgewählt.")
+                return@launch
+            }
+            val send = if (uris.size == 1) {
+                Intent(Intent.ACTION_SEND).apply {
+                    type = if (uris[0].toString().endsWith(".pdf")) "application/pdf" else "text/x-tex"
+                    putExtra(Intent.EXTRA_STREAM, uris[0])
+                }
+            } else {
+                Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+                    type = "*/*"
+                    putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
+                }
+            }
+            send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            context.startActivity(Intent.createChooser(send, "Teilen"))
+        }
     }
 
     fun saveDocument() {
@@ -348,6 +396,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onOpen = ::openDocument,
                 onSave = ::saveDocument,
                 onExportPdf = ::exportPdf,
+                onShare = { showShare = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
@@ -522,6 +571,70 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     if (showSettings) {
         AiSettingsSheet(settings = aiSettings, onDismiss = { showSettings = false })
     }
+    if (showShare) {
+        ShareDialog(
+            hasText = !editor?.text?.toString().isNullOrEmpty(),
+            hasPdf = pdfFile != null,
+            onDismiss = { showShare = false },
+            onShare = { tex, pdf -> showShare = false; shareSelected(tex, pdf) },
+        )
+    }
+}
+
+/** Auswahl beim Teilen: TeX-Quelle, PDF oder beides – in einem Dialog. */
+@Composable
+private fun ShareDialog(
+    hasText: Boolean,
+    hasPdf: Boolean,
+    onDismiss: () -> Unit,
+    onShare: (tex: Boolean, pdf: Boolean) -> Unit,
+) {
+    var tex by remember { mutableStateOf(hasText) }
+    var pdf by remember { mutableStateOf(hasPdf) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Teilen") },
+        text = {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = hasText) { tex = !tex }
+                        .padding(vertical = 4.dp),
+                ) {
+                    Checkbox(checked = tex && hasText, enabled = hasText, onCheckedChange = { tex = it })
+                    Text("TeX-Quelle (.tex)", modifier = Modifier.padding(start = 4.dp))
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = hasPdf) { pdf = !pdf }
+                        .padding(vertical = 4.dp),
+                ) {
+                    Checkbox(checked = pdf && hasPdf, enabled = hasPdf, onCheckedChange = { pdf = it })
+                    Column(modifier = Modifier.padding(start = 4.dp)) {
+                        Text("PDF (.pdf)")
+                        if (!hasPdf) {
+                            Text(
+                                "Erst kompilieren",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onShare(tex && hasText, pdf && hasPdf) },
+                enabled = (tex && hasText) || (pdf && hasPdf),
+            ) { Text("Teilen") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+    )
 }
 
 @Composable
@@ -534,6 +647,7 @@ private fun AppHeader(
     onOpen: () -> Unit,
     onSave: () -> Unit,
     onExportPdf: () -> Unit,
+    onShare: () -> Unit,
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
     canShowLog: Boolean,
@@ -583,6 +697,7 @@ private fun AppHeader(
                     canShowLog = canShowLog,
                     onNew = onNew,
                     onExportPdf = onExportPdf,
+                    onShare = onShare,
                     onShowLog = onShowLog,
                     onSettings = onSettings,
                     onAutoCompileChange = onAutoCompileChange,
@@ -633,6 +748,7 @@ private fun OverflowMenu(
     canShowLog: Boolean,
     onNew: () -> Unit,
     onExportPdf: () -> Unit,
+    onShare: () -> Unit,
     onShowLog: () -> Unit,
     onSettings: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
@@ -654,6 +770,12 @@ private fun OverflowMenu(
                 leadingIcon = { Icon(Icons.Filled.PictureAsPdf, contentDescription = null) },
                 enabled = canExportPdf && !compiling,
                 onClick = { expanded = false; onExportPdf() },
+            )
+            DropdownMenuItem(
+                text = { Text("Teilen…") },
+                leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
+                enabled = !compiling,
+                onClick = { expanded = false; onShare() },
             )
             DropdownMenuItem(
                 text = { Text("Log ansehen") },
