@@ -34,6 +34,10 @@ _Optionaler KI-Assistent (BYOK): der „Erklären"-Chip an jedem Fehler schickt 
   per Tab auf schmalen Displays.
 - **Fehler auf Deutsch**: die häufigsten TeX-Meldungen werden ins Deutsche
   übersetzt; Tippen springt zur Fehlerzeile.
+- **Mehrdatei-Projekte**: Projektordner-Sidebar (Dateibaum), Datei-Wechsel per Tap,
+  `\input`/`\include` und Bibliografie (`bibtex`, sowie `biblatex` mit `backend=bibtex`).
+- **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile, Kommentar
+  ein/aus für Zeile oder Auswahl.
 - **Assistenten & Vorlagen**: Dokument- und Tabellen-Assistent, kuratierte
   Vorlagen (Beamer, Thesis, Brief, Klausur).
 - **Teilen & Speichern**: PDF und/oder `.tex`-Quelle teilen, PDF exportieren,
@@ -70,25 +74,42 @@ proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
 | Dateizugriff | Storage Access Framework (SAF), Teilen via `FileProvider` |
 | KI-Assistent | optional, BYOK — Anthropic · OpenAI · Gemini über `HttpURLConnection` (keine Netzwerk-Dependency); Keys via Android Keystore verschlüsselt |
 
-**ABI-Targets:** `arm64-v8a`, `armeabi-v7a`.
+**ABI-Targets:** `arm64-v8a` (echte Geräte) + `x86_64` (Emulator), je als eigene
+APK (ABI-Splits). `armeabi-v7a` (alte 32-bit-Geräte) noch offen.
 
 ## Status
 
-🚧 In früher Entwicklung. Roadmap und Milestones siehe [`PROJECT.md`](./PROJECT.md).
+🧪 **Alpha** — auf echten Geräten nutzbar (Galaxy Tab S8 Ultra, S9, S5e; Android
+11 & 16). Roadmap und Milestones siehe [`PROJECT.md`](./PROJECT.md).
 
 - [x] **M0** — Proof of Concept (Rust↔Kotlin-Brücke, erstes PDF lokal erzeugt)
 - [x] **M1** — Basis-Editor + Compile-Loop
 - [x] **M2** — PDF-Preview + Tablet-Split-View
 - [x] **M3** — Live/Auto-Compile & UX
 - [x] **Extras** — Assistenten & Vorlagen, PDF/`.tex` teilen, deutsche Fehlermeldungen
-- [x] **KI-Assistent (Beta)** — optionaler BYOK-Assistent (Anthropic · OpenAI · Gemini), „Fehler erklären"
-- [ ] **M4** — Projektverwaltung (Multi-File)
+- [x] **MA — KI-Assistent** — optionaler BYOK-Assistent (Anthropic · OpenAI · Gemini), „Fehler erklären"
+- [x] **M4** — Projektverwaltung (Multi-File, Bibliografie)
+- [x] **ME** — Editor-Komfort (Suchen & Ersetzen, Gehe zu Zeile, Kommentar) + TeX-Branding
+- [x] **MR** — Alpha-Release: signierte APK, auf 3 Geräten verifiziert
 - [ ] **M5** — F-Droid-Release
+- [ ] **M6** — Play-Store-Release (optional)
 
 > Der KI-Assistent ist **standardmäßig aus** und rein optional. Nur wenn du ihn
 > aktivierst und einen eigenen API-Key hinterlegst, spricht die App mit einem
 > externen Dienst (F-Droid-Anti-Feature `NonFreeNetwork`). Ohne ihn bleibt
 > TexDroid vollständig offline und quelloffen nutzbar.
+
+## Installieren (Alpha)
+
+Vorgebaute, signierte APKs gibt es unter
+[**Releases**](https://github.com/thobgg/TexDroid/releases):
+
+- **Tablet/Handy:** `…-arm64-v8a.apk` · **Emulator:** `…-x86_64.apk`
+- **Auto-Updates:** dieses Repo als Quelle in [Obtainium](https://github.com/ImranR98/Obtainium) hinzufügen.
+- Voraussetzung: **Android 8.0+**, „Installation aus unbekannten Quellen" erlauben.
+
+> Der **erste Compile** lädt einmalig das TeX-Paket-Bundle übers Netz (~1–2 Min);
+> ein Hinweis erscheint. Danach arbeitet TexDroid vollständig offline.
 
 ## Native Build (Tectonic)
 
@@ -133,10 +154,9 @@ Das Skript legt `libtexdroid_native.so` **und** `libc++_shared.so` in
 Tectonic-Lib ist ~60 MB), z.B. `app-arm64-v8a-debug.apk` (~80 MB, fürs Tablet)
 und `app-x86_64-debug.apk` (fürs Emulator) unter `app/build/outputs/apk/debug/`.
 
-> **Status:** `x86_64` (Emulator) und `arm64-v8a` (echte Tablets) sind gebaut.
-> Der x86_64-Build ist auf dem Emulator getestet; der arm64-Build ist gebaut und
-> verifiziert (Symbol + `libc++_shared.so` in der APK), aber noch nicht auf einem
-> echten Gerät gelaufen. `armeabi-v7a` weiterhin offen.
+> **Status:** `x86_64` (Emulator) und `arm64-v8a` (echte Geräte) sind gebaut und
+> getestet — der arm64-Build läuft auf Galaxy Tab S8 Ultra, S9 (Android 16) und
+> Tab S5e (Android 11), inkl. lokalem Compile. `armeabi-v7a` (32-bit) weiterhin offen.
 
 ## Lizenz
 

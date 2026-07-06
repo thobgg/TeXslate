@@ -54,7 +54,8 @@ externe Tastatur, Stift), Phone als sekundäres Layout.
 | PDF-Anzeige | Android `PdfRenderer` (Bordmittel) | Keine Zusatz-Lib nötig |
 | Dateizugriff | Storage Access Framework (SAF) | Nutzer wählt eigene Projektordner |
 
-**ABI-Targets:** `arm64-v8a`, `armeabi-v7a`.
+**ABI-Targets:** `arm64-v8a` (echte Geräte, produktiv) + `x86_64` (Emulator),
+je als eigene APK (ABI-Splits). `armeabi-v7a` (alte 32-bit-Geräte) noch offen.
 
 **Layout-Strategie (Tablet-first):**
 - Tablet/breite Screens: echte Split-View — Editor links, PDF-Preview rechts.
@@ -62,6 +63,11 @@ externe Tastatur, Stift), Phone als sekundäres Layout.
 - Von Anfang an mit `WindowSizeClass` bauen, nicht Phone-first nachrüsten.
 
 ## 3. Milestones
+
+> **Stand:** M0–M4, MA (KI), ME (Editor-Komfort), MR (Alpha-Release) ✅ —
+> `v1.0-alpha1` als GitHub-Prerelease veröffentlicht, auf 3 echten Geräten
+> (Android 11 & 16) verifiziert. Offen: M5 (F-Droid), M6 (Play Store),
+> Rest-Testabdeckung (Handy, 32-bit, S-Pen).
 
 **Pro Milestone eine eigene Session/Branch.**
 
@@ -87,8 +93,8 @@ Erfolgserlebnis gibt:
 - [x] **QW 0.3:** Tectonic cross-compilen und einbinden.
       Statt `arm64-v8a` zuerst **`x86_64`** (der Emulator ist x86_64) — C-Stack via
       vcpkg (`TECTONIC_DEP_BACKEND=vcpkg`), siehe README. `arm64-v8a` inzwischen
-      ebenfalls gebaut (via ABI-Splits eigene Tablet-APK), aber noch nicht auf
-      echtem Gerät getestet.
+      ebenfalls gebaut (via ABI-Splits eigene Tablet-APK) und auf echten Geräten
+      verifiziert (Galaxy Tab S8 Ultra, S9, S5e).
       🎉 Sichtbar: App zeigt „Tectonic-Engine eingebettet ✓ / XeTeX format serial: 33"
       auf dem Gerät.
 - [x] **QW 0.4:** Fest einprogrammiertes Mini-`.tex` wird beim App-Start
@@ -155,6 +161,26 @@ Erfolgserlebnis gibt:
       biber-Binary) wird auf Android noch nicht unterstützt — Workaround:
       `backend=bibtex` setzen. Vollständiges biber = separates, größeres Vorhaben.
 
+### MA — KI-Assistent (BYOK, optional)
+- [x] **QW A1:** Verschlüsselte API-Key-Ablage (Android Keystore, AES-256-GCM),
+      Opt-in in den Einstellungen. Ohne Key bleibt die App voll nutzbar.
+      🎉 Sichtbar: eigener Schlüssel wird sicher auf dem Gerät gespeichert.
+- [x] **QW A2:** KI-Assistent-Sheet — Frage stellen, Kontext (Auswahl/Dokument),
+      Antwort anzeigen. Zentriertes Dialog-Layout, das die Tastatur nicht überdeckt.
+      🎉 Sichtbar: Frage → Antwort direkt in der App.
+- [x] **QW A3/A4:** Multi-Provider (Anthropic / OpenAI / Gemini) über
+      `HttpURLConnection` + `org.json` (keine Netzwerk-Abhängigkeit).
+      🎉 Sichtbar: derselbe Dialog funktioniert mit dem Anbieter der Wahl.
+- [x] **QW A5:** Gespräch mit Rückfragen (Kontext bleibt über mehrere Runden).
+      🎉 Sichtbar: „mach die erste Spalte fett" bezieht sich auf die vorige Antwort.
+- [x] **QW A6:** Deutsche Fehlermeldungen (HTTP-Status + TeX-Fehler übersetzt).
+      🎉 Sichtbar: „API-Key ungültig" statt kryptischem 401.
+- [x] **QW A7:** KI-Inhalt einfügen — Am Cursor / Am Dokumentende / Ersetzen;
+      Code-Fences werden entfernt. „Fehler erklären" schickt den Compile-Fehler an die KI.
+      🎉 Sichtbar: generierter Beweis landet sauber im Dokument und kompiliert.
+      ⚠️ Netzwerk-Nutzung (nur bei aktivem Key) — für F-Droid als „NonFreeNetwork"
+      zu kennzeichnen; Opt-in, Kernfunktionen bleiben offline.
+
 ### ME — Editor-Komfort & Branding
 - [x] **QW E.1:** Suchen & Ersetzen im Editor.
       🎉 Sichtbar: Lupe in der Toolbar → Suchen mit Live-Markierung + Zähler,
@@ -169,10 +195,27 @@ Erfolgserlebnis gibt:
       Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
       Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.
 
+### MR — Alpha-Release & Multi-Device-Tests
+- [x] **Multi-Device-Tests:** Galaxy Tab S8 Ultra (Android 16), Tab S9 (16),
+      Tab S5e (Android 11, Snapdragon 670) — Layout (Split-View) + nativer
+      Tectonic-Compile auf jedem verifiziert.
+- [x] **First-Compile-Hinweis:** der erste Compile pro Installation lädt einmalig
+      das TeX-Bundle (~1–2 Min, netz-gebunden) → Hinweis statt „hängt?".
+- [x] **Release-Signierung:** eigener Keystore, `keystore.properties` (gitignored),
+      signingConfig nur wenn vorhanden (F-Droid-Build bleibt unsigniert statt zu brechen).
+- [x] **GitHub-Prerelease `v1.0-alpha1`** mit arm64-v8a- + x86_64-APK, per
+      Obtainium abonnierbar. Erste Tester können loslegen.
+      🎉 Sichtbar: signierte APK öffentlich installierbar.
+- [ ] Offene Test-Lücken: Handy-Format (Hochformat), `armeabi-v7a` (32-bit), S-Pen.
+- [ ] Nächster Alpha-Build: `versionCode` hochzählen (Update-Pflicht).
+
 ### M5 — F-Droid-Release
-- [ ] Reproducible Build, keine proprietären Abhängigkeiten
+- [ ] Reproducible Build, keine proprietären Abhängigkeiten.
+      ⚠️ Großer Brocken: die native `.so` (Tectonic + C-Stack via vcpkg/cargo-ndk)
+      muss auf F-Droids Buildservern aus dem Quellcode bauen — entscheidet, ob
+      F-Droid praktikabel ist. Play Store (M6) ist technisch einfacher.
 - [ ] Lizenzcheck: Tectonic = MIT ✓; nachgeladene TeX-Pakete/Fonts (LPPL etc.)
-      prüfen, v.a. falls gebündelt statt nachgeladen
+      prüfen, v.a. falls gebündelt statt nachgeladen. KI = NonFreeNetwork-Opt-in.
 - [ ] F-Droid-Metadata, Screenshots (Tablet-Auflösung!), Submission
 
 ### M6 — Play-Store-Release (optional)
