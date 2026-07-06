@@ -1,15 +1,11 @@
 package de.bgg_home.texdroid.ui
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -19,7 +15,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -61,15 +56,7 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
         showKey = false
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
-        Column(
-            Modifier
-                .fillMaxWidth()
-                .imePadding()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 24.dp),
-        ) {
+    KeyboardAwareDialog(onDismiss = onDismiss) {
             Text(
                 "KI-Assistent (Beta)",
                 style = MaterialTheme.typography.titleMedium,
@@ -146,7 +133,6 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                 },
                 modifier = Modifier.padding(top = 16.dp),
             ) { Text("Speichern") }
-        }
     }
 }
 
