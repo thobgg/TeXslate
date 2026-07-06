@@ -4,6 +4,7 @@ import de.bgg_home.texdroid.compile.CompileError
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticRegion
 import io.github.rosemoe.sora.lang.diagnostic.DiagnosticsContainer
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.EditorSearcher
 
 /**
  * Editor-Aktionen für QW 3.2 (Jump-to-Error + Fehlerzeilen markieren).
@@ -52,6 +53,63 @@ fun CodeEditor.insertBeforeEndDocument(snippet: String) {
     text.insert(line, column, block)
     setSelection(line, column) // Cursor an den Anfang des eingefügten Blocks.
     requestFocus()
+}
+
+/**
+ * Suchen & Ersetzen (Editor-Komfort). Nutzt die eingebaute Such-Engine von
+ * sora-editor (`EditorSearcher`); wir binden nur die UI an.
+ */
+
+/**
+ * Startet/aktualisiert die Suche. Leere [query] beendet die Suche (Markierungen
+ * verschwinden). Gibt `false` zurück, wenn [regex] aktiv ist und das Muster
+ * ungültig ist – die UI zeigt das als Hinweis. [caseInsensitive] = Groß/Klein egal.
+ */
+fun CodeEditor.runSearch(query: String, caseInsensitive: Boolean, regex: Boolean): Boolean {
+    if (query.isEmpty()) {
+        stopSearch()
+        return true
+    }
+    // Bei Regex das Muster vorab prüfen (sora wirft nicht, sondern liefert 0
+    // Treffer) – so kann die UI ein ungültiges Muster als solches anzeigen.
+    if (regex && runCatching { java.util.regex.Pattern.compile(query) }.isFailure) {
+        stopSearch()
+        return false
+    }
+    val type = if (regex) {
+        EditorSearcher.SearchOptions.TYPE_REGULAR_EXPRESSION
+    } else {
+        EditorSearcher.SearchOptions.TYPE_NORMAL
+    }
+    return runCatching {
+        searcher.search(query, EditorSearcher.SearchOptions(type, caseInsensitive))
+    }.isSuccess
+}
+
+/** Zum nächsten Treffer springen (zyklisch, sobald eine Suche aktiv ist). */
+fun CodeEditor.searchNext() {
+    if (searcher.hasQuery()) searcher.gotoNext()
+}
+
+/** Zum vorigen Treffer springen. */
+fun CodeEditor.searchPrevious() {
+    if (searcher.hasQuery()) searcher.gotoPrevious()
+}
+
+/** Aktuellen Treffer durch [replacement] ersetzen und weiterspringen. */
+fun CodeEditor.replaceCurrentMatch(replacement: String) {
+    if (searcher.hasQuery()) runCatching { searcher.replaceCurrentMatch(replacement) }
+}
+
+/** Alle Treffer durch [replacement] ersetzen. */
+fun CodeEditor.replaceAllMatches(replacement: String) {
+    if (searcher.hasQuery()) runCatching { searcher.replaceAll(replacement) }
+}
+
+/** Suche beenden und Trefferhervorhebung entfernen (inkl. Neuzeichnen). */
+fun CodeEditor.stopSearch() {
+    searcher.stopSearch()
+    invalidate() // stopSearch räumt den Zustand, zeichnet aber nicht neu.
 }
 
 fun CodeEditor.showErrorDiagnostics(errors: List<CompileError>) {
