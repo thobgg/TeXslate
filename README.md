@@ -1,6 +1,10 @@
-# TexDroid
+<p align="center">
+  <img src="./docs/logo.png" alt="TexDroid" width="128">
+</p>
 
-**Nativer LaTeX/XeTeX-Editor für Android — Tablet-first.**
+<h1 align="center">TexDroid</h1>
+
+<p align="center"><strong>Nativer LaTeX/XeTeX-Editor für Android — Tablet-first.</strong></p>
 
 Schreibe LaTeX direkt auf dem Tablet und sieh live nebenan das PDF — ohne Terminal,
 ohne Cloud-Zwang. TexDroid verbindet Editor, lokalen Compiler und PDF-Vorschau in
