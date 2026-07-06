@@ -106,6 +106,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import de.bgg_home.texdroid.ai.AiSettings
@@ -193,6 +194,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Referenz auf den konkreten Editor (für das Auslesen des Textes beim Compile).
     var editor by remember { mutableStateOf<CodeEditor?>(null) }
     var compiling by remember { mutableStateOf(false) }
+    // Erster Compile pro Installation lädt einmalig das Tectonic-Paket-Bundle
+    // (kann auf schwacher Hardware/langsamem Netz ~1 Min dauern) → Hinweis zeigen.
+    val appPrefs = remember { context.getSharedPreferences("app", Context.MODE_PRIVATE) }
+    var compiledOnce by remember { mutableStateOf(appPrefs.getBoolean("compiledOnce", false)) }
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var reloadToken by remember { mutableIntStateOf(0) }
     var errors by remember { mutableStateOf<List<CompileError>>(emptyList()) }
@@ -503,6 +508,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 // Läuft auch bei Abbruch (finally) – erst wenn der native Aufruf
                 // wirklich zurückkehrt, damit keine zwei Compiles gleichzeitig laufen.
                 compiling = false
+                // Nach dem ersten Compile ist das Bundle geladen → Hinweis künftig aus.
+                if (!compiledOnce) {
+                    compiledOnce = true
+                    appPrefs.edit().putBoolean("compiledOnce", true).apply()
+                }
             }
         }
     }
@@ -663,6 +673,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             pdfFile = pdfFile,
                             reloadToken = reloadToken,
                             compiling = compiling,
+                            firstCompile = compiling && !compiledOnce,
                             modifier = Modifier.weight(1f - splitFraction).fillMaxSize(),
                         )
                     }
@@ -698,6 +709,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             pdfFile = pdfFile,
                             reloadToken = reloadToken,
                             compiling = compiling,
+                            firstCompile = compiling && !compiledOnce,
                             modifier = Modifier.fillMaxSize(),
                         )
                     }
@@ -1253,12 +1265,28 @@ private fun PreviewPane(
     pdfFile: File?,
     reloadToken: Int,
     compiling: Boolean,
+    firstCompile: Boolean,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
         when {
             pdfFile != null -> PdfPreview(file = pdfFile, reloadToken = reloadToken)
-            compiling -> CircularProgressIndicator()
+            compiling -> Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = 24.dp),
+            ) {
+                CircularProgressIndicator()
+                if (firstCompile) {
+                    Spacer(Modifier.height(20.dp))
+                    Text(
+                        text = "Lade TeX-Pakete …\n" +
+                            "Das passiert nur beim ersten Mal und kann eine Minute dauern.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
             else -> Text(
                 text = "Noch nicht kompiliert.\nTippe auf „Kompilieren“.",
                 style = MaterialTheme.typography.bodyMedium,
