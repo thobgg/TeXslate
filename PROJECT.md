@@ -132,12 +132,20 @@ Erfolgserlebnis gibt:
       🎉 Sichtbar: angenehmes Schreiben mit Hardware-Tastatur.
 
 ### M4 — Projektverwaltung
-- [ ] **QW 4.1:** Dateibaum-Sidebar (Tablet), Datei-Wechsel per Tap.
+- [x] **QW 4.1:** Dateibaum-Sidebar (Tablet), Datei-Wechsel per Tap.
       🎉 Sichtbar: Projektordner mit mehreren Dateien navigierbar.
-- [ ] **QW 4.2:** Multi-File-Compile: `\input` / `\include` funktionieren.
+      (SAF-Tree-Uri persistent, Sidebar via ModalNavigationDrawer, Auswahl
+      lädt die Datei sofort; Projekt wird beim Neustart wiederhergestellt.)
+- [x] **QW 4.2:** Multi-File-Compile: `\input` / `\include` funktionieren.
       🎉 Sichtbar: mehrteiliges Dokument (z.B. Kapitel-Dateien) baut korrekt.
-- [ ] **QW 4.3:** Bibliografie prüfen (biber, sofern Tectonic abdeckt —
-      sonst als bekanntes Limit dokumentieren und verschieben).
+      (ProjectStore.syncToDir kopiert den Projektbaum ins Arbeitsverzeichnis;
+      nativ `.filesystem_root(out_dir)`, damit Tectonic die Dateien findet.)
+- [x] **QW 4.3:** Bibliografie (klassisches `bibtex`) funktioniert.
+      🎉 Sichtbar: `\cite{...}` + `\bibliography{...}` erzeugen Zitat [1] und
+      Literaturverzeichnis. Ohne Code-Änderung: Tectonics eingebautes bibtex
+      macht die Mehrfach-Durchläufe, QW 4.2 kopiert die `.bib` mit.
+      ⚠️ Bekanntes Limit: `biblatex`+`biber` (externes biber-Binary) wird auf
+      Android noch nicht unterstützt — separates, größeres Vorhaben.
 
 ### M5 — F-Droid-Release
 - [ ] Reproducible Build, keine proprietären Abhängigkeiten
