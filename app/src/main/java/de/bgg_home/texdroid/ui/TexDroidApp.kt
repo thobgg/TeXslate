@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
@@ -188,6 +189,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     val aiSettings = remember { AiSettings(context) }
     var showSettings by remember { mutableStateOf(false) }
     var showAi by remember { mutableStateOf(false) }
+    var aiInitialQuestion by remember { mutableStateOf("") }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -385,6 +387,13 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         err.line?.let { editor?.jumpToErrorLine(it) }
     }
 
+    // QW A4: „Fehler erklären" – KI-Assistent mit vorbefüllter Frage zum Fehler öffnen.
+    val onExplainError: (CompileError) -> Unit = { err ->
+        val where = err.line?.let { " (Zeile $it)" } ?: ""
+        aiInitialQuestion = "Erkläre kurz diesen LaTeX-Compile-Fehler und wie ich ihn behebe$where:\n${err.message}"
+        showAi = true
+    }
+
     val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     Scaffold(
@@ -400,7 +409,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onSave = ::saveDocument,
                 onExportPdf = ::exportPdf,
                 onShare = { showShare = true },
-                onAi = { showAi = true },
+                onAi = { aiInitialQuestion = ""; showAi = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
@@ -440,6 +449,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             onEditorCreated = { editor = it },
                             onTextChanged = { textVersion++ },
                             onErrorClick = onErrorClick,
+                            onExplainError = onExplainError,
                             onPrevError = { jumpToError(errorIndex - 1) },
                             onNextError = { jumpToError(errorIndex + 1) },
                             modifier = Modifier.weight(splitFraction).fillMaxSize(),
@@ -479,6 +489,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             onEditorCreated = { editor = it },
                             onTextChanged = { textVersion++ },
                             onErrorClick = onErrorClick,
+                            onExplainError = onExplainError,
                             onPrevError = { jumpToError(errorIndex - 1) },
                             onNextError = { jumpToError(errorIndex + 1) },
                             modifier = Modifier.fillMaxSize(),
@@ -583,6 +594,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             onInsert = { text -> editor?.insertText(text, text.length); editor?.requestFocus() },
             onOpenSettings = { showSettings = true },
             onDismiss = { showAi = false },
+            initialQuestion = aiInitialQuestion,
         )
     }
     if (showShare) {
@@ -894,6 +906,7 @@ private fun EditorPane(
     onEditorCreated: (CodeEditor) -> Unit,
     onTextChanged: () -> Unit,
     onErrorClick: (CompileError) -> Unit,
+    onExplainError: (CompileError) -> Unit,
     onPrevError: () -> Unit,
     onNextError: () -> Unit,
     modifier: Modifier = Modifier,
@@ -907,7 +920,7 @@ private fun EditorPane(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         if (errors.isNotEmpty()) {
-            ErrorPanel(errors, onErrorClick, onPrevError, onNextError)
+            ErrorPanel(errors, onErrorClick, onExplainError, onPrevError, onNextError)
         }
     }
 }
@@ -916,6 +929,7 @@ private fun EditorPane(
 private fun ErrorPanel(
     errors: List<CompileError>,
     onErrorClick: (CompileError) -> Unit,
+    onExplainError: (CompileError) -> Unit,
     onPrevError: () -> Unit,
     onNextError: () -> Unit,
 ) {
@@ -948,15 +962,30 @@ private fun ErrorPanel(
             }
             errors.forEach { err ->
                 val prefix = err.line?.let { "Zeile $it: " } ?: ""
-                Text(
-                    text = "• $prefix${err.message}",
-                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onErrorClick(err) } // QW 3.2: Sprung zur Fehlerzeile
-                        .padding(vertical = 2.dp),
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "• $prefix${err.message}",
+                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onErrorClick(err) } // QW 3.2: Sprung zur Fehlerzeile
+                            .padding(vertical = 2.dp),
+                    )
+                    // QW A4: KI direkt am Fehler – öffnet den Assistenten mit vorbefüllter Frage.
+                    AssistChip(
+                        onClick = { onExplainError(err) },
+                        label = { Text("Erklären") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Filled.AutoAwesome,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                            )
+                        },
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
             }
         }
     }

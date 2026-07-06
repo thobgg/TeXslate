@@ -56,12 +56,13 @@ fun AiAssistantSheet(
     onInsert: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
+    initialQuestion: String = "",
 ) {
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
 
     var stage by remember { mutableStateOf(Stage.INPUT) }
-    var question by remember { mutableStateOf("") }
+    var question by remember { mutableStateOf(initialQuestion) }
     var contextScope by remember {
         mutableStateOf(
             when {
@@ -146,6 +147,7 @@ fun AiAssistantSheet(
 
                 Stage.RESULT -> ResultStage(
                     answer = answer,
+                    hasSelection = selection.isNotBlank(),
                     onInsert = { onInsert(answer); onDismiss() },
                     onCopy = { clipboard.setText(AnnotatedString(answer)) },
                     onNewQuestion = { answer = ""; stage = Stage.INPUT },
@@ -257,6 +259,7 @@ private fun InputStage(
 @Composable
 private fun ResultStage(
     answer: String,
+    hasSelection: Boolean,
     onInsert: () -> Unit,
     onCopy: () -> Unit,
     onNewQuestion: () -> Unit,
@@ -278,7 +281,7 @@ private fun ResultStage(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(top = 12.dp),
     ) {
-        Button(onClick = onInsert) { Text("Einfügen") }
+        Button(onClick = onInsert) { Text(if (hasSelection) "Ersetzen" else "Einfügen") }
         TextButton(onClick = onCopy) { Text("Kopieren") }
         TextButton(onClick = onNewQuestion) { Text("Neue Frage") }
     }
