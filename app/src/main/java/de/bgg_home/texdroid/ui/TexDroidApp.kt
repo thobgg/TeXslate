@@ -46,6 +46,7 @@ import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -85,6 +86,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.ai.AiSettings
 import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
@@ -173,6 +175,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var showTableWizard by remember { mutableStateOf(false) }
     var showDocumentWizard by remember { mutableStateOf(false) }
     var showTemplates by remember { mutableStateOf(false) }
+
+    // KI-Assistenz (QW A1): Einstellungen (verschlüsselter Key, Opt-in).
+    val aiSettings = remember { AiSettings(context) }
+    var showSettings by remember { mutableStateOf(false) }
 
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
@@ -345,6 +351,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
+                onSettings = { showSettings = true },
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
                 onCompile = ::runCompile,
@@ -510,6 +517,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     if (showLog) {
         LogSheet(log = lastLog, onDismiss = { showLog = false })
     }
+
+    // KI-Einstellungen (Kebab → „Einstellungen").
+    if (showSettings) {
+        AiSettingsSheet(settings = aiSettings, onDismiss = { showSettings = false })
+    }
 }
 
 @Composable
@@ -525,6 +537,7 @@ private fun AppHeader(
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
     canShowLog: Boolean,
+    onSettings: () -> Unit,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCompile: () -> Unit,
@@ -571,6 +584,7 @@ private fun AppHeader(
                     onNew = onNew,
                     onExportPdf = onExportPdf,
                     onShowLog = onShowLog,
+                    onSettings = onSettings,
                     onAutoCompileChange = onAutoCompileChange,
                 )
             }
@@ -620,6 +634,7 @@ private fun OverflowMenu(
     onNew: () -> Unit,
     onExportPdf: () -> Unit,
     onShowLog: () -> Unit,
+    onSettings: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -655,6 +670,11 @@ private fun OverflowMenu(
                     )
                 },
                 onClick = { onAutoCompileChange(!autoCompile) }, // offen lassen: Haken-Wechsel sichtbar
+            )
+            DropdownMenuItem(
+                text = { Text("Einstellungen") },
+                leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
+                onClick = { expanded = false; onSettings() },
             )
         }
     }
