@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
@@ -34,9 +35,15 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.painterResource
+import de.bgg_home.texdroid.R
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Article
+import androidx.compose.material.icons.automirrored.filled.Comment
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AutoAwesome
@@ -51,6 +58,7 @@ import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
@@ -104,10 +112,19 @@ import de.bgg_home.texdroid.ai.AiSettings
 import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
+import de.bgg_home.texdroid.editor.goToLine
 import de.bgg_home.texdroid.editor.insertBeforeEndDocument
 import de.bgg_home.texdroid.editor.jumpToErrorLine
+import de.bgg_home.texdroid.editor.replaceAllMatches
+import de.bgg_home.texdroid.editor.replaceCurrentMatch
+import de.bgg_home.texdroid.editor.runSearch
+import de.bgg_home.texdroid.editor.searchNext
+import de.bgg_home.texdroid.editor.searchPrevious
 import de.bgg_home.texdroid.editor.selectedText
 import de.bgg_home.texdroid.editor.showErrorDiagnostics
+import de.bgg_home.texdroid.editor.stopSearch
+import de.bgg_home.texdroid.editor.toggleLineComment
+import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import de.bgg_home.texdroid.storage.ProjectEntry
@@ -200,6 +217,18 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var showAi by remember { mutableStateOf(false) }
     var aiInitialQuestion by remember { mutableStateOf("") }
 
+    // Suchen & Ersetzen (Editor-Komfort). Die eigentliche Suche macht sora-editor;
+    // matchCount/matchIndex kommen per PublishSearchResultEvent zurück.
+    var showGoToLine by remember { mutableStateOf(false) }
+    var showSearch by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var replaceText by remember { mutableStateOf("") }
+    var searchCaseInsensitive by remember { mutableStateOf(true) }
+    var searchRegex by remember { mutableStateOf(false) }
+    var searchMatchCount by remember { mutableIntStateOf(0) }
+    var searchMatchIndex by remember { mutableIntStateOf(-1) }
+    var searchInvalidRegex by remember { mutableStateOf(false) }
+
     // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
     var lastLog by remember { mutableStateOf("") }
     var showLog by remember { mutableStateOf(false) }
@@ -230,6 +259,54 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         projectWritable = perms.any { it.uri == saved && it.isWritePermission }
         projectFolderName = ProjectStore.folderName(context, saved) ?: "Projekt"
         projectEntries = ProjectStore.list(context, saved)
+    }
+
+    // Trefferzähler live halten: sora meldet fertige Suchergebnisse per Event.
+    // Ohne aktives Muster (z.B. nach stopSearch) werfen die Getter „pattern not
+    // set" – deshalb erst hasQuery() prüfen.
+    LaunchedEffect(editor) {
+        val ed = editor ?: return@LaunchedEffect
+        ed.subscribeEvent(PublishSearchResultEvent::class.java) { _, _ ->
+            if (ed.searcher.hasQuery()) {
+                searchMatchCount = ed.searcher.matchedPositionCount
+                searchMatchIndex = ed.searcher.currentMatchedPositionIndex
+            } else {
+                searchMatchCount = 0
+                searchMatchIndex = -1
+            }
+        }
+    }
+
+    // Suche (neu) ausführen, sobald sich Text/Optionen ändern oder die Leiste öffnet.
+    LaunchedEffect(searchQuery, searchCaseInsensitive, searchRegex, showSearch, editor) {
+        val ed = editor
+        if (!showSearch || ed == null) return@LaunchedEffect
+        searchInvalidRegex = !ed.runSearch(searchQuery, searchCaseInsensitive, searchRegex)
+        if (searchQuery.isEmpty() || searchInvalidRegex) {
+            searchMatchCount = 0
+            searchMatchIndex = -1
+        }
+    }
+
+    fun closeSearch() {
+        editor?.stopSearch()
+        showSearch = false
+        searchInvalidRegex = false
+        searchMatchCount = 0
+        searchMatchIndex = -1
+    }
+
+    // Trefferzähler nach Navigation/Ersetzen auffrischen (das Event feuert nur
+    // bei einer Neusuche, nicht beim Weiterspringen).
+    fun refreshSearchCounts() {
+        val ed = editor ?: return
+        if (ed.searcher.hasQuery()) {
+            searchMatchCount = ed.searcher.matchedPositionCount
+            searchMatchIndex = ed.searcher.currentMatchedPositionIndex
+        } else {
+            searchMatchCount = 0
+            searchMatchIndex = -1
+        }
     }
 
     // SAF: Datei öffnen (ACTION_OPEN_DOCUMENT).
@@ -507,6 +584,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onSave = ::saveDocument,
                 onExportPdf = ::exportPdf,
                 onShare = { showShare = true },
+                onSearch = { if (showSearch) closeSearch() else showSearch = true },
+                onGoToLine = { showGoToLine = true },
+                onToggleComment = { editor?.toggleLineComment() },
                 onAi = { aiInitialQuestion = ""; showAi = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
@@ -523,6 +603,28 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         // imePadding(): Inhalt über der Software-Tastatur halten (edge-to-edge
         // verkleinert das Fenster sonst nicht → Tastatur überdeckte den Editor).
         Column(Modifier.padding(innerPadding).imePadding().fillMaxSize()) {
+            // Suchleiste – nur über dem sichtbaren Editor.
+            if (showSearch && (isWide || selectedTab == Tab.Editor)) {
+                SearchBar(
+                    query = searchQuery,
+                    onQueryChange = { searchQuery = it },
+                    replacement = replaceText,
+                    onReplacementChange = { replaceText = it },
+                    caseInsensitive = searchCaseInsensitive,
+                    onCaseInsensitiveChange = { searchCaseInsensitive = it },
+                    regex = searchRegex,
+                    onRegexChange = { searchRegex = it },
+                    matchIndex = searchMatchIndex,
+                    matchCount = searchMatchCount,
+                    invalidRegex = searchInvalidRegex,
+                    onPrev = { editor?.searchPrevious(); refreshSearchCounts() },
+                    onNext = { editor?.searchNext(); refreshSearchCounts() },
+                    onReplace = { editor?.replaceCurrentMatch(replaceText); refreshSearchCounts() },
+                    onReplaceAll = { editor?.replaceAllMatches(replaceText); refreshSearchCounts() },
+                    onClose = { closeSearch() },
+                )
+                HorizontalDivider()
+            }
             // LaTeX-Favoriten-Leiste – nur zeigen, wenn der Editor sichtbar ist.
             if (isWide || selectedTab == Tab.Editor) {
                 LatexFavoritesBar(
@@ -680,6 +782,15 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         LogSheet(log = lastLog, onDismiss = { showLog = false })
     }
 
+    // Gehe zu Zeile (Kebab → „Gehe zu Zeile…").
+    if (showGoToLine) {
+        GoToLineDialog(
+            lineCount = (editor?.text?.lineCount ?: 1).coerceAtLeast(1),
+            onGo = { line -> editor?.goToLine(line); showGoToLine = false },
+            onDismiss = { showGoToLine = false },
+        )
+    }
+
     // KI-Einstellungen (Kebab → „Einstellungen").
     if (showSettings) {
         AiSettingsSheet(settings = aiSettings, onDismiss = { showSettings = false })
@@ -775,6 +886,9 @@ private fun AppHeader(
     onSave: () -> Unit,
     onExportPdf: () -> Unit,
     onShare: () -> Unit,
+    onSearch: () -> Unit,
+    onGoToLine: () -> Unit,
+    onToggleComment: () -> Unit,
     onAi: () -> Unit,
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
@@ -802,6 +916,9 @@ private fun AppHeader(
                 Icons.Filled.Menu, "Projekt", true,
                 MaterialTheme.colorScheme.onPrimaryContainer, onMenu,
             )
+            // App-Logo (Branding): TeX-Monogramm als kleines Icon-Badge.
+            AppLogo()
+            Spacer(Modifier.width(8.dp))
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
             // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
@@ -821,6 +938,7 @@ private fun AppHeader(
                 ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
                 ToolbarSeparator(tint)
+                ToolbarIcon(Icons.Filled.Search, "Suchen & Ersetzen", true, tint, onSearch)
                 ToolbarIcon(Icons.Filled.AutoAwesome, "KI-Assistent", !compiling, tint, onAi)
                 CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
                 OverflowMenu(
@@ -833,6 +951,8 @@ private fun AppHeader(
                     onExportPdf = onExportPdf,
                     onShare = onShare,
                     onShowLog = onShowLog,
+                    onGoToLine = onGoToLine,
+                    onToggleComment = onToggleComment,
                     onSettings = onSettings,
                     onAutoCompileChange = onAutoCompileChange,
                 )
@@ -884,6 +1004,8 @@ private fun OverflowMenu(
     onExportPdf: () -> Unit,
     onShare: () -> Unit,
     onShowLog: () -> Unit,
+    onGoToLine: () -> Unit,
+    onToggleComment: () -> Unit,
     onSettings: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
@@ -918,6 +1040,16 @@ private fun OverflowMenu(
                 onClick = { expanded = false; onShowLog() },
             )
             DropdownMenuItem(
+                text = { Text("Gehe zu Zeile…") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
+                onClick = { expanded = false; onGoToLine() },
+            )
+            DropdownMenuItem(
+                text = { Text("Kommentar ein/aus") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = null) },
+                onClick = { expanded = false; onToggleComment() },
+            )
+            DropdownMenuItem(
                 text = { Text("Auto-Compile") },
                 leadingIcon = {
                     Icon(
@@ -933,6 +1065,25 @@ private fun OverflowMenu(
                 onClick = { expanded = false; onSettings() },
             )
         }
+    }
+}
+
+/** App-Logo fürs Header-Branding: TeX-Monogramm auf blauem Verlauf-Badge. */
+@Composable
+private fun AppLogo() {
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .background(
+                Brush.linearGradient(listOf(Color(0xFF4A7BC8), Color(0xFF5EA3E8))),
+            ),
+    ) {
+        Image(
+            painter = painterResource(R.drawable.ic_launcher_foreground),
+            contentDescription = "TexDroid",
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 }
 
