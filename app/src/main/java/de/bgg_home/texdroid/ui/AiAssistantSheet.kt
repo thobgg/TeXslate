@@ -77,6 +77,7 @@ fun AiAssistantSheet(
     selection: String,
     document: String,
     onInsert: (String) -> Unit,
+    onInsertBody: (String) -> Unit,
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
     initialQuestion: String = "",
@@ -192,8 +193,10 @@ fun AiAssistantSheet(
                 followUp = question,
                 onFollowUpChange = { question = it },
                 hasSelection = selection.isNotBlank(),
+                canInsertBody = document.contains("\\end{document}"),
                 onAsk = { showPreview = true },
                 onInsert = { onInsert(latexForInsert(turns.last().answer)); onDismiss() },
+                onInsertBody = { onInsertBody(latexForInsert(turns.last().answer)); onDismiss() },
                 onCopy = { clipboard.setText(AnnotatedString(turns.last().answer)) },
                 onNewConversation = { turns = emptyList(); question = ""; stage = Stage.INPUT },
             )
@@ -329,8 +332,10 @@ private fun ChatStage(
     followUp: String,
     onFollowUpChange: (String) -> Unit,
     hasSelection: Boolean,
+    canInsertBody: Boolean,
     onAsk: () -> Unit,
     onInsert: () -> Unit,
+    onInsertBody: () -> Unit,
     onCopy: () -> Unit,
     onNewConversation: () -> Unit,
 ) {
@@ -347,7 +352,11 @@ private fun ChatStage(
         modifier = Modifier.padding(top = 12.dp),
     ) {
         Button(onClick = onAsk, enabled = followUp.isNotBlank()) { Text("Nachfragen") }
-        TextButton(onClick = onInsert) { Text(if (hasSelection) "Ersetzen" else "Einfügen") }
+        // Nur reinen Code-Block einfügen (Markdown-Zäune werden entfernt).
+        if (canInsertBody && !hasSelection) {
+            TextButton(onClick = onInsertBody) { Text("Am Dokumentende") }
+        }
+        TextButton(onClick = onInsert) { Text(if (hasSelection) "Ersetzen" else "Am Cursor") }
         TextButton(onClick = onCopy) { Text("Kopieren") }
         TextButton(onClick = onNewConversation) { Text("Neue Frage") }
     }

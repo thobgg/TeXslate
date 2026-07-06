@@ -32,6 +32,28 @@ fun CodeEditor.selectedText(): String {
     return if (c.isSelected) text.subSequence(c.left, c.right).toString() else ""
 }
 
+/**
+ * Fügt [snippet] als eigenständigen Block direkt **vor** dem letzten
+ * `\end{document}` ein (mit Leerzeile davor), damit KI-generierter Inhalt im
+ * Dokumentkörper landet – ohne dass der Cursor manuell gesetzt werden muss.
+ * Fehlt `\end{document}`, wird am Cursor eingefügt.
+ */
+fun CodeEditor.insertBeforeEndDocument(snippet: String) {
+    val block = snippet.trim() + "\n\n"
+    val full = text.toString()
+    val idx = full.lastIndexOf("\\end{document}")
+    if (idx < 0) {
+        insertText(block, block.length)
+        return
+    }
+    val before = full.substring(0, idx)
+    val line = before.count { it == '\n' }
+    val column = idx - (before.lastIndexOf('\n') + 1)
+    text.insert(line, column, block)
+    setSelection(line, column) // Cursor an den Anfang des eingefügten Blocks.
+    requestFocus()
+}
+
 fun CodeEditor.showErrorDiagnostics(errors: List<CompileError>) {
     val content = text
     val container = DiagnosticsContainer()

@@ -98,6 +98,7 @@ import de.bgg_home.texdroid.ai.AiSettings
 import de.bgg_home.texdroid.compile.CompileError
 import de.bgg_home.texdroid.compile.LatexCompiler
 import de.bgg_home.texdroid.editor.LatexEditor
+import de.bgg_home.texdroid.editor.insertBeforeEndDocument
 import de.bgg_home.texdroid.editor.jumpToErrorLine
 import de.bgg_home.texdroid.editor.selectedText
 import de.bgg_home.texdroid.editor.showErrorDiagnostics
@@ -592,6 +593,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             selection = editor?.selectedText() ?: "",
             document = editor?.text?.toString() ?: "",
             onInsert = { text -> editor?.insertText(text, text.length); editor?.requestFocus() },
+            onInsertBody = { text -> editor?.insertBeforeEndDocument(text) },
             onOpenSettings = { showSettings = true },
             onDismiss = { showAi = false },
             initialQuestion = aiInitialQuestion,
