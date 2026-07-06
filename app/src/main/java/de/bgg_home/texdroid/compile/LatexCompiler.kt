@@ -35,6 +35,7 @@ object LatexCompiler {
         withContext(Dispatchers.IO) {
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
             try {
+                cleanAuxArtifacts(jobDir)
                 if (projectTree != null) {
                     ProjectStore.syncToDir(context, projectTree, jobDir)
                 }
@@ -47,4 +48,24 @@ object LatexCompiler {
                 CompileResult.nativeUnavailable(t)
             }
         }
+
+    /**
+     * Zwischen-/Hilfsdateien des letzten Compile-Laufs löschen, bevor neu gebaut
+     * wird. Nötig, damit eine veraltete `.bbl` (z.B. aus einem anderen Bib-System)
+     * den nächsten Lauf nicht bricht: biblatex bricht sonst mit „File 'document.bbl'
+     * not created by biblatex" ab. PDF, SyncTeX, das Tectonic-Bundle/den Cache und
+     * die Projektquellen lassen wir bewusst stehen (Neuaufbau wäre teuer).
+     *
+     * Der Hauptinput heißt nativ immer `document.tex`, daher alle Namen `document.*`.
+     */
+    private fun cleanAuxArtifacts(jobDir: File) {
+        AUX_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
+        File(jobDir, "document-blx.bib").delete() // biblatex-Kontrolldatei
+    }
+
+    private val AUX_EXTENSIONS = listOf(
+        "aux", "bbl", "blg", "bcf", "run.xml",
+        "toc", "out", "nav", "snm", "lof", "lot",
+        "idx", "ilg", "ind",
+    )
 }
