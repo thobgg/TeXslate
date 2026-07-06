@@ -49,6 +49,19 @@ private data class Turn(val displayQuestion: String, val apiUserContent: String,
 /** Wie viele der letzten Runden als Gesprächskontext mitgeschickt werden. */
 private const val CONTEXT_ROUNDS = 3
 
+private val CODE_FENCE = Regex("```(?:latex|tex)?[ \\t]*\\r?\\n(.*?)```", RegexOption.DOT_MATCHES_ALL)
+
+/**
+ * Bereitet die KI-Antwort fürs Einfügen ins Dokument auf: Steckt der LaTeX-Code
+ * in Markdown-Zäunen (```` ```latex … ``` ````), wird nur der Code-Inhalt
+ * genommen (mehrere Blöcke aneinandergehängt). Ohne Zäune bleibt die Antwort wie
+ * sie ist.
+ */
+private fun latexForInsert(answer: String): String {
+    val blocks = CODE_FENCE.findAll(answer).map { it.groupValues[1].trim('\n', '\r') }.toList()
+    return if (blocks.isNotEmpty()) blocks.joinToString("\n\n") else answer.trim()
+}
+
 /**
  * KI-Assistent (QW A2/A4/A5). Frage stellen, Kontext-Umfang wählen, **vor jedem
  * Aufruf** den zu sendenden Text im Vorschau-Dialog bestätigen, echter Roundtrip.
@@ -180,7 +193,7 @@ fun AiAssistantSheet(
                 onFollowUpChange = { question = it },
                 hasSelection = selection.isNotBlank(),
                 onAsk = { showPreview = true },
-                onInsert = { onInsert(turns.last().answer); onDismiss() },
+                onInsert = { onInsert(latexForInsert(turns.last().answer)); onDismiss() },
                 onCopy = { clipboard.setText(AnnotatedString(turns.last().answer)) },
                 onNewConversation = { turns = emptyList(); question = ""; stage = Stage.INPUT },
             )
