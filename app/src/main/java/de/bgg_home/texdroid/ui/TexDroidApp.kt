@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -34,13 +35,18 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -151,6 +157,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     // Split-View: Anteil des Editors an der Breite (per Trenner verschiebbar, 0.2–0.8).
     var splitFraction by remember { mutableFloatStateOf(0.5f) }
+
+    // LaTeX-Einfüge-Sheet (der „mehr"-Button der Favoriten-Leiste).
+    var showInsertSheet by remember { mutableStateOf(false) }
 
     // Aktuell geöffnete Datei (SAF): Uri, Anzeigename und ob wir zurückschreiben dürfen.
     var currentUri by remember { mutableStateOf<Uri?>(null) }
@@ -299,7 +308,21 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { innerPadding ->
-        Box(Modifier.padding(innerPadding).fillMaxSize()) {
+        // imePadding(): Inhalt über der Software-Tastatur halten (edge-to-edge
+        // verkleinert das Fenster sonst nicht → Tastatur überdeckte den Editor).
+        Column(Modifier.padding(innerPadding).imePadding().fillMaxSize()) {
+            // LaTeX-Favoriten-Leiste – nur zeigen, wenn der Editor sichtbar ist.
+            if (isWide || selectedTab == Tab.Editor) {
+                LatexFavoritesBar(
+                    onInsert = { text, caret ->
+                        editor?.insertText(text, caret)
+                        editor?.requestFocus()
+                    },
+                    onOpenMore = { showInsertSheet = true },
+                )
+                HorizontalDivider()
+            }
+            Box(Modifier.weight(1f).fillMaxWidth()) {
             if (isWide) {
                 // Tablet-Landscape: echte Split-View (Editor | Preview) mit
                 // verschiebbarem Trenner. splitFraction = Breitenanteil des Editors.
@@ -360,7 +383,19 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                     }
                 }
             }
+            }
         }
+    }
+
+    // „Mehr"-Bausteine als kategorisiertes Bottom-Sheet (öffnet der ▦-Button).
+    if (showInsertSheet) {
+        LatexInsertSheet(
+            onInsert = { text, caret ->
+                editor?.insertText(text, caret)
+                editor?.requestFocus()
+            },
+            onDismiss = { showInsertSheet = false },
+        )
     }
 }
 
@@ -401,21 +436,25 @@ private fun AppHeader(
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
             )
-            // Kile-artige Icon-Toolbar: Datei-Aktionen · Undo/Redo · Auto · Kompilieren.
+            // Häufige Aktionen direkt sichtbar; Seltenes im Kebab-Überlauf (⋮).
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val tint = MaterialTheme.colorScheme.onPrimaryContainer
-                ToolbarIcon(Icons.Filled.NoteAdd, "Neu", !compiling, tint, onNew)
                 ToolbarIcon(Icons.Filled.FolderOpen, "Öffnen", !compiling, tint, onOpen)
                 ToolbarIcon(Icons.Filled.Save, "Speichern", !compiling, tint, onSave)
-                ToolbarIcon(Icons.Filled.PictureAsPdf, "PDF speichern", canExportPdf && !compiling, tint, onExportPdf)
                 ToolbarSeparator(tint)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
                 ToolbarSeparator(tint)
-                Text("Auto", style = MaterialTheme.typography.labelLarge, color = tint)
-                Switch(checked = autoCompile, onCheckedChange = onAutoCompileChange)
-                Spacer(Modifier.width(8.dp))
                 CompileButton(compiling = compiling, onCompile = onCompile)
+                OverflowMenu(
+                    tint = tint,
+                    compiling = compiling,
+                    autoCompile = autoCompile,
+                    canExportPdf = canExportPdf,
+                    onNew = onNew,
+                    onExportPdf = onExportPdf,
+                    onAutoCompileChange = onAutoCompileChange,
+                )
             }
         }
     }
@@ -449,6 +488,49 @@ private fun SplitHandle(onDragDelta: (Float) -> Unit) {
                     shape = RoundedCornerShape(2.dp),
                 ),
         )
+    }
+}
+
+/** Kebab-Überlauf (⋮) für seltene Aktionen: Neu · PDF speichern · Auto-Compile. */
+@Composable
+private fun OverflowMenu(
+    tint: Color,
+    compiling: Boolean,
+    autoCompile: Boolean,
+    canExportPdf: Boolean,
+    onNew: () -> Unit,
+    onExportPdf: () -> Unit,
+    onAutoCompileChange: (Boolean) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }) {
+            Icon(Icons.Filled.MoreVert, contentDescription = "Mehr", tint = tint)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(
+                text = { Text("Neu") },
+                leadingIcon = { Icon(Icons.Filled.NoteAdd, contentDescription = null) },
+                enabled = !compiling,
+                onClick = { expanded = false; onNew() },
+            )
+            DropdownMenuItem(
+                text = { Text("PDF speichern") },
+                leadingIcon = { Icon(Icons.Filled.PictureAsPdf, contentDescription = null) },
+                enabled = canExportPdf && !compiling,
+                onClick = { expanded = false; onExportPdf() },
+            )
+            DropdownMenuItem(
+                text = { Text("Auto-Compile") },
+                leadingIcon = {
+                    Icon(
+                        if (autoCompile) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
+                        contentDescription = null,
+                    )
+                },
+                onClick = { onAutoCompileChange(!autoCompile) }, // offen lassen: Haken-Wechsel sichtbar
+            )
+        }
     }
 }
 
