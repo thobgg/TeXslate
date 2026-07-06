@@ -2,6 +2,7 @@ package de.bgg_home.texdroid.ui
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.core.content.FileProvider
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
@@ -57,6 +59,7 @@ import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +68,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -104,6 +110,8 @@ import de.bgg_home.texdroid.editor.selectedText
 import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
+import de.bgg_home.texdroid.storage.ProjectEntry
+import de.bgg_home.texdroid.storage.ProjectStore
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -204,6 +212,26 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var currentName by remember { mutableStateOf<String?>(null) }
     var canWrite by remember { mutableStateOf(false) }
 
+    // Projekt (M4): gewählter Ordner (Tree-Uri) + aktuelle Navigationsebene.
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val projectPrefs = remember { context.getSharedPreferences("project", Context.MODE_PRIVATE) }
+    var projectTree by remember { mutableStateOf<Uri?>(null) }
+    var projectWritable by remember { mutableStateOf(false) }
+    var projectFolderName by remember { mutableStateOf<String?>(null) }
+    var projectStack by remember { mutableStateOf(listOf<ProjectEntry>()) }
+    var projectEntries by remember { mutableStateOf(listOf<ProjectEntry>()) }
+
+    // Zuletzt geöffnetes Projekt wiederherstellen (Uri-Recht überlebt Neustart).
+    LaunchedEffect(Unit) {
+        val saved = projectPrefs.getString("tree", null)?.let(Uri::parse) ?: return@LaunchedEffect
+        val perms = context.contentResolver.persistedUriPermissions
+        if (perms.none { it.uri == saved && it.isReadPermission }) return@LaunchedEffect
+        projectTree = saved
+        projectWritable = perms.any { it.uri == saved && it.isWritePermission }
+        projectFolderName = ProjectStore.folderName(context, saved) ?: "Projekt"
+        projectEntries = ProjectStore.list(context, saved)
+    }
+
     // SAF: Datei öffnen (ACTION_OPEN_DOCUMENT).
     val openLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
@@ -217,6 +245,58 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
                 snackbarHostState.showSnackbar("Geöffnet: $currentName")
             }
+        }
+    }
+
+    // Aktuelle Ordner-Ebene (Wurzel oder Unterordner) neu laden.
+    fun reloadProjectLevel() {
+        val tree = projectTree ?: return
+        scope.launch {
+            projectEntries = if (projectStack.isEmpty()) {
+                ProjectStore.list(context, tree)
+            } else {
+                ProjectStore.listSubdir(context, tree, projectStack.last().uri)
+            }
+        }
+    }
+
+    // SAF: Projektordner öffnen (ACTION_OPEN_DOCUMENT_TREE).
+    val openFolderLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree(),
+    ) { uri ->
+        if (uri != null) {
+            projectWritable = DocumentStore.takePersistablePermission(context, uri)
+            projectTree = uri
+            projectStack = emptyList()
+            projectPrefs.edit().putString("tree", uri.toString()).apply()
+            scope.launch {
+                projectFolderName = ProjectStore.folderName(context, uri) ?: "Projekt"
+                projectEntries = ProjectStore.list(context, uri)
+            }
+        }
+    }
+
+    fun openProjectEntry(entry: ProjectEntry) {
+        if (entry.isDir) {
+            projectStack = projectStack + entry
+            reloadProjectLevel()
+            return
+        }
+        scope.launch {
+            val text = DocumentStore.read(context, entry.uri)
+            editor?.setText(text)
+            currentUri = entry.uri
+            currentName = entry.name
+            canWrite = projectWritable // Tree-Recht deckt alle Dateien darin ab.
+            drawerState.close()
+            snackbarHostState.showSnackbar("Geöffnet: ${entry.name}")
+        }
+    }
+
+    fun projectUp() {
+        if (projectStack.isNotEmpty()) {
+            projectStack = projectStack.dropLast(1)
+            reloadProjectLevel()
         }
     }
 
@@ -397,6 +477,22 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                ProjectDrawer(
+                    folderName = projectFolderName,
+                    canGoUp = projectStack.isNotEmpty(),
+                    entries = projectEntries,
+                    currentUri = currentUri,
+                    onOpenFolder = { openFolderLauncher.launch(null) },
+                    onUp = ::projectUp,
+                    onEntryClick = ::openProjectEntry,
+                )
+            }
+        },
+    ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -405,6 +501,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 compiling = compiling,
                 autoCompile = autoCompile,
                 onAutoCompileChange = { autoCompile = it },
+                onMenu = { scope.launch { drawerState.open() } },
                 onNew = ::newDocument,
                 onOpen = ::openDocument,
                 onSave = ::saveDocument,
@@ -607,6 +704,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             onShare = { tex, pdf -> showShare = false; shareSelected(tex, pdf) },
         )
     }
+    } // ModalNavigationDrawer
 }
 
 /** Auswahl beim Teilen: TeX-Quelle, PDF oder beides – in einem Dialog. */
@@ -671,6 +769,7 @@ private fun AppHeader(
     compiling: Boolean,
     autoCompile: Boolean,
     onAutoCompileChange: (Boolean) -> Unit,
+    onMenu: () -> Unit,
     onNew: () -> Unit,
     onOpen: () -> Unit,
     onSave: () -> Unit,
@@ -698,6 +797,11 @@ private fun AppHeader(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
+            // Projekt-Sidebar öffnen (Dateibaum).
+            ToolbarIcon(
+                Icons.Filled.Menu, "Projekt", true,
+                MaterialTheme.colorScheme.onPrimaryContainer, onMenu,
+            )
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
             // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
