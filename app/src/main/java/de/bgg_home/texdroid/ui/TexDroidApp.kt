@@ -33,24 +33,31 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Redo
 import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -86,6 +93,7 @@ import de.bgg_home.texdroid.editor.showErrorDiagnostics
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -160,6 +168,12 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     // LaTeX-Einfüge-Sheet (der „mehr"-Button der Favoriten-Leiste).
     var showInsertSheet by remember { mutableStateOf(false) }
+
+    // Build-Komfort: volles Log, laufender Compile-Job (zum Stoppen), Fehler-Cursor.
+    var lastLog by remember { mutableStateOf("") }
+    var showLog by remember { mutableStateOf(false) }
+    var compileJob by remember { mutableStateOf<Job?>(null) }
+    var errorIndex by remember { mutableIntStateOf(0) }
 
     // Aktuell geöffnete Datei (SAF): Uri, Anzeigename und ob wir zurückschreiben dürfen.
     var currentUri by remember { mutableStateOf<Uri?>(null) }
@@ -252,16 +266,39 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         val source = editor?.text?.toString()
         if (source == null || compiling) return
         compiling = true
-        scope.launch {
-            val result = LatexCompiler.compile(context, source)
-            errors = result.errors
-            if (result.ok && result.pdfPath.isNotEmpty()) {
-                pdfFile = File(result.pdfPath)
-                reloadToken++ // Preview neu laden, Scroll-Position bleibt erhalten.
+        compileJob = scope.launch {
+            try {
+                val result = LatexCompiler.compile(context, source)
+                lastLog = result.log.ifBlank { result.engineError }
+                errors = result.errors
+                errorIndex = 0
+                if (result.ok && result.pdfPath.isNotEmpty()) {
+                    pdfFile = File(result.pdfPath)
+                    reloadToken++ // Preview neu laden, Scroll-Position bleibt erhalten.
+                }
+                snackbarHostState.showSnackbar(result.summary())
+            } finally {
+                // Läuft auch bei Abbruch (finally) – erst wenn der native Aufruf
+                // wirklich zurückkehrt, damit keine zwei Compiles gleichzeitig laufen.
+                compiling = false
             }
-            compiling = false
-            snackbarHostState.showSnackbar(result.summary())
         }
+    }
+
+    fun stopCompile() {
+        // Cancel verwirft das Ergebnis; der native Tectonic-Aufruf lässt sich
+        // aber nicht mitten drin abbrechen – er läuft im Hintergrund zu Ende.
+        compileJob?.cancel()
+        scope.launch { snackbarHostState.showSnackbar("Compile abgebrochen") }
+    }
+
+    // Build-Komfort: zwischen Fehlern springen (zyklisch).
+    fun jumpToError(index: Int) {
+        if (errors.isEmpty()) return
+        val i = ((index % errors.size) + errors.size) % errors.size
+        errorIndex = i
+        selectedTab = Tab.Editor
+        errors[i].line?.let { editor?.jumpToErrorLine(it) }
     }
 
     // QW 3.1: Debounce – nach der letzten Änderung kurz warten, dann kompilieren.
@@ -301,9 +338,12 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onSave = ::saveDocument,
                 onExportPdf = ::exportPdf,
                 canExportPdf = pdfFile != null,
+                onShowLog = { showLog = true },
+                canShowLog = lastLog.isNotBlank(),
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
                 onCompile = ::runCompile,
+                onStop = ::stopCompile,
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -335,6 +375,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             onEditorCreated = { editor = it },
                             onTextChanged = { textVersion++ },
                             onErrorClick = onErrorClick,
+                            onPrevError = { jumpToError(errorIndex - 1) },
+                            onNextError = { jumpToError(errorIndex + 1) },
                             modifier = Modifier.weight(splitFraction).fillMaxSize(),
                         )
                         SplitHandle(
@@ -372,6 +414,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                             onEditorCreated = { editor = it },
                             onTextChanged = { textVersion++ },
                             onErrorClick = onErrorClick,
+                            onPrevError = { jumpToError(errorIndex - 1) },
+                            onNextError = { jumpToError(errorIndex + 1) },
                             modifier = Modifier.fillMaxSize(),
                         )
                         Tab.Preview -> PreviewPane(
@@ -397,6 +441,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             onDismiss = { showInsertSheet = false },
         )
     }
+
+    // Volles TeX-Log ansehen (Kebab → „Log ansehen").
+    if (showLog) {
+        LogSheet(log = lastLog, onDismiss = { showLog = false })
+    }
 }
 
 @Composable
@@ -410,9 +459,12 @@ private fun AppHeader(
     onSave: () -> Unit,
     onExportPdf: () -> Unit,
     canExportPdf: Boolean,
+    onShowLog: () -> Unit,
+    canShowLog: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCompile: () -> Unit,
+    onStop: () -> Unit,
 ) {
     Surface(color = MaterialTheme.colorScheme.primaryContainer) {
         Row(
@@ -445,14 +497,16 @@ private fun AppHeader(
                 ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
                 ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
                 ToolbarSeparator(tint)
-                CompileButton(compiling = compiling, onCompile = onCompile)
+                CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
                 OverflowMenu(
                     tint = tint,
                     compiling = compiling,
                     autoCompile = autoCompile,
                     canExportPdf = canExportPdf,
+                    canShowLog = canShowLog,
                     onNew = onNew,
                     onExportPdf = onExportPdf,
+                    onShowLog = onShowLog,
                     onAutoCompileChange = onAutoCompileChange,
                 )
             }
@@ -498,8 +552,10 @@ private fun OverflowMenu(
     compiling: Boolean,
     autoCompile: Boolean,
     canExportPdf: Boolean,
+    canShowLog: Boolean,
     onNew: () -> Unit,
     onExportPdf: () -> Unit,
+    onShowLog: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -519,6 +575,12 @@ private fun OverflowMenu(
                 leadingIcon = { Icon(Icons.Filled.PictureAsPdf, contentDescription = null) },
                 enabled = canExportPdf && !compiling,
                 onClick = { expanded = false; onExportPdf() },
+            )
+            DropdownMenuItem(
+                text = { Text("Log ansehen") },
+                leadingIcon = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
+                enabled = canShowLog,
+                onClick = { expanded = false; onShowLog() },
             )
             DropdownMenuItem(
                 text = { Text("Auto-Compile") },
@@ -559,16 +621,46 @@ private fun ToolbarSeparator(tint: Color) {
 }
 
 @Composable
-private fun CompileButton(compiling: Boolean, onCompile: () -> Unit) {
-    Button(onClick = onCompile, enabled = !compiling) {
-        if (compiling) {
+private fun CompileButton(compiling: Boolean, onCompile: () -> Unit, onStop: () -> Unit) {
+    if (compiling) {
+        // Während des Compiles wird der Button zum Stopp-Button.
+        Button(onClick = onStop) {
             CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
             Spacer(Modifier.width(8.dp))
-            Text("Kompiliere …")
-        } else {
+            Icon(Icons.Filled.Stop, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text("Stopp")
+        }
+    } else {
+        Button(onClick = onCompile) {
             Icon(Icons.Filled.PlayArrow, contentDescription = null)
             Spacer(Modifier.width(4.dp))
             Text("Kompilieren")
+        }
+    }
+}
+
+/** Volles TeX-Compile-Log als Bottom-Sheet (Monospace, scrollbar). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LogSheet(log: String, onDismiss: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+            Text(
+                "Compile-Log",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+            Text(
+                text = log.ifBlank { "(kein Log vorhanden)" },
+                style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                modifier = Modifier
+                    .heightIn(max = 460.dp)
+                    .verticalScroll(rememberScrollState()),
+            )
         }
     }
 }
@@ -580,6 +672,8 @@ private fun EditorPane(
     onEditorCreated: (CodeEditor) -> Unit,
     onTextChanged: () -> Unit,
     onErrorClick: (CompileError) -> Unit,
+    onPrevError: () -> Unit,
+    onNextError: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -591,13 +685,18 @@ private fun EditorPane(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         if (errors.isNotEmpty()) {
-            ErrorPanel(errors, onErrorClick)
+            ErrorPanel(errors, onErrorClick, onPrevError, onNextError)
         }
     }
 }
 
 @Composable
-private fun ErrorPanel(errors: List<CompileError>, onErrorClick: (CompileError) -> Unit) {
+private fun ErrorPanel(
+    errors: List<CompileError>,
+    onErrorClick: (CompileError) -> Unit,
+    onPrevError: () -> Unit,
+    onNextError: () -> Unit,
+) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
         modifier = Modifier.fillMaxWidth(),
@@ -609,11 +708,22 @@ private fun ErrorPanel(errors: List<CompileError>, onErrorClick: (CompileError) 
                 .padding(12.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            Text(
-                text = "Fehler (${errors.size}) – zum Springen antippen",
-                style = MaterialTheme.typography.titleSmall,
-                color = MaterialTheme.colorScheme.onErrorContainer,
-            )
+            // Kopfzeile mit Fehler-Navigation (springt zum vorigen/nächsten Fehler).
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "Fehler (${errors.size})",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    modifier = Modifier.weight(1f),
+                )
+                val navTint = MaterialTheme.colorScheme.onErrorContainer
+                IconButton(onClick = onPrevError, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.KeyboardArrowUp, "Vorheriger Fehler", tint = navTint)
+                }
+                IconButton(onClick = onNextError, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.KeyboardArrowDown, "Nächster Fehler", tint = navTint)
+                }
+            }
             errors.forEach { err ->
                 val prefix = err.line?.let { "Zeile $it: " } ?: ""
                 Text(
