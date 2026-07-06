@@ -39,7 +39,7 @@ object LatexLog {
             val fileMatch = fileLineRegex.find(line.trim())
             if (fileMatch != null) {
                 val lineNo = fileMatch.groupValues[1].toIntOrNull()
-                val msg = fileMatch.groupValues[2].trim().ifEmpty { "TeX-Fehler" }
+                val msg = LatexErrorGerman.translate(fileMatch.groupValues[2].trim().ifEmpty { "TeX-Fehler" })
                 out += CompileError(lineNo, msg)
                 i++
                 continue
@@ -47,7 +47,7 @@ object LatexLog {
 
             // Form 1: "! message" ... später "l.<n>"
             if (line.startsWith("!")) {
-                val msg = line.removePrefix("!").trim().ifEmpty { "TeX-Fehler" }
+                val msg = LatexErrorGerman.translate(line.removePrefix("!").trim().ifEmpty { "TeX-Fehler" })
                 // In den nächsten paar Zeilen nach der zugehörigen "l.<n>" suchen.
                 var lineNo: Int? = null
                 var j = i + 1
