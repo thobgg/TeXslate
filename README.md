@@ -40,8 +40,11 @@ _Optionaler KI-Assistent (BYOK): der „Erklären"-Chip an jedem Fehler schickt 
   Dateien via Storage Access Framework öffnen und speichern.
 - **KI-Assistent (optional, Opt-in)**: eigener API-Key (**BYOK**) für Anthropic,
   OpenAI oder Google Gemini; Kontext wahlweise Markierung oder ganzes Dokument;
-  verpflichtender Vorschau-Dialog vor jedem Aufruf. Keys bleiben **verschlüsselt
-  lokal** (Android Keystore). Die Kern-App funktioniert **vollständig offline**.
+  **Rückfragen im Gespräch** (die letzten Runden werden mitgeschickt, die KI
+  kennt den Zusammenhang); **„Fehler erklären"** direkt an jedem Compile-Fehler;
+  Ergebnis einfügen/ersetzen oder kopieren. Verpflichtender Vorschau-Dialog vor
+  jedem Aufruf. Keys bleiben **verschlüsselt lokal** (Android Keystore). Die
+  Kern-App funktioniert **vollständig offline**.
 
 ## Ziel (v1.0)
 
