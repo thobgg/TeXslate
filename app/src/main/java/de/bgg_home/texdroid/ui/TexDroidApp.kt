@@ -54,6 +54,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Toc
 import androidx.compose.material.icons.filled.NoteAdd
 import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material.icons.filled.PlayArrow
@@ -228,6 +229,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Suchen & Ersetzen (Editor-Komfort). Die eigentliche Suche macht sora-editor;
     // matchCount/matchIndex kommen per PublishSearchResultEvent zurück.
     var showGoToLine by remember { mutableStateOf(false) }
+    var showOutline by remember { mutableStateOf(false) }
+    var outlineEntries by remember { mutableStateOf<List<OutlineEntry>>(emptyList()) }
     var showSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }
     var replaceText by remember { mutableStateOf("") }
@@ -600,6 +603,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onSearch = { if (showSearch) closeSearch() else showSearch = true },
                 onGoToLine = { showGoToLine = true },
                 onToggleComment = { editor?.toggleLineComment() },
+                onOutline = {
+                    outlineEntries = parseOutline(editor?.text?.toString() ?: "")
+                    showOutline = true
+                },
                 onAi = { aiInitialQuestion = ""; showAi = true },
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
@@ -828,6 +835,15 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         LogSheet(log = lastLog, onDismiss = { showLog = false })
     }
 
+    // Dokumentstruktur (Kebab → „Dokumentstruktur…"): Sektion antippen → springen.
+    if (showOutline) {
+        OutlineSheet(
+            entries = outlineEntries,
+            onJump = { line -> editor?.goToLine(line); showOutline = false },
+            onDismiss = { showOutline = false },
+        )
+    }
+
     // Gehe zu Zeile (Kebab → „Gehe zu Zeile…").
     if (showGoToLine) {
         GoToLineDialog(
@@ -935,6 +951,7 @@ private fun AppHeader(
     onSearch: () -> Unit,
     onGoToLine: () -> Unit,
     onToggleComment: () -> Unit,
+    onOutline: () -> Unit,
     onAi: () -> Unit,
     canExportPdf: Boolean,
     onShowLog: () -> Unit,
@@ -999,6 +1016,7 @@ private fun AppHeader(
                     onShowLog = onShowLog,
                     onGoToLine = onGoToLine,
                     onToggleComment = onToggleComment,
+                    onOutline = onOutline,
                     onSettings = onSettings,
                     onAutoCompileChange = onAutoCompileChange,
                 )
@@ -1052,6 +1070,7 @@ private fun OverflowMenu(
     onShowLog: () -> Unit,
     onGoToLine: () -> Unit,
     onToggleComment: () -> Unit,
+    onOutline: () -> Unit,
     onSettings: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
@@ -1089,6 +1108,11 @@ private fun OverflowMenu(
                 text = { Text("Gehe zu Zeile…") },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                 onClick = { expanded = false; onGoToLine() },
+            )
+            DropdownMenuItem(
+                text = { Text("Dokumentstruktur…") },
+                leadingIcon = { Icon(Icons.Filled.Toc, contentDescription = null) },
+                onClick = { expanded = false; onOutline() },
             )
             DropdownMenuItem(
                 text = { Text("Kommentar ein/aus") },

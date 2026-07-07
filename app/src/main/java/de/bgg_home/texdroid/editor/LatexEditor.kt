@@ -2,6 +2,7 @@ package de.bgg_home.texdroid.editor
 
 import android.content.Context
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -107,6 +108,18 @@ fun LatexEditor(
                 //    Niemals im update-Block erneut – das würde die laufende Analyse
                 //    abbrechen und nur die erste Zeile gefärbt zurücklassen.
                 setEditorLanguage(TextMateLanguage.create(LATEX_SCOPE, true))
+                // Breiterer, gut sichtbarer vertikaler Scroll-Griff: der schmale
+                // Standard-Balken ist auf dem Touchscreen schwer zu fassen. Ein
+                // abgerundetes, halbtransparentes Thumb-Drawable vergrößert die
+                // sichtbare wie die berührbare Fläche.
+                val d = resources.displayMetrics.density
+                setVerticalScrollbarThumbDrawable(
+                    GradientDrawable().apply {
+                        setColor(0x99757575.toInt())
+                        cornerRadius = 5f * d
+                        setSize((10f * d).toInt(), (56f * d).toInt())
+                    },
+                )
                 // 4) Inhaltsänderungen melden (Auto-Compile). Nach dem initialen
                 //    setText registriert – die Startbelegung löst also nichts aus.
                 subscribeEvent(ContentChangeEvent::class.java) { _, _ -> onTextChanged() }

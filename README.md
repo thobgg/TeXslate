@@ -40,8 +40,9 @@ _Optionaler KI-Assistent (BYOK): Frage stellen, Kontext wählen (Markierung oder
   übersetzt; Tippen springt zur Fehlerzeile.
 - **Mehrdatei-Projekte**: Projektordner-Sidebar (Dateibaum), Datei-Wechsel per Tap,
   `\input`/`\include` und Bibliografie (`bibtex`, sowie `biblatex` mit `backend=bibtex`).
-- **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile, Kommentar
-  ein/aus für Zeile oder Auswahl.
+- **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile,
+  **Dokumentstruktur** (Gliederung der Sektionen zum Anspringen wie in Kile),
+  Kommentar ein/aus für Zeile oder Auswahl, gut greifbarer Scroll-Griff.
 - **Assistenten & Vorlagen**: Dokument- und Tabellen-Assistent, kuratierte
   Vorlagen (Beamer, Thesis, Brief, Klausur) sowie **eigene Vorlagen** — das
   aktuelle Dokument als benannte Vorlage ablegen (offline, interner Speicher)

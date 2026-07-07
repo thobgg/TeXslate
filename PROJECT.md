@@ -197,6 +197,13 @@ Erfolgserlebnis gibt:
       (`UserTemplateStore`, offline); sie erscheint unter „Eigene Vorlagen" neben
       den mitgelieferten, lädt per Tap und lässt sich mit Bestätigung löschen.
       Am Tablet verifiziert: Speichern → Laden (Round-Trip) → Löschen.
+- [x] **QW E.5:** Dokumentstruktur (Gliederung) + greifbarer Scroll-Griff.
+      🎉 Sichtbar: Kebab → „Dokumentstruktur…" listet `\part`/`\chapter`/`\section`/
+      `\subsection`/… (+ Beamer `\frametitle`) mit Zeilennummer und Einrückung nach
+      Ebene; ein Tipp springt zielgenau zur Zeile (`DocumentOutline`, wie Kiles
+      Strukturansicht). Dazu ein breiterer, abgerundeter vertikaler Scroll-Griff
+      (`setVerticalScrollbarThumbDrawable`), da der schmale Standard-Balken auf dem
+      Touchscreen schwer zu fassen war. Am Tablet verifiziert (Sprung zu Zeile 40).
 - [x] **Branding:** eigenes TeX-Icon (Latin Modern / Computer Modern) als reines
       Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
       Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.
