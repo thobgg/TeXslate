@@ -209,6 +209,31 @@ Erfolgserlebnis gibt:
 - [ ] Offene Test-Lücken: Handy-Format (Hochformat), `armeabi-v7a` (32-bit), S-Pen.
 - [ ] Nächster Alpha-Build: `versionCode` hochzählen (Update-Pflicht).
 
+### Befunde & offene Punkte aus Alpha-Tests (07.07.2026, Tab S8 Ultra)
+Test mit einem echten, anspruchsvollen Dokument (66-KB-`.tex` mit eigener
+XeLaTeX-`.cls` daneben) bestätigt: große Klassen-Dokumente kompilieren via
+Tectonic sauber — KOMA `scrartcl`, `scrlayer-scrpage`, `geometry`, `csquotes`,
+`hyperref` und `fontspec`-Default (Latin Modern) laufen; die `.cls` wird korrekt
+mitsynchronisiert. Dabei drei offene Punkte gefunden:
+
+- [ ] **Fonts per Name (`\setmainfont`):** `\setmainfont{<Name>}` (z.B. „TeX Gyre
+      Termes", „Latin Modern Roman") scheitert auf Android — XeTeX/fontspec löst
+      Schriften über die OS-Fontdatenbank (fontconfig) auf, die dort fehlt. Der
+      fontspec-**Default** (ohne `\setmainfont`) funktioniert dagegen. Fix-Idee:
+      gängige Fonts (Latin Modern, TeX Gyre) bündeln und per Datei-Pfad
+      (`\setmainfont[Path=…]{…}`) bzw. Fontconfig-Cache verfügbar machen.
+- [ ] **Projekt-Tree-Fußangel:** Eine *Einzeldatei* über den Datei-Picker
+      (`ACTION_OPEN_DOCUMENT`) zu öffnen setzt die Projekt-Freigabe (SAF-Tree)
+      **nicht**. Liegt die Datei in einem anderen Ordner als der zuletzt geöffnete
+      Projektordner, synchronisiert `syncToDir` das *falsche* Projekt →
+      `\input{unterordner/…}` bricht mit „File not found" ab. Multi-File läuft
+      korrekt, sobald der Ordner via „Projektordner öffnen" (`OPEN_DOCUMENT_TREE`)
+      geladen ist. Fix-Idee: beim Einzeldatei-Öffnen den Tree aus dem Datei-Parent
+      ableiten oder bei Ordner-Mismatch warnen.
+- [ ] **Compile-Datum:** `\today` ergibt „1. Januar 1970" — die Tectonic-Sandbox
+      hat keine Systemuhr. Fix-Idee: aktuelles Datum an den Compile reichen
+      (`SOURCE_DATE_EPOCH` bzw. `\year/\month/\day` vorbelegen).
+
 ### M5 — F-Droid-Release
 - [ ] Reproducible Build, keine proprietären Abhängigkeiten.
       ⚠️ Großer Brocken: die native `.so` (Tectonic + C-Stack via vcpkg/cargo-ndk)

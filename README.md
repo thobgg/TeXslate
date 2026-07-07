@@ -11,17 +11,21 @@ ohne Cloud-Zwang. TexDroid verbindet Editor, lokalen Compiler und PDF-Vorschau i
 einer nativen Android-Oberfläche — mit deutscher Fehlerausgabe und einem
 **optionalen** KI-Assistenten (eigener API-Key, standardmäßig aus).
 
-![TexDroid: Editor mit LaTeX-Syntax-Highlighting links, Live-PDF-Vorschau rechts, Auto-Compile](./docs/screenshot-splitview.jpg)
+![TexDroid: Editor mit LaTeX-Syntax-Highlighting links, Live-PDF-Vorschau rechts, Auto-Compile](./docs/screenshots/01-editor-vorschau.png)
 
-_Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, Live-PDF-Vorschau rechts — lokal via Tectonic kompiliert._
+_Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, live gerendertes PDF rechts — lokal via Tectonic kompiliert (hier ein Satz mit vollständigem Induktionsbeweis)._
 
 ![TexDroid: LaTeX-Einfüge-Palette als Bottom-Sheet mit Kategorien Struktur, Umgebungen, Mathe](./docs/screenshot-palette.jpg)
 
 _Touch-Palette: häufige Bausteine per Tap einfügen (Umgebungen, Mathe-Symbole, Struktur) — der Cursor landet automatisch an der richtigen Stelle._
 
-![TexDroid: KI-Assistent erklärt einen LaTeX-Compile-Fehler auf Deutsch](./docs/screenshot-ai.jpg)
+![TexDroid: Projektbaum-Sidebar für Mehrdatei-Projekte](./docs/screenshots/02-datei-sidebar.png)
 
-_Optionaler KI-Assistent (BYOK): der „Erklären"-Chip an jedem Fehler schickt Meldung + Dokument an einen selbst gewählten Anbieter (Anthropic · OpenAI · Gemini) und liefert Ursache und Korrektur auf Deutsch — erst nach ausdrücklicher Vorschau-Bestätigung._
+_Mehrdatei-Projekte: Projektordner als Sidebar (Dateibaum), Datei-Wechsel per Tap — `\input` aus Unterordnern und `.bib` inklusive._
+
+![TexDroid: optionaler KI-Assistent mit Vorschau-Bestätigung](./docs/screenshots/03-ki-assistent.png)
+
+_Optionaler KI-Assistent (BYOK): Frage stellen, Kontext wählen (Markierung oder ganzes Dokument), Modell sichtbar — gesendet wird erst nach ausdrücklicher Vorschau-Bestätigung._
 
 ## Funktionen
 
