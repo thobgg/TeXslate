@@ -4,9 +4,10 @@
 // Später hängt an genau diesem Mechanismus der Tectonic-Compiler.
 
 use jni::objects::{JClass, JString};
-use jni::sys::{jint, jstring};
+use jni::sys::{jint, jlong, jstring};
 use jni::JNIEnv;
 use std::path::Path;
+use std::time::{Duration, SystemTime};
 
 fn jstr<'a>(env: &mut JNIEnv<'a>, s: &str) -> jstring {
     env.new_string(s)
@@ -138,6 +139,11 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
     _class: JClass<'a>,
     tex_source: JString<'a>,
     job_dir: JString<'a>,
+    // Compile-Datum als Unix-Epoch-Sekunden. Kotlin reicht die LOKALE Wanduhr-
+    // zeit (currentTimeMillis + TZ-Offset) durch; wir zwingen die Engine unten
+    // per TZ=UTC dazu, genau diese Komponenten für \today/\time zu verwenden.
+    // <= 0 (unbekannt) → Fallback auf die System-Uhr des Geräts.
+    build_epoch: jlong,
 ) -> jstring {
     let source: String = match env.get_string(&tex_source) {
         Ok(s) => s.into(),
@@ -148,7 +154,7 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
         Err(_) => return jstr(&mut env, r#"{"ok":false,"error":"job_dir ungültig"}"#),
     };
 
-    let result = compile_to_dir(&source, &dir);
+    let result = compile_to_dir(&source, &dir, build_epoch);
     let json = match result {
         Ok(out) => format!(
             r#"{{"ok":true,"pdfPath":"{}","synctexPath":"{}","log":"{}","error":""}}"#,
@@ -178,7 +184,7 @@ struct CompileErr {
 
 /// Der eigentliche Compile über den Tectonic-Treiber. Getrennt von der
 /// JNI-Funktion, damit die JNI-Schicht dünn bleibt.
-fn compile_to_dir(source: &str, dir: &str) -> Result<CompileOk, CompileErr> {
+fn compile_to_dir(source: &str, dir: &str, build_epoch: jlong) -> Result<CompileOk, CompileErr> {
     use tectonic::config::PersistentConfig;
     use tectonic::driver::{OutputFormat, ProcessingSessionBuilder};
     use tectonic::status::NoopStatusBackend;
@@ -187,6 +193,12 @@ fn compile_to_dir(source: &str, dir: &str) -> Result<CompileOk, CompileErr> {
     // App-Verzeichnis biegen, sonst schlägt der Bundle-Cache fehl.
     std::env::set_var("XDG_CACHE_HOME", dir);
     std::env::set_var("HOME", dir);
+
+    // XeTeX berechnet \today/\time via localtime(build_date). Kotlin liefert die
+    // lokale Wanduhrzeit bereits als „UTC-kodierte" Epoch — mit TZ=UTC gibt
+    // localtime exakt diese Komponenten zurück, unabhängig von der (im
+    // Sandbox-Prozess oft fehlenden) Geräte-Zeitzone.
+    std::env::set_var("TZ", "UTC0");
 
     let out_dir = Path::new(dir);
 
@@ -217,6 +229,16 @@ fn compile_to_dir(source: &str, dir: &str) -> Result<CompileOk, CompileErr> {
         .keep_logs(true)
         .keep_intermediates(true) // nötig, damit die .synctex.gz erhalten bleibt
         .synctex(true); // ← SyncTeX-Ausgabe aktivieren (M3-Vorbereitung)
+
+    // Compile-Datum: ohne dies fällt Tectonic auf UNIX_EPOCH zurück → \today
+    // ergäbe „1. Januar 1970". Positive Epoch aus Kotlin verwenden; sonst
+    // (unbekannt/ungültig) die echte System-Uhr des Geräts.
+    let build_date = if build_epoch > 0 {
+        SystemTime::UNIX_EPOCH + Duration::from_secs(build_epoch as u64)
+    } else {
+        SystemTime::now()
+    };
+    builder.build_date(build_date);
 
     let mut session = builder
         .create(&mut status)

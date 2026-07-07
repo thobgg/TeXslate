@@ -35,11 +35,21 @@ object RustBridge {
      * (z.B. ein Unterordner von `context.filesDir`) und dient zugleich als
      * Tectonic-Cache-Verzeichnis.
      *
+     * [buildEpochSeconds] ist das Compile-Datum als Unix-Epoch-Sekunden und
+     * belegt `\today`/`\time`. Erwartet die LOKALE Wanduhrzeit als „UTC-kodierte"
+     * Epoch (currentTimeMillis + Zeitzonen-Offset, in Sekunden) — die native
+     * Seite kompiliert dann mit TZ=UTC, sodass das Datum lokal korrekt erscheint.
+     * `<= 0` überlässt der nativen Seite den Fallback auf die Geräte-Uhr.
+     *
      * Rückgabe: ein JSON-String
      *   {"ok":Boolean,"pdfPath":String,"synctexPath":String,"log":String,"error":String}
      * → auf Kotlin-Seite von [de.bgg_home.texdroid.compile.CompileResult.fromJson] geparst.
      *
      * Blockiert (Compile + evtl. Netzwerk) → nur vom Hintergrund-Thread rufen.
      */
-    external fun tectonicCompileToFile(texSource: String, jobDir: String): String
+    external fun tectonicCompileToFile(
+        texSource: String,
+        jobDir: String,
+        buildEpochSeconds: Long,
+    ): String
 }

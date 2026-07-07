@@ -220,7 +220,9 @@ Erfolgserlebnis gibt:
       Obtainium abonnierbar. Erste Tester können loslegen.
       🎉 Sichtbar: signierte APK öffentlich installierbar.
 - [ ] Offene Test-Lücken: Handy-Format (Hochformat), `armeabi-v7a` (32-bit), S-Pen.
-- [ ] Nächster Alpha-Build: `versionCode` hochzählen (Update-Pflicht).
+- [x] **GitHub-Prerelease `v1.0-alpha2`** (versionCode 2): Eigene Vorlagen,
+      Dokumentstruktur/Gliederung, greifbarer Scroll-Griff. In-place-Update
+      (gleiche Signatur), von Obtainium automatisch erkannt.
 
 ### Befunde & offene Punkte aus Alpha-Tests (07.07.2026, Tab S8 Ultra)
 Test mit einem echten, anspruchsvollen Dokument (66-KB-`.tex` mit eigener
@@ -243,9 +245,11 @@ mitsynchronisiert. Dabei drei offene Punkte gefunden:
       korrekt, sobald der Ordner via „Projektordner öffnen" (`OPEN_DOCUMENT_TREE`)
       geladen ist. Fix-Idee: beim Einzeldatei-Öffnen den Tree aus dem Datei-Parent
       ableiten oder bei Ordner-Mismatch warnen.
-- [ ] **Compile-Datum:** `\today` ergibt „1. Januar 1970" — die Tectonic-Sandbox
-      hat keine Systemuhr. Fix-Idee: aktuelles Datum an den Compile reichen
-      (`SOURCE_DATE_EPOCH` bzw. `\year/\month/\day` vorbelegen).
+- [x] **Compile-Datum:** `\today` ergab „1. Januar 1970" — Tectonic fällt ohne
+      gesetztes `build_date` auf `UNIX_EPOCH` zurück. Fix: Kotlin reicht die lokale
+      Wanduhrzeit als Epoch-Sekunden durch, die native Seite setzt `TZ=UTC` +
+      `builder.build_date(...)`. `\today` zeigt jetzt das korrekte lokale Datum
+      (live verifiziert: „July 7, 2026" im Titel). ✅
 
 ### M5 — F-Droid-Release
 - [ ] Reproducible Build, keine proprietären Abhängigkeiten.

@@ -39,7 +39,7 @@ object LatexCompiler {
                 if (projectTree != null) {
                     ProjectStore.syncToDir(context, projectTree, jobDir)
                 }
-                val json = RustBridge.tectonicCompileToFile(source, jobDir.absolutePath)
+                val json = RustBridge.tectonicCompileToFile(source, jobDir.absolutePath, localWallClockEpoch())
                 CompileResult.fromJson(json)
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
@@ -48,6 +48,19 @@ object LatexCompiler {
                 CompileResult.nativeUnavailable(t)
             }
         }
+
+    /**
+     * Aktuelle LOKALE Wanduhrzeit als „UTC-kodierte" Epoch-Sekunden: die echte
+     * Epoch plus den Zeitzonen-Offset des Geräts. Die native Seite kompiliert mit
+     * TZ=UTC und interpretiert diese Sekunden direkt als Datum/Uhrzeit — so zeigt
+     * `\today` das lokale Datum statt „1. Januar 1970" (Tectonic-Default) oder
+     * einer um den Offset verschobenen UTC-Zeit.
+     */
+    private fun localWallClockEpoch(): Long {
+        val nowMillis = System.currentTimeMillis()
+        val offsetMillis = java.util.TimeZone.getDefault().getOffset(nowMillis)
+        return (nowMillis + offsetMillis) / 1000L
+    }
 
     /**
      * Zwischen-/Hilfsdateien des letzten Compile-Laufs löschen, bevor neu gebaut
