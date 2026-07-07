@@ -191,6 +191,12 @@ Erfolgserlebnis gibt:
 - [x] **QW E.3:** Kommentar ein/aus.
       🎉 Sichtbar: Kebab → „Kommentar ein/aus" (ent)kommentiert Zeile/Auswahl
       mit `%` (ein Undo-Schritt).
+- [x] **QW E.4:** Eigene Vorlagen.
+      🎉 Sichtbar: „Aktuelles Dokument als Vorlage speichern" (Vorlagen-Dialog)
+      legt den Editor-Inhalt als benannte `.tex`-Vorlage im internen Speicher ab
+      (`UserTemplateStore`, offline); sie erscheint unter „Eigene Vorlagen" neben
+      den mitgelieferten, lädt per Tap und lässt sich mit Bestätigung löschen.
+      Am Tablet verifiziert: Speichern → Laden (Round-Trip) → Löschen.
 - [x] **Branding:** eigenes TeX-Icon (Latin Modern / Computer Modern) als reines
       Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
       Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.

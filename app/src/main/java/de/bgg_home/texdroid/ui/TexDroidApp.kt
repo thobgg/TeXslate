@@ -130,6 +130,8 @@ import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import de.bgg_home.texdroid.storage.ProjectEntry
 import de.bgg_home.texdroid.storage.ProjectStore
+import de.bgg_home.texdroid.storage.UserTemplate
+import de.bgg_home.texdroid.storage.UserTemplateStore
 import io.github.rosemoe.sora.widget.CodeEditor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -215,6 +217,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var showTableWizard by remember { mutableStateOf(false) }
     var showDocumentWizard by remember { mutableStateOf(false) }
     var showTemplates by remember { mutableStateOf(false) }
+    var userTemplates by remember { mutableStateOf<List<UserTemplate>>(emptyList()) }
 
     // KI-Assistenz (QW A1): Einstellungen (verschlüsselter Key, Opt-in).
     val aiSettings = remember { AiSettings(context) }
@@ -736,6 +739,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             },
             onOpenTemplates = {
                 showInsertSheet = false
+                userTemplates = UserTemplateStore.list(context)
                 showTemplates = true
             },
             onDismiss = { showInsertSheet = false },
@@ -745,7 +749,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     // Offline-Vorlagen-Bibliothek (QW T1): Auswahl lädt die Vorlage in den Editor.
     if (showTemplates) {
         TemplatePickerSheet(
-            onPick = { template ->
+            userTemplates = userTemplates,
+            canSaveCurrent = editor?.text?.toString()?.isNotBlank() == true,
+            onPickBuiltin = { template ->
                 showTemplates = false
                 scope.launch {
                     val text = withContext(Dispatchers.IO) {
@@ -758,6 +764,34 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                     currentName = null
                     canWrite = false
                 }
+            },
+            onPickUser = { template ->
+                showTemplates = false
+                scope.launch {
+                    val text = withContext(Dispatchers.IO) { UserTemplateStore.read(template) }
+                    editor?.setText(text)
+                    editor?.setSelection(0, 0)
+                    editor?.requestFocus()
+                    currentUri = null
+                    currentName = null
+                    canWrite = false
+                }
+            },
+            onSaveCurrent = { name ->
+                val content = editor?.text?.toString() ?: ""
+                scope.launch {
+                    val saved = withContext(Dispatchers.IO) {
+                        UserTemplateStore.save(context, name, content)
+                    }
+                    userTemplates = UserTemplateStore.list(context)
+                    snackbarHostState.showSnackbar(
+                        if (saved != null) "Vorlage „$saved“ gespeichert" else "Speichern fehlgeschlagen",
+                    )
+                }
+            },
+            onDeleteUser = { template ->
+                UserTemplateStore.delete(template)
+                userTemplates = UserTemplateStore.list(context)
             },
             onDismiss = { showTemplates = false },
         )

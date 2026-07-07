@@ -43,7 +43,9 @@ _Optionaler KI-Assistent (BYOK): Frage stellen, Kontext wählen (Markierung oder
 - **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile, Kommentar
   ein/aus für Zeile oder Auswahl.
 - **Assistenten & Vorlagen**: Dokument- und Tabellen-Assistent, kuratierte
-  Vorlagen (Beamer, Thesis, Brief, Klausur).
+  Vorlagen (Beamer, Thesis, Brief, Klausur) sowie **eigene Vorlagen** — das
+  aktuelle Dokument als benannte Vorlage ablegen (offline, interner Speicher)
+  und jederzeit wieder laden oder löschen.
 - **Teilen & Speichern**: PDF und/oder `.tex`-Quelle teilen, PDF exportieren,
   Dateien via Storage Access Framework öffnen und speichern.
 - **KI-Assistent (optional, Opt-in)**: eigener API-Key (**BYOK**) für Anthropic,
