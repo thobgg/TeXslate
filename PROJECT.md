@@ -237,14 +237,16 @@ mitsynchronisiert. Dabei drei offene Punkte gefunden:
       fontspec-**Default** (ohne `\setmainfont`) funktioniert dagegen. Fix-Idee:
       gängige Fonts (Latin Modern, TeX Gyre) bündeln und per Datei-Pfad
       (`\setmainfont[Path=…]{…}`) bzw. Fontconfig-Cache verfügbar machen.
-- [ ] **Projekt-Tree-Fußangel:** Eine *Einzeldatei* über den Datei-Picker
+- [x] **Projekt-Tree-Fußangel:** Eine *Einzeldatei* über den Datei-Picker
       (`ACTION_OPEN_DOCUMENT`) zu öffnen setzt die Projekt-Freigabe (SAF-Tree)
-      **nicht**. Liegt die Datei in einem anderen Ordner als der zuletzt geöffnete
-      Projektordner, synchronisiert `syncToDir` das *falsche* Projekt →
-      `\input{unterordner/…}` bricht mit „File not found" ab. Multi-File läuft
-      korrekt, sobald der Ordner via „Projektordner öffnen" (`OPEN_DOCUMENT_TREE`)
-      geladen ist. Fix-Idee: beim Einzeldatei-Öffnen den Tree aus dem Datei-Parent
-      ableiten oder bei Ordner-Mismatch warnen.
+      **nicht** – aus einer Einzeldatei lässt SAF auch kein Tree-Recht ableiten.
+      Fix: Zugehörigkeit prüfen (`ProjectStore.isWithinTree`, Vergleich der
+      Dokument-Ids). Der Compile synchronisiert den Tree nur noch, wenn das offene
+      Dokument wirklich dazugehört (`currentInProject`) – sonst würde das *falsche*
+      Projekt kopiert. Öffnet man eine mehrteilige Datei (`\input`/`\includegraphics`
+      /…) außerhalb des aktiven Projekts, weist eine Snackbar klar auf
+      „Projektordner öffnen" hin. Beide Pfade live verifiziert (Tab S8 Ultra):
+      Datei im Projekt → `\input` löst auf; Datei außerhalb → gezielte Warnung. ✅
 - [x] **Compile-Datum:** `\today` ergab „1. Januar 1970" — Tectonic fällt ohne
       gesetztes `build_date` auf `UNIX_EPOCH` zurück. Fix: Kotlin reicht die lokale
       Wanduhrzeit als Epoch-Sekunden durch, die native Seite setzt `TZ=UTC` +

@@ -43,6 +43,28 @@ object ProjectStore {
         listChildren(context, treeUri, DocumentsContract.getDocumentId(dirDocumentUri))
 
     /**
+     * Prüft, ob die (per ACTION_OPEN_DOCUMENT einzeln geöffnete) Datei [fileUri]
+     * innerhalb des Projektbaums [treeUri] liegt. Grundlage ist der Dokument-Id:
+     * Tree- und Datei-Id kodieren bei den gängigen Providern (v.a.
+     * ExternalStorageProvider) den Pfad, z.B. `primary:Documents/proj` bzw.
+     * `primary:Documents/proj/kap/x.tex`. „Innerhalb" heißt also: gleicher
+     * Provider und die Datei-Id ist die Tree-Id selbst oder beginnt mit
+     * `Tree-Id + "/"`.
+     *
+     * Bei opaken Dokument-Ids (manche Cloud-Provider) schlägt der Vergleich
+     * konservativ zu `false` fehl – dann wird lieber gewarnt als stillschweigend
+     * das falsche Projekt kopiert.
+     */
+    fun isWithinTree(fileUri: Uri, treeUri: Uri): Boolean {
+        if (fileUri.authority != treeUri.authority) return false
+        val treeId = runCatching { DocumentsContract.getTreeDocumentId(treeUri) }.getOrNull()
+            ?: return false
+        val fileId = runCatching { DocumentsContract.getDocumentId(fileUri) }.getOrNull()
+            ?: return false
+        return fileId == treeId || fileId.startsWith("$treeId/")
+    }
+
+    /**
      * Kopiert alle Dateien des Projektbaums (rekursiv, mit Unterordner-Struktur)
      * nach [destDir] – nötig für QW 4.2, damit `\input{...}`/`\include{...}` beim
      * Kompilieren im Arbeitsverzeichnis auf die Geschwisterdateien auflösen.

@@ -184,6 +184,35 @@ private val NEW_DOC_TEMPLATE = """
 private enum class Tab { Editor, Preview }
 
 /**
+ * Befehle, die weitere Dateien einbinden (mehrteiliges Projekt). Trifft einer
+ * davon zu, braucht der Compile die Geschwisterdateien im Arbeitsverzeichnis –
+ * also einen als Projektordner geöffneten Tree, nicht nur die Einzeldatei.
+ */
+private val EXTERNAL_FILE_REGEX =
+    Regex("""\\(input|include|includeonly|subfile|subfileinclude|import|subimport|includegraphics|bibliography|addbibresource|addglobalbib)\b""")
+
+/**
+ * Grobheuristik: Bindet [text] weitere Dateien ein? Kommentare (ab unmaskiertem
+ * `%` bis Zeilenende) werden ignoriert, damit ein auskommentiertes `\input`
+ * keine unnötige Warnung auslöst.
+ */
+private fun referencesExternalFiles(text: String): Boolean =
+    text.lineSequence().any { line ->
+        val code = stripLatexComment(line)
+        EXTERNAL_FILE_REGEX.containsMatchIn(code)
+    }
+
+/** Schneidet den `%`-Kommentar einer Zeile ab (ein `\%` bleibt erhalten). */
+private fun stripLatexComment(line: String): String {
+    var i = 0
+    while (i < line.length) {
+        if (line[i] == '%' && (i == 0 || line[i - 1] != '\\')) return line.substring(0, i)
+        i++
+    }
+    return line
+}
+
+/**
  * Wurzel-Composable der App. Entscheidet anhand der [WindowSizeClass] zwischen
  * Split-View (breite Tablets) und Tab-Umschaltung (Phone/Portrait).
  */
@@ -251,6 +280,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var currentUri by remember { mutableStateOf<Uri?>(null) }
     var currentName by remember { mutableStateOf<String?>(null) }
     var canWrite by remember { mutableStateOf(false) }
+    // Gehört das aktuell offene Dokument zum aktiven Projektbaum? Nur dann darf der
+    // Compile den Tree ins Arbeitsverzeichnis synchronisieren – sonst würde beim
+    // Einzeldatei-Öffnen aus einem fremden Ordner das falsche Projekt kopiert und
+    // \input{...} bräche mit „File not found" ab.
+    var currentInProject by remember { mutableStateOf(false) }
 
     // Projekt (M4): gewählter Ordner (Tree-Uri) + aktuelle Navigationsebene.
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -326,12 +360,26 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     ) { uri ->
         if (uri != null) {
             canWrite = DocumentStore.takePersistablePermission(context, uri)
+            val tree = projectTree
+            val within = tree != null && ProjectStore.isWithinTree(uri, tree)
+            currentInProject = within
             scope.launch {
                 val text = DocumentStore.read(context, uri)
                 editor?.setText(text)
                 currentUri = uri
                 currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
-                snackbarHostState.showSnackbar("Geöffnet: $currentName")
+                // Mehrteilige Datei außerhalb des Projekts geöffnet → \input & Co.
+                // finden ihre Geschwisterdateien nicht. Klar darauf hinweisen,
+                // statt den Nutzer später ins „File not found" laufen zu lassen.
+                if (!within && referencesExternalFiles(text)) {
+                    snackbarHostState.showSnackbar(
+                        "„$currentName“ bindet weitere Dateien ein (\\input …). Zum " +
+                            "Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ " +
+                            "den enthaltenden Ordner wählen.",
+                    )
+                } else {
+                    snackbarHostState.showSnackbar("Geöffnet: $currentName")
+                }
             }
         }
     }
@@ -376,6 +424,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             currentUri = entry.uri
             currentName = entry.name
             canWrite = projectWritable // Tree-Recht deckt alle Dateien darin ab.
+            currentInProject = true // aus dem Projektbaum → \input findet die Geschwister.
             drawerState.close()
             snackbarHostState.showSnackbar("Geöffnet: ${entry.name}")
         }
@@ -395,6 +444,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         val text = editor?.text?.toString()
         if (uri != null && text != null) {
             canWrite = DocumentStore.takePersistablePermission(context, uri)
+            val tree = projectTree
+            currentInProject = tree != null && ProjectStore.isWithinTree(uri, tree)
             scope.launch {
                 DocumentStore.write(context, uri, text)
                 currentUri = uri
@@ -493,6 +544,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         currentUri = null
         currentName = null
         canWrite = false
+        currentInProject = false
     }
 
     fun runCompile() {
@@ -501,7 +553,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         compiling = true
         compileJob = scope.launch {
             try {
-                val result = LatexCompiler.compile(context, source, projectTree)
+                // Tree nur synchronisieren, wenn das offene Dokument wirklich dazu
+                // gehört – sonst kopierte syncToDir das falsche Projekt (Fußangel).
+                val result = LatexCompiler.compile(context, source, projectTree.takeIf { currentInProject })
                 lastLog = result.log.ifBlank { result.engineError }
                 errors = result.errors
                 errorIndex = 0
