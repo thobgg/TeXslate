@@ -1,6 +1,29 @@
 <resources>
     <!-- Shared -->
     <string name="cancel">Abbrechen</string>
+    <string name="save">Speichern</string>
+    <string name="delete">Löschen</string>
+
+    <!-- Vorlagen -->
+    <string name="templates_title">Vorlagen</string>
+    <string name="template_save_current">Aktuelles Dokument als Vorlage speichern</string>
+    <string name="templates_user_section">Eigene Vorlagen</string>
+    <string name="template_delete">Vorlage löschen</string>
+    <string name="templates_builtin_section">Mitgelieferte Vorlagen</string>
+    <string name="template_save_dialog_title">Als Vorlage speichern</string>
+    <string name="template_name_label">Name der Vorlage</string>
+    <string name="template_delete_dialog_title">Vorlage löschen?</string>
+    <string name="template_delete_confirm">„%1$s“ wird dauerhaft entfernt.</string>
+    <string name="template_saved">Vorlage „%1$s“ gespeichert</string>
+    <string name="template_save_failed">Speichern fehlgeschlagen</string>
+    <string name="tmpl_beamer_name">Beamer-Präsentation</string>
+    <string name="tmpl_beamer_desc">Folien mit Titelframe, Gliederung und Beispiel-Frames</string>
+    <string name="tmpl_thesis_name">Akademische Arbeit</string>
+    <string name="tmpl_thesis_desc">Titelseite, Inhaltsverzeichnis, Kapitel, Literatur (report)</string>
+    <string name="tmpl_letter_name">Brief (KOMA scrlttr2)</string>
+    <string name="tmpl_letter_desc">Geschäftsbrief mit Absender, Empfänger und Betreff</string>
+    <string name="tmpl_exam_name">Klausur / Übungsblatt</string>
+    <string name="tmpl_exam_desc">Aufgaben mit Punkten und Lösungen (exam-Klasse)</string>
 
     <!-- Gehe zu Zeile -->
     <string name="goto_line_title">Gehe zu Zeile</string>

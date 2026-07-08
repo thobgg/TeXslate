@@ -850,7 +850,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                     }
                     userTemplates = UserTemplateStore.list(context)
                     snackbarHostState.showSnackbar(
-                        if (saved != null) "Vorlage „$saved“ gespeichert" else "Speichern fehlgeschlagen",
+                        if (saved != null) {
+                            context.getString(R.string.template_saved, saved)
+                        } else {
+                            context.getString(R.string.template_save_failed)
+                        },
                     )
                 }
             },

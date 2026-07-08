@@ -3,6 +3,29 @@
 
     <!-- Shared -->
     <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="delete">Delete</string>
+
+    <!-- Templates -->
+    <string name="templates_title">Templates</string>
+    <string name="template_save_current">Save current document as template</string>
+    <string name="templates_user_section">Your templates</string>
+    <string name="template_delete">Delete template</string>
+    <string name="templates_builtin_section">Bundled templates</string>
+    <string name="template_save_dialog_title">Save as template</string>
+    <string name="template_name_label">Template name</string>
+    <string name="template_delete_dialog_title">Delete template?</string>
+    <string name="template_delete_confirm">“%1$s” will be permanently removed.</string>
+    <string name="template_saved">Template “%1$s” saved</string>
+    <string name="template_save_failed">Save failed</string>
+    <string name="tmpl_beamer_name">Beamer presentation</string>
+    <string name="tmpl_beamer_desc">Slides with title frame, outline and example frames</string>
+    <string name="tmpl_thesis_name">Academic thesis</string>
+    <string name="tmpl_thesis_desc">Title page, table of contents, chapters, bibliography (report)</string>
+    <string name="tmpl_letter_name">Letter (KOMA scrlttr2)</string>
+    <string name="tmpl_letter_desc">Business letter with sender, recipient and subject</string>
+    <string name="tmpl_exam_name">Exam / worksheet</string>
+    <string name="tmpl_exam_desc">Exercises with points and solutions (exam class)</string>
 
     <!-- Go to line -->
     <string name="goto_line_title">Go to line</string>

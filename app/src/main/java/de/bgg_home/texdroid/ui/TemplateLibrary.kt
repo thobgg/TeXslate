@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.storage.UserTemplate
 
 /**
@@ -40,27 +42,27 @@ import de.bgg_home.texdroid.storage.UserTemplate
  * ablegen (interner Speicher, siehe [de.bgg_home.texdroid.storage.UserTemplateStore]);
  * sie erscheinen hier in einer eigenen Sektion und lassen sich wieder löschen.
  */
-data class DocTemplate(val name: String, val description: String, val asset: String)
+data class DocTemplate(val nameRes: Int, val descRes: Int, val asset: String)
 
 val DOC_TEMPLATES = listOf(
     DocTemplate(
-        "Beamer-Präsentation",
-        "Folien mit Titelframe, Gliederung und Beispiel-Frames",
+        R.string.tmpl_beamer_name,
+        R.string.tmpl_beamer_desc,
         "templates/beamer_presentation.tex",
     ),
     DocTemplate(
-        "Akademische Arbeit",
-        "Titelseite, Inhaltsverzeichnis, Kapitel, Literatur (report)",
+        R.string.tmpl_thesis_name,
+        R.string.tmpl_thesis_desc,
         "templates/academic_thesis.tex",
     ),
     DocTemplate(
-        "Brief (KOMA scrlttr2)",
-        "Geschäftsbrief mit Absender, Empfänger und Betreff",
+        R.string.tmpl_letter_name,
+        R.string.tmpl_letter_desc,
         "templates/letter_scrlttr2.tex",
     ),
     DocTemplate(
-        "Klausur / Übungsblatt",
-        "Aufgaben mit Punkten und Lösungen (exam-Klasse)",
+        R.string.tmpl_exam_name,
+        R.string.tmpl_exam_desc,
         "templates/exam_worksheet.tex",
     ),
 )
@@ -85,7 +87,7 @@ fun TemplatePickerSheet(
                 .verticalScroll(rememberScrollState()),
         ) {
             Text(
-                "Vorlagen",
+                stringResource(R.string.templates_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
@@ -109,7 +111,7 @@ fun TemplatePickerSheet(
                         tint = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        "Aktuelles Dokument als Vorlage speichern",
+                        stringResource(R.string.template_save_current),
                         style = MaterialTheme.typography.titleSmall,
                         color = if (canSaveCurrent) {
                             MaterialTheme.colorScheme.primary
@@ -122,7 +124,7 @@ fun TemplatePickerSheet(
 
             if (userTemplates.isNotEmpty()) {
                 Text(
-                    "Eigene Vorlagen",
+                    stringResource(R.string.templates_user_section),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp, bottom = 2.dp),
@@ -151,7 +153,7 @@ fun TemplatePickerSheet(
                             IconButton(onClick = { pendingDelete = template }) {
                                 Icon(
                                     Icons.Filled.Delete,
-                                    contentDescription = "Vorlage löschen",
+                                    contentDescription = stringResource(R.string.template_delete),
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 )
                             }
@@ -161,7 +163,7 @@ fun TemplatePickerSheet(
             }
 
             Text(
-                "Mitgelieferte Vorlagen",
+                stringResource(R.string.templates_builtin_section),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 12.dp, bottom = 2.dp),
@@ -183,9 +185,9 @@ fun TemplatePickerSheet(
                             modifier = Modifier.padding(end = 12.dp),
                         )
                         Column {
-                            Text(template.name, style = MaterialTheme.typography.titleSmall)
+                            Text(stringResource(template.nameRes), style = MaterialTheme.typography.titleSmall)
                             Text(
-                                template.description,
+                                stringResource(template.descRes),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -200,13 +202,13 @@ fun TemplatePickerSheet(
         var nameText by remember { mutableStateOf("") }
         AlertDialog(
             onDismissRequest = { showNameDialog = false },
-            title = { Text("Als Vorlage speichern") },
+            title = { Text(stringResource(R.string.template_save_dialog_title)) },
             text = {
                 OutlinedTextField(
                     value = nameText,
                     onValueChange = { nameText = it },
                     singleLine = true,
-                    label = { Text("Name der Vorlage") },
+                    label = { Text(stringResource(R.string.template_name_label)) },
                 )
             },
             confirmButton = {
@@ -216,10 +218,10 @@ fun TemplatePickerSheet(
                         showNameDialog = false
                     },
                     enabled = nameText.isNotBlank(),
-                ) { Text("Speichern") }
+                ) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showNameDialog = false }) { Text("Abbrechen") }
+                TextButton(onClick = { showNameDialog = false }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -227,16 +229,16 @@ fun TemplatePickerSheet(
     pendingDelete?.let { template ->
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
-            title = { Text("Vorlage löschen?") },
-            text = { Text("„${template.name}“ wird dauerhaft entfernt.") },
+            title = { Text(stringResource(R.string.template_delete_dialog_title)) },
+            text = { Text(stringResource(R.string.template_delete_confirm, template.name)) },
             confirmButton = {
                 TextButton(onClick = {
                     onDeleteUser(template)
                     pendingDelete = null
-                }) { Text("Löschen") }
+                }) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {
-                TextButton(onClick = { pendingDelete = null }) { Text("Abbrechen") }
+                TextButton(onClick = { pendingDelete = null }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
