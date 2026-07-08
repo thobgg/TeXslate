@@ -1,68 +1,160 @@
 package de.bgg_home.texdroid.compile
 
+import java.util.Locale
+
 /**
- * Übersetzt die (englischen) TeX-/LaTeX-Fehlermeldungen in kurze deutsche Sätze.
- * Die Engine (Tectonic/XeTeX) gibt Meldungen nur auf Englisch aus; für die
- * Fehlerliste bereiten wir die häufigsten davon auf Deutsch auf. Unbekannte
- * Meldungen bleiben unverändert, damit keine Information verloren geht.
+ * Bereitet die (englischen) TeX-/LaTeX-Rohmeldungen als kurze, verständliche
+ * Sätze auf – in der UI-Sprache (Deutsch bei deutscher Geräte-Locale, sonst
+ * Englisch). Die Engine (Tectonic/XeTeX) meldet stets auf Englisch; hier wird
+ * daraus eine freundlichere Fassung. Unbekannte Meldungen bleiben unverändert,
+ * damit keine Information verloren geht.
+ *
+ * Reine Logik ohne Context → Sprache über [Locale.getDefault] (spiegelt die
+ * App-/Systemsprache), wie in [de.bgg_home.texdroid.ai.AiPrompt].
  */
 object LatexErrorGerman {
 
-    // Regel: (Muster über die Roh-Meldung) -> deutsche Fassung (mit $1/$2 aus Gruppen).
-    private val rules: List<Pair<Regex, String>> = listOf(
-        Regex("""^Undefined control sequence\.?$""") to
+    private val german: Boolean get() = Locale.getDefault().language == "de"
+
+    // (Muster über die Roh-Meldung) -> (deutsche Fassung, englische Fassung),
+    // jeweils mit $1/$2 aus den Regex-Gruppen.
+    private val rules: List<Triple<Regex, String, String>> = listOf(
+        Triple(
+            Regex("""^Undefined control sequence\.?$"""),
             "Unbekannter Befehl (undefinierte Kontrollsequenz) – Tippfehler oder fehlendes Paket?",
-        Regex("""^Too many \}'s\.?$""") to "Zu viele schließende Klammern }.",
-        Regex("""^Missing \$ inserted\.?$""") to
+            "Unknown command (undefined control sequence) – typo or missing package?",
+        ),
+        Triple(
+            Regex("""^Too many \}'s\.?$"""),
+            "Zu viele schließende Klammern }.",
+            "Too many closing braces }.",
+        ),
+        Triple(
+            Regex("""^Missing \$ inserted\.?$"""),
             "Fehlendes \$ – Mathematik-Modus nicht korrekt geöffnet oder geschlossen.",
-        Regex("""^Missing \{ inserted\.?$""") to "Fehlende öffnende Klammer {.",
-        Regex("""^Missing \} inserted\.?$""") to "Fehlende schließende Klammer }.",
-        Regex("""^Double superscript\.?$""") to "Doppelte Hochstellung ^ – schreibe ^{...}.",
-        Regex("""^Double subscript\.?$""") to "Doppelte Tiefstellung _ – schreibe _{...}.",
-        Regex("""^Misplaced alignment tab character &\.?$""") to
+            "Missing \$ – math mode not opened or closed correctly.",
+        ),
+        Triple(
+            Regex("""^Missing \{ inserted\.?$"""),
+            "Fehlende öffnende Klammer {.",
+            "Missing opening brace {.",
+        ),
+        Triple(
+            Regex("""^Missing \} inserted\.?$"""),
+            "Fehlende schließende Klammer }.",
+            "Missing closing brace }.",
+        ),
+        Triple(
+            Regex("""^Double superscript\.?$"""),
+            "Doppelte Hochstellung ^ – schreibe ^{...}.",
+            "Double superscript ^ – write ^{...}.",
+        ),
+        Triple(
+            Regex("""^Double subscript\.?$"""),
+            "Doppelte Tiefstellung _ – schreibe _{...}.",
+            "Double subscript _ – write _{...}.",
+        ),
+        Triple(
+            Regex("""^Misplaced alignment tab character &\.?$"""),
             "Falsch platziertes Tabellen-Trennzeichen & (außerhalb einer Tabelle?).",
-        Regex("""^Extra alignment tab has been changed to \\cr\.?$""") to
+            "Misplaced table separator & (outside a table?).",
+        ),
+        Triple(
+            Regex("""^Extra alignment tab has been changed to \\cr\.?$"""),
             "Zu viele Spalten in der Tabellenzeile (ein & zu viel).",
-        Regex("""^Runaway argument\?.*""") to
+            "Too many columns in the table row (one & too many).",
+        ),
+        Triple(
+            Regex("""^Runaway argument\?.*"""),
             "Außer Kontrolle geratenes Argument – wahrscheinlich fehlt eine schließende Klammer }.",
-        Regex("""^Emergency stop\.?$""") to
+            "Runaway argument – a closing brace } is probably missing.",
+        ),
+        Triple(
+            Regex("""^Emergency stop\.?$"""),
             "Notausstieg – TeX konnte nicht weiter verarbeiten (siehe vorherige Fehler).",
-        Regex("""^Paragraph ended before.*""") to
+            "Emergency stop – TeX could not continue (see the previous errors).",
+        ),
+        Triple(
+            Regex("""^Paragraph ended before.*"""),
             "Absatz endete, bevor ein Befehl abgeschlossen war – fehlt eine schließende Klammer }?",
-        Regex("""^File ended while scanning.*""") to
+            "Paragraph ended before a command was complete – is a closing brace } missing?",
+        ),
+        Triple(
+            Regex("""^File ended while scanning.*"""),
             "Datei endete mitten in einem Befehl – fehlt eine schließende Klammer } oder ein \\end{...}?",
-        Regex("""^Missing \\begin\{document\}\.?$""") to "Fehlendes \\begin{document}.",
-        Regex("""^Missing number, treated as zero\.?$""") to
+            "File ended in the middle of a command – is a closing brace } or an \\end{...} missing?",
+        ),
+        Triple(
+            Regex("""^Missing \\begin\{document\}\.?$"""),
+            "Fehlendes \\begin{document}.",
+            "Missing \\begin{document}.",
+        ),
+        Triple(
+            Regex("""^Missing number, treated as zero\.?$"""),
             "Fehlende Zahl – TeX hat sie als 0 angenommen (Einheit oder Wert vergessen?).",
-        Regex("""^Illegal unit of measure.*""") to
+            "Missing number – TeX assumed 0 (forgot a unit or value?).",
+        ),
+        Triple(
+            Regex("""^Illegal unit of measure.*"""),
             "Ungültige Maßeinheit – erwartet wird z. B. pt, cm oder mm.",
+            "Invalid unit of measure – expected e.g. pt, cm or mm.",
+        ),
         // LaTeX-spezifische Meldungen (file:line-Form)
-        Regex("""^LaTeX Error: Environment (.+?) undefined\.?$""") to
+        Triple(
+            Regex("""^LaTeX Error: Environment (.+?) undefined\.?$"""),
             "LaTeX-Fehler: Umgebung „$1“ ist nicht definiert (fehlt ein Paket?).",
-        Regex("""^LaTeX Error: File [`'](.+?)'? not found\.?$""") to
+            "LaTeX error: environment “$1” is undefined (missing a package?).",
+        ),
+        Triple(
+            Regex("""^LaTeX Error: File [`'](.+?)'? not found\.?$"""),
             "LaTeX-Fehler: Datei „$1“ nicht gefunden.",
-        Regex("""^LaTeX Error: \\begin\{(.+?)\} on input line \d+ ended by \\end\{(.+?)\}\.?$""") to
+            "LaTeX error: file “$1” not found.",
+        ),
+        Triple(
+            Regex("""^LaTeX Error: \\begin\{(.+?)\} on input line \d+ ended by \\end\{(.+?)\}\.?$"""),
             "LaTeX-Fehler: \\begin{$1} wird fälschlich mit \\end{$2} geschlossen.",
-        Regex("""^LaTeX Error: Something's wrong--perhaps a missing \\item\.?$""") to
+            "LaTeX error: \\begin{$1} is wrongly closed with \\end{$2}.",
+        ),
+        Triple(
+            Regex("""^LaTeX Error: Something's wrong--perhaps a missing \\item\.?$"""),
             "LaTeX-Fehler: Vermutlich fehlt ein \\item.",
-        Regex("""^LaTeX Error: There's no line here to end\.?$""") to
+            "LaTeX error: an \\item is probably missing.",
+        ),
+        Triple(
+            Regex("""^LaTeX Error: There's no line here to end\.?$"""),
             "LaTeX-Fehler: Hier gibt es keine Zeile zum Beenden (überflüssiges \\\\?).",
-        Regex("""^Undefined color.*""") to "Unbekannte Farbe – zuerst mit \\definecolor definieren.",
+            "LaTeX error: there is no line here to end (superfluous \\\\?).",
+        ),
+        Triple(
+            Regex("""^Undefined color.*"""),
+            "Unbekannte Farbe – zuerst mit \\definecolor definieren.",
+            "Unknown color – define it first with \\definecolor.",
+        ),
     )
 
-    // Allgemeine Präfixe: Detail (englisch) beibehalten, aber deutsch etikettieren.
+    // Allgemeine Präfixe: Detail (englisch) beibehalten, aber übersetzt etikettieren.
     private val genericLatex = Regex("""^LaTeX Error:\s*(.*)$""")
     private val genericPackage = Regex("""^Package (.+?) Error:\s*(.*)$""")
     private val placeholder = Regex("""\$(\d)""")
 
+    /** Fallback-Bezeichnung, wenn die Roh-Meldung leer ist. */
+    fun fallback(): String = if (german) "TeX-Fehler" else "TeX error"
+
     fun translate(message: String): String {
         val m = message.trim()
-        for ((re, german) in rules) {
+        for ((re, germanMsg, englishMsg) in rules) {
             val match = re.find(m) ?: continue
-            return placeholder.replace(german) { match.groupValues[it.groupValues[1].toInt()] }
+            val template = if (german) germanMsg else englishMsg
+            return placeholder.replace(template) { match.groupValues[it.groupValues[1].toInt()] }
         }
-        genericLatex.find(m)?.let { return "LaTeX-Fehler: ${it.groupValues[1]}" }
-        genericPackage.find(m)?.let { return "Paket-Fehler (${it.groupValues[1]}): ${it.groupValues[2]}" }
+        genericLatex.find(m)?.let {
+            val label = if (german) "LaTeX-Fehler" else "LaTeX error"
+            return "$label: ${it.groupValues[1]}"
+        }
+        genericPackage.find(m)?.let {
+            val label = if (german) "Paket-Fehler" else "Package error"
+            return "$label (${it.groupValues[1]}): ${it.groupValues[2]}"
+        }
         return message
     }
 }

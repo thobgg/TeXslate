@@ -65,17 +65,28 @@ data class CompileResult(
         }
 
         /** Ergebnis, wenn die native Lib (noch) nicht geladen/rebuildet ist. */
-        fun nativeUnavailable(cause: Throwable): CompileResult = CompileResult(
-            ok = false,
-            pdfPath = "",
-            synctexPath = "",
-            log = cause.stackTraceToString(),
-            engineError = "Native Compile-Funktion nicht verfügbar – " +
-                "libtexdroid_native.so muss mit der neuen tectonicCompileToFile-Funktion " +
-                "neu gebaut werden (./build-native.sh). Details: ${cause.message}",
-            errors = listOf(
-                CompileError(null, "Native Lib nicht auf dem neuesten Stand (siehe ./build-native.sh)"),
-            ),
-        )
+        fun nativeUnavailable(cause: Throwable): CompileResult {
+            val de = java.util.Locale.getDefault().language == "de"
+            return CompileResult(
+                ok = false,
+                pdfPath = "",
+                synctexPath = "",
+                log = cause.stackTraceToString(),
+                engineError = if (de) {
+                    "Native Compile-Funktion nicht verfügbar – libtexdroid_native.so muss neu " +
+                        "gebaut werden (./build-native.sh). Details: ${cause.message}"
+                } else {
+                    "Native compile function unavailable – libtexdroid_native.so must be rebuilt " +
+                        "(./build-native.sh). Details: ${cause.message}"
+                },
+                errors = listOf(
+                    CompileError(
+                        null,
+                        if (de) "Native Lib nicht auf dem neuesten Stand (siehe ./build-native.sh)"
+                        else "Native lib out of date (see ./build-native.sh)",
+                    ),
+                ),
+            )
+        }
     }
 }

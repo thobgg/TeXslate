@@ -7,6 +7,7 @@ import org.json.JSONObject
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.Locale
 
 /** Ergebnis eines KI-Aufrufs: Antworttext oder eine menschenlesbare Fehlermeldung. */
 sealed interface AiResult {
@@ -27,6 +28,9 @@ data class AiMessage(val role: String, val content: String)
  */
 object AiClient {
 
+    // UI-Sprache für Fehlermeldungen (reine Logik, kein Context) – wie AiPrompt.
+    private val german: Boolean get() = Locale.getDefault().language == "de"
+
     suspend fun complete(
         provider: AiProvider,
         model: String,
@@ -41,9 +45,13 @@ object AiClient {
                 AiProvider.GEMINI -> gemini(model, apiKey, systemPrompt, messages)
             }
         } catch (e: IOException) {
-            AiResult.Failure("Keine Verbindung – bitte Internet prüfen.")
+            AiResult.Failure(
+                if (german) "Keine Verbindung – bitte Internet prüfen."
+                else "No connection – please check your internet.",
+            )
         } catch (e: Exception) {
-            AiResult.Failure("Unerwarteter Fehler: ${e.message ?: e.javaClass.simpleName}")
+            val what = e.message ?: e.javaClass.simpleName
+            AiResult.Failure(if (german) "Unerwarteter Fehler: $what" else "Unexpected error: $what")
         }
     }
 
@@ -151,18 +159,29 @@ object AiClient {
         }
     }
 
-    /** Übersetzt HTTP-Status + Fehler-JSON in eine kurze, deutsche Meldung. */
+    /** Übersetzt HTTP-Status + Fehler-JSON in eine kurze Meldung (UI-Sprache). */
     private fun httpError(code: Int, body: String): AiResult.Failure {
         val detail = runCatching {
             JSONObject(body).getJSONObject("error").getString("message")
         }.getOrNull()
-        val base = when (code) {
-            400 -> "Anfrage abgelehnt (400) – evtl. falsche Modell-ID?"
-            401, 403 -> "API-Key ungültig oder ohne Berechtigung."
-            404 -> "Nicht gefunden (404) – evtl. falsche Modell-ID?"
-            429 -> "Rate-Limit oder Kontingent erreicht – kurz warten und erneut versuchen."
-            in 500..599 -> "Der Anbieter meldet einen Serverfehler ($code)."
-            else -> "Anfrage fehlgeschlagen ($code)."
+        val base = if (german) {
+            when (code) {
+                400 -> "Anfrage abgelehnt (400) – evtl. falsche Modell-ID?"
+                401, 403 -> "API-Key ungültig oder ohne Berechtigung."
+                404 -> "Nicht gefunden (404) – evtl. falsche Modell-ID?"
+                429 -> "Rate-Limit oder Kontingent erreicht – kurz warten und erneut versuchen."
+                in 500..599 -> "Der Anbieter meldet einen Serverfehler ($code)."
+                else -> "Anfrage fehlgeschlagen ($code)."
+            }
+        } else {
+            when (code) {
+                400 -> "Request rejected (400) – maybe a wrong model ID?"
+                401, 403 -> "API key invalid or not authorized."
+                404 -> "Not found (404) – maybe a wrong model ID?"
+                429 -> "Rate limit or quota reached – wait a moment and try again."
+                in 500..599 -> "The provider reports a server error ($code)."
+                else -> "Request failed ($code)."
+            }
         }
         return AiResult.Failure(if (detail.isNullOrBlank()) base else "$base\n\n$detail")
     }
