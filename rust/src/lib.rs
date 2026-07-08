@@ -144,6 +144,9 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
     // per TZ=UTC dazu, genau diese Komponenten für \today/\time zu verwenden.
     // <= 0 (unbekannt) → Fallback auf die System-Uhr des Geräts.
     build_epoch: jlong,
+    // Absoluter Pfad einer fonts.conf (siehe FontStore). Wird via FONTCONFIG_FILE
+    // an fontconfig durchgereicht, damit \setmainfont{<Name>} auflöst. Leer → aus.
+    fontconfig_file: JString<'a>,
 ) -> jstring {
     let source: String = match env.get_string(&tex_source) {
         Ok(s) => s.into(),
@@ -153,8 +156,13 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
         Ok(s) => s.into(),
         Err(_) => return jstr(&mut env, r#"{"ok":false,"error":"job_dir ungültig"}"#),
     };
+    // Font-Config-Pfad ist optional: ein Lesefehler darf den Compile nicht kippen.
+    let font_config: String = env
+        .get_string(&fontconfig_file)
+        .map(|s| s.into())
+        .unwrap_or_default();
 
-    let result = compile_to_dir(&source, &dir, build_epoch);
+    let result = compile_to_dir(&source, &dir, build_epoch, &font_config);
     let json = match result {
         Ok(out) => format!(
             r#"{{"ok":true,"pdfPath":"{}","synctexPath":"{}","log":"{}","error":""}}"#,
@@ -184,7 +192,12 @@ struct CompileErr {
 
 /// Der eigentliche Compile über den Tectonic-Treiber. Getrennt von der
 /// JNI-Funktion, damit die JNI-Schicht dünn bleibt.
-fn compile_to_dir(source: &str, dir: &str, build_epoch: jlong) -> Result<CompileOk, CompileErr> {
+fn compile_to_dir(
+    source: &str,
+    dir: &str,
+    build_epoch: jlong,
+    font_config: &str,
+) -> Result<CompileOk, CompileErr> {
     use tectonic::config::PersistentConfig;
     use tectonic::driver::{OutputFormat, ProcessingSessionBuilder};
     use tectonic::status::NoopStatusBackend;
@@ -199,6 +212,13 @@ fn compile_to_dir(source: &str, dir: &str, build_epoch: jlong) -> Result<Compile
     // localtime exakt diese Komponenten zurück, unabhängig von der (im
     // Sandbox-Prozess oft fehlenden) Geräte-Zeitzone.
     std::env::set_var("TZ", "UTC0");
+
+    // fontconfig auf unsere fonts.conf zeigen (mitgelieferte + eigene Fonts +
+    // /system/fonts, beschreibbarer Cache), damit XeTeX \setmainfont{<Name>} per
+    // Name auflöst. Ohne Pfad bleibt der (auf Android magere) fontconfig-Default.
+    if !font_config.is_empty() {
+        std::env::set_var("FONTCONFIG_FILE", font_config);
+    }
 
     let out_dir = Path::new(dir);
 

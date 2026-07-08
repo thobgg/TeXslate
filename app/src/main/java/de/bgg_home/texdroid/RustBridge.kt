@@ -41,6 +41,11 @@ object RustBridge {
      * Seite kompiliert dann mit TZ=UTC, sodass das Datum lokal korrekt erscheint.
      * `<= 0` überlässt der nativen Seite den Fallback auf die Geräte-Uhr.
      *
+     * [fontconfigFile] ist der absolute Pfad einer `fonts.conf`, die die native
+     * Seite via `FONTCONFIG_FILE` an fontconfig durchreicht — so löst XeTeX
+     * `\setmainfont{<Name>}` gegen die mitgelieferten/eigenen Fonts +
+     * `/system/fonts` auf. Leerer String → fontconfig-Default (nur Systemfonts).
+     *
      * Rückgabe: ein JSON-String
      *   {"ok":Boolean,"pdfPath":String,"synctexPath":String,"log":String,"error":String}
      * → auf Kotlin-Seite von [de.bgg_home.texdroid.compile.CompileResult.fromJson] geparst.
@@ -51,5 +56,6 @@ object RustBridge {
         texSource: String,
         jobDir: String,
         buildEpochSeconds: Long,
+        fontconfigFile: String,
     ): String
 }

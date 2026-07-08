@@ -3,6 +3,7 @@ package de.bgg_home.texdroid.compile
 import android.content.Context
 import android.net.Uri
 import de.bgg_home.texdroid.RustBridge
+import de.bgg_home.texdroid.storage.FontStore
 import de.bgg_home.texdroid.storage.ProjectStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -39,7 +40,12 @@ object LatexCompiler {
                 if (projectTree != null) {
                     ProjectStore.syncToDir(context, projectTree, jobDir)
                 }
-                val json = RustBridge.tectonicCompileToFile(source, jobDir.absolutePath, localWallClockEpoch())
+                // Fonts auspacken + fonts.conf sicherstellen, damit \setmainfont{<Name>}
+                // (Latin Modern / TeX Gyre / Systemfonts) per Name aufgelöst wird.
+                val fontConfig = FontStore.ensureReady(context)
+                val json = RustBridge.tectonicCompileToFile(
+                    source, jobDir.absolutePath, localWallClockEpoch(), fontConfig,
+                )
                 CompileResult.fromJson(json)
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
