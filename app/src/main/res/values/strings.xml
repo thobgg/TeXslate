@@ -125,4 +125,75 @@
     <string name="ai_scope_none">No context</string>
     <string name="ai_scope_selection">Selection</string>
     <string name="ai_scope_document">Whole document</string>
+
+    <!-- Shared (main screen) -->
+    <string name="open">Open</string>
+    <string name="undo">Undo</string>
+    <string name="redo">Redo</string>
+    <string name="close">Close</string>
+    <string name="more">More</string>
+    <string name="stop">Stop</string>
+    <string name="compile">Compile</string>
+
+    <!-- App header -->
+    <string name="header_project">Project</string>
+    <string name="header_title_with_file">TexDroid — %1$s</string>
+    <string name="search_replace_title">Search &amp; replace</string>
+    <string name="ai_assistant">AI assistant</string>
+
+    <!-- Tabs (phone layout) -->
+    <string name="tab_editor">Editor</string>
+    <string name="tab_preview">Preview</string>
+
+    <!-- Overflow menu -->
+    <string name="menu_new">New</string>
+    <string name="menu_save_pdf">Save PDF</string>
+    <string name="menu_share">Share …</string>
+    <string name="menu_view_log">View log</string>
+    <string name="menu_goto_line">Go to line …</string>
+    <string name="menu_outline">Document outline …</string>
+    <string name="menu_toggle_comment">Toggle comment</string>
+    <string name="menu_autocompile">Auto-compile</string>
+    <string name="menu_settings">Settings</string>
+    <string name="menu_about">About TexDroid</string>
+
+    <!-- Share dialog -->
+    <string name="share_title">Share</string>
+    <string name="share_tex_source">TeX source (.tex)</string>
+    <string name="share_pdf">PDF (.pdf)</string>
+    <string name="share_compile_first_hint">Compile first</string>
+
+    <!-- Snackbars / messages -->
+    <string name="snackbar_opened">Opened: %1$s</string>
+    <string name="snackbar_saved">Saved: %1$s</string>
+    <string name="snackbar_pdf_saved">PDF saved: %1$s</string>
+    <string name="snackbar_compile_first">Compile first – there is no PDF yet.</string>
+    <string name="snackbar_nothing_to_share">Nothing selected to share.</string>
+    <string name="snackbar_compile_cancelled">Compile cancelled</string>
+    <string name="snackbar_multifile_hint">“%1$s” includes other files (\\input …). To compile multi-part projects, choose the containing folder via the “Open project folder” menu.</string>
+    <string name="fallback_document">Document</string>
+    <string name="fallback_project">Project</string>
+
+    <!-- AI error-explain prefill -->
+    <string name="ai_explain_error">Briefly explain this LaTeX compile error and how to fix it%1$s:\n%2$s</string>
+    <string name="error_line_paren"> (line %1$d)</string>
+
+    <!-- About dialog -->
+    <string name="about_version">Version %1$s</string>
+    <string name="about_description">Native LaTeX/XeTeX editor for Android tablets — editor, Tectonic compiler and PDF preview, fully offline.</string>
+    <string name="about_developer">Developer: Thomas Bugge (thobgg)</string>
+    <string name="about_license">License: GPL-3.0-or-later</string>
+    <string name="about_components_header">Included open-source components</string>
+    <string name="about_components">• Tectonic / XeTeX — MIT\n• Latin Modern &amp; TeX Gyre (fonts) — GUST Font License (LPPL)\n• sora-editor — LGPL-2.1\n• vscode-latex-basics (syntax) — MIT</string>
+
+    <!-- Compile log &amp; errors -->
+    <string name="compile_log">Compile log</string>
+    <string name="log_empty">(no log available)</string>
+    <string name="errors_count">Errors (%1$d)</string>
+    <string name="prev_error">Previous error</string>
+    <string name="next_error">Next error</string>
+    <string name="error_line_prefix">Line %1$d: </string>
+    <string name="explain">Explain</string>
+    <string name="loading_bundle">Downloading TeX packages …\nThis happens only the first time and may take a minute.</string>
+    <string name="preview_not_compiled">Not compiled yet.\nTap “Compile”.</string>
 </resources>

@@ -108,6 +108,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -305,7 +306,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         if (perms.none { it.uri == saved && it.isReadPermission }) return@LaunchedEffect
         projectTree = saved
         projectWritable = perms.any { it.uri == saved && it.isWritePermission }
-        projectFolderName = ProjectStore.folderName(context, saved) ?: "Projekt"
+        projectFolderName = ProjectStore.folderName(context, saved) ?: context.getString(R.string.fallback_project)
         projectEntries = ProjectStore.list(context, saved)
     }
 
@@ -376,12 +377,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 // statt den Nutzer später ins „File not found" laufen zu lassen.
                 if (!within && referencesExternalFiles(text)) {
                     snackbarHostState.showSnackbar(
-                        "„$currentName“ bindet weitere Dateien ein (\\input …). Zum " +
-                            "Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ " +
-                            "den enthaltenden Ordner wählen.",
+                        context.getString(R.string.snackbar_multifile_hint, currentName),
                     )
                 } else {
-                    snackbarHostState.showSnackbar("Geöffnet: $currentName")
+                    snackbarHostState.showSnackbar(context.getString(R.string.snackbar_opened, currentName))
                 }
             }
         }
@@ -409,7 +408,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             projectStack = emptyList()
             projectPrefs.edit().putString("tree", uri.toString()).apply()
             scope.launch {
-                projectFolderName = ProjectStore.folderName(context, uri) ?: "Projekt"
+                projectFolderName = ProjectStore.folderName(context, uri) ?: context.getString(R.string.fallback_project)
                 projectEntries = ProjectStore.list(context, uri)
             }
         }
@@ -429,7 +428,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             canWrite = projectWritable // Tree-Recht deckt alle Dateien darin ab.
             currentInProject = true // aus dem Projektbaum → \input findet die Geschwister.
             drawerState.close()
-            snackbarHostState.showSnackbar("Geöffnet: ${entry.name}")
+            snackbarHostState.showSnackbar(context.getString(R.string.snackbar_opened, entry.name))
         }
     }
 
@@ -453,7 +452,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 DocumentStore.write(context, uri, text)
                 currentUri = uri
                 currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
-                snackbarHostState.showSnackbar("Gespeichert: $currentName")
+                snackbarHostState.showSnackbar(context.getString(R.string.snackbar_saved, currentName))
             }
         }
     }
@@ -467,7 +466,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             scope.launch {
                 DocumentStore.exportFile(context, pdf, uri)
                 snackbarHostState.showSnackbar(
-                    "PDF gespeichert: ${DocumentStore.displayName(context, uri) ?: "PDF"}",
+                    context.getString(
+                        R.string.snackbar_pdf_saved,
+                        DocumentStore.displayName(context, uri) ?: "PDF",
+                    ),
                 )
             }
         }
@@ -480,7 +482,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     fun exportPdf() {
         if (pdfFile == null) {
-            scope.launch { snackbarHostState.showSnackbar("Erst kompilieren – es gibt noch kein PDF.") }
+            scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snackbar_compile_first)) }
             return
         }
         val base = currentName?.removeSuffix(".tex") ?: "dokument"
@@ -509,7 +511,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 list
             }
             if (uris.isEmpty()) {
-                snackbarHostState.showSnackbar("Nichts zum Teilen ausgewählt.")
+                snackbarHostState.showSnackbar(context.getString(R.string.snackbar_nothing_to_share))
                 return@launch
             }
             val send = if (uris.size == 1) {
@@ -524,7 +526,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 }
             }
             send.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            context.startActivity(Intent.createChooser(send, "Teilen"))
+            context.startActivity(Intent.createChooser(send, context.getString(R.string.share_title)))
         }
     }
 
@@ -534,7 +536,12 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         if (uri != null && canWrite) {
             scope.launch {
                 DocumentStore.write(context, uri, text)
-                snackbarHostState.showSnackbar("Gespeichert: ${currentName ?: "Dokument"}")
+                snackbarHostState.showSnackbar(
+                    context.getString(
+                        R.string.snackbar_saved,
+                        currentName ?: context.getString(R.string.fallback_document),
+                    ),
+                )
             }
         } else {
             // Noch keine (beschreibbare) Datei → „Speichern unter…".
@@ -584,7 +591,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         // Cancel verwirft das Ergebnis; der native Tectonic-Aufruf lässt sich
         // aber nicht mitten drin abbrechen – er läuft im Hintergrund zu Ende.
         compileJob?.cancel()
-        scope.launch { snackbarHostState.showSnackbar("Compile abgebrochen") }
+        scope.launch { snackbarHostState.showSnackbar(context.getString(R.string.snackbar_compile_cancelled)) }
     }
 
     // Build-Komfort: zwischen Fehlern springen (zyklisch).
@@ -620,8 +627,8 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     // QW A4: „Fehler erklären" – KI-Assistent mit vorbefüllter Frage zum Fehler öffnen.
     val onExplainError: (CompileError) -> Unit = { err ->
-        val where = err.line?.let { " (Zeile $it)" } ?: ""
-        aiInitialQuestion = "Erkläre kurz diesen LaTeX-Compile-Fehler und wie ich ihn behebe$where:\n${err.message}"
+        val where = err.line?.let { context.getString(R.string.error_line_paren, it) } ?: ""
+        aiInitialQuestion = context.getString(R.string.ai_explain_error, where, err.message)
         showAi = true
     }
 
@@ -753,12 +760,12 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                         Tab(
                             selected = selectedTab == Tab.Editor,
                             onClick = { selectedTab = Tab.Editor },
-                            text = { Text("Editor") },
+                            text = { Text(stringResource(R.string.tab_editor)) },
                         )
                         Tab(
                             selected = selectedTab == Tab.Preview,
                             onClick = { selectedTab = Tab.Preview },
-                            text = { Text("Vorschau") },
+                            text = { Text(stringResource(R.string.tab_preview)) },
                         )
                     }
                     when (selectedTab) {
@@ -957,7 +964,7 @@ private fun ShareDialog(
     var pdf by remember { mutableStateOf(hasPdf) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Teilen") },
+        title = { Text(stringResource(R.string.share_title)) },
         text = {
             Column {
                 Row(
@@ -968,7 +975,7 @@ private fun ShareDialog(
                         .padding(vertical = 4.dp),
                 ) {
                     Checkbox(checked = tex && hasText, enabled = hasText, onCheckedChange = { tex = it })
-                    Text("TeX-Quelle (.tex)", modifier = Modifier.padding(start = 4.dp))
+                    Text(stringResource(R.string.share_tex_source), modifier = Modifier.padding(start = 4.dp))
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -979,10 +986,10 @@ private fun ShareDialog(
                 ) {
                     Checkbox(checked = pdf && hasPdf, enabled = hasPdf, onCheckedChange = { pdf = it })
                     Column(modifier = Modifier.padding(start = 4.dp)) {
-                        Text("PDF (.pdf)")
+                        Text(stringResource(R.string.share_pdf))
                         if (!hasPdf) {
                             Text(
-                                "Erst kompilieren",
+                                stringResource(R.string.share_compile_first_hint),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -995,9 +1002,9 @@ private fun ShareDialog(
             TextButton(
                 onClick = { onShare(tex && hasText, pdf && hasPdf) },
                 enabled = (tex && hasText) || (pdf && hasPdf),
-            ) { Text("Teilen") }
+            ) { Text(stringResource(R.string.share_title)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -1022,26 +1029,28 @@ private fun AboutDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = { AppLogo() },
-        title = { Text("TexDroid") },
+        title = { Text(stringResource(R.string.app_name)) },
         text = {
             Column(
                 modifier = Modifier.verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 if (version.isNotBlank()) {
-                    Text("Version $version", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        stringResource(R.string.about_version, version),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                 }
                 Text(
-                    "Nativer LaTeX-/XeTeX-Editor für Android-Tablets — Editor, " +
-                        "Tectonic-Compiler und PDF-Vorschau, komplett offline.",
+                    stringResource(R.string.about_description),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    "Entwickler: Thomas Bugge (thobgg)",
+                    stringResource(R.string.about_developer),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    "Lizenz: GPL-3.0-or-later",
+                    stringResource(R.string.about_license),
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
@@ -1054,19 +1063,16 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
                 Text(
-                    "Enthaltene Open-Source-Komponenten",
+                    stringResource(R.string.about_components_header),
                     style = MaterialTheme.typography.titleSmall,
                 )
                 Text(
-                    "• Tectonic / XeTeX — MIT\n" +
-                        "• Latin Modern & TeX Gyre (Schriften) — GUST Font License (LPPL)\n" +
-                        "• sora-editor — LGPL-2.1\n" +
-                        "• vscode-latex-basics (Syntax) — MIT",
+                    stringResource(R.string.about_components),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Schließen") } },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
     )
 }
 
@@ -1111,7 +1117,7 @@ private fun AppHeader(
         ) {
             // Projekt-Sidebar öffnen (Dateibaum).
             ToolbarIcon(
-                Icons.Filled.Menu, "Projekt", true,
+                Icons.Filled.Menu, stringResource(R.string.header_project), true,
                 MaterialTheme.colorScheme.onPrimaryContainer, onMenu,
             )
             // App-Logo (Branding): TeX-Monogramm als kleines Icon-Badge.
@@ -1120,7 +1126,11 @@ private fun AppHeader(
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
             // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
-                text = if (fileName != null) "TexDroid — $fileName" else "TexDroid",
+                text = if (fileName != null) {
+                    stringResource(R.string.header_title_with_file, fileName)
+                } else {
+                    stringResource(R.string.app_name)
+                },
                 style = MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 1,
@@ -1130,14 +1140,14 @@ private fun AppHeader(
             // Häufige Aktionen direkt sichtbar; Seltenes im Kebab-Überlauf (⋮).
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val tint = MaterialTheme.colorScheme.onPrimaryContainer
-                ToolbarIcon(Icons.Filled.FolderOpen, "Öffnen", !compiling, tint, onOpen)
-                ToolbarIcon(Icons.Filled.Save, "Speichern", !compiling, tint, onSave)
+                ToolbarIcon(Icons.Filled.FolderOpen, stringResource(R.string.open), !compiling, tint, onOpen)
+                ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
                 ToolbarSeparator(tint)
-                ToolbarIcon(Icons.AutoMirrored.Filled.Undo, "Rückgängig", !compiling, tint, onUndo)
-                ToolbarIcon(Icons.AutoMirrored.Filled.Redo, "Wiederherstellen", !compiling, tint, onRedo)
+                ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
+                ToolbarIcon(Icons.AutoMirrored.Filled.Redo, stringResource(R.string.redo), !compiling, tint, onRedo)
                 ToolbarSeparator(tint)
-                ToolbarIcon(Icons.Filled.Search, "Suchen & Ersetzen", true, tint, onSearch)
-                ToolbarIcon(Icons.Filled.AutoAwesome, "KI-Assistent", !compiling, tint, onAi)
+                ToolbarIcon(Icons.Filled.Search, stringResource(R.string.search_replace_title), true, tint, onSearch)
+                ToolbarIcon(Icons.Filled.AutoAwesome, stringResource(R.string.ai_assistant), !compiling, tint, onAi)
                 CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
                 OverflowMenu(
                     tint = tint,
@@ -1214,50 +1224,50 @@ private fun OverflowMenu(
     var expanded by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { expanded = true }) {
-            Icon(Icons.Filled.MoreVert, contentDescription = "Mehr", tint = tint)
+            Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more), tint = tint)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
-                text = { Text("Neu") },
+                text = { Text(stringResource(R.string.menu_new)) },
                 leadingIcon = { Icon(Icons.Filled.NoteAdd, contentDescription = null) },
                 enabled = !compiling,
                 onClick = { expanded = false; onNew() },
             )
             DropdownMenuItem(
-                text = { Text("PDF speichern") },
+                text = { Text(stringResource(R.string.menu_save_pdf)) },
                 leadingIcon = { Icon(Icons.Filled.PictureAsPdf, contentDescription = null) },
                 enabled = canExportPdf && !compiling,
                 onClick = { expanded = false; onExportPdf() },
             )
             DropdownMenuItem(
-                text = { Text("Teilen…") },
+                text = { Text(stringResource(R.string.menu_share)) },
                 leadingIcon = { Icon(Icons.Filled.Share, contentDescription = null) },
                 enabled = !compiling,
                 onClick = { expanded = false; onShare() },
             )
             DropdownMenuItem(
-                text = { Text("Log ansehen") },
+                text = { Text(stringResource(R.string.menu_view_log)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Article, contentDescription = null) },
                 enabled = canShowLog,
                 onClick = { expanded = false; onShowLog() },
             )
             DropdownMenuItem(
-                text = { Text("Gehe zu Zeile…") },
+                text = { Text(stringResource(R.string.menu_goto_line)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.List, contentDescription = null) },
                 onClick = { expanded = false; onGoToLine() },
             )
             DropdownMenuItem(
-                text = { Text("Dokumentstruktur…") },
+                text = { Text(stringResource(R.string.menu_outline)) },
                 leadingIcon = { Icon(Icons.Filled.Toc, contentDescription = null) },
                 onClick = { expanded = false; onOutline() },
             )
             DropdownMenuItem(
-                text = { Text("Kommentar ein/aus") },
+                text = { Text(stringResource(R.string.menu_toggle_comment)) },
                 leadingIcon = { Icon(Icons.AutoMirrored.Filled.Comment, contentDescription = null) },
                 onClick = { expanded = false; onToggleComment() },
             )
             DropdownMenuItem(
-                text = { Text("Auto-Compile") },
+                text = { Text(stringResource(R.string.menu_autocompile)) },
                 leadingIcon = {
                     Icon(
                         if (autoCompile) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
@@ -1267,12 +1277,12 @@ private fun OverflowMenu(
                 onClick = { onAutoCompileChange(!autoCompile) }, // offen lassen: Haken-Wechsel sichtbar
             )
             DropdownMenuItem(
-                text = { Text("Einstellungen") },
+                text = { Text(stringResource(R.string.menu_settings)) },
                 leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                 onClick = { expanded = false; onSettings() },
             )
             DropdownMenuItem(
-                text = { Text("Über TexDroid") },
+                text = { Text(stringResource(R.string.menu_about)) },
                 leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
                 onClick = { expanded = false; onAbout() },
             )
@@ -1293,7 +1303,7 @@ private fun AppLogo() {
     ) {
         Image(
             painter = painterResource(R.drawable.ic_launcher_foreground),
-            contentDescription = "TexDroid",
+            contentDescription = stringResource(R.string.app_name),
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -1332,13 +1342,13 @@ private fun CompileButton(compiling: Boolean, onCompile: () -> Unit, onStop: () 
             Spacer(Modifier.width(8.dp))
             Icon(Icons.Filled.Stop, contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            Text("Stopp")
+            Text(stringResource(R.string.stop))
         }
     } else {
         Button(onClick = onCompile) {
             Icon(Icons.Filled.PlayArrow, contentDescription = null)
             Spacer(Modifier.width(4.dp))
-            Text("Kompilieren")
+            Text(stringResource(R.string.compile))
         }
     }
 }
@@ -1353,12 +1363,12 @@ private fun LogSheet(log: String, onDismiss: () -> Unit) {
     ) {
         Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(
-                "Compile-Log",
+                stringResource(R.string.compile_log),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
             Text(
-                text = log.ifBlank { "(kein Log vorhanden)" },
+                text = log.ifBlank { stringResource(R.string.log_empty) },
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
                 modifier = Modifier
                     .heightIn(max = 460.dp)
@@ -1416,21 +1426,21 @@ private fun ErrorPanel(
             // Kopfzeile mit Fehler-Navigation (springt zum vorigen/nächsten Fehler).
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Fehler (${errors.size})",
+                    text = stringResource(R.string.errors_count, errors.size),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.weight(1f),
                 )
                 val navTint = MaterialTheme.colorScheme.onErrorContainer
                 IconButton(onClick = onPrevError, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.KeyboardArrowUp, "Vorheriger Fehler", tint = navTint)
+                    Icon(Icons.Filled.KeyboardArrowUp, stringResource(R.string.prev_error), tint = navTint)
                 }
                 IconButton(onClick = onNextError, modifier = Modifier.size(32.dp)) {
-                    Icon(Icons.Filled.KeyboardArrowDown, "Nächster Fehler", tint = navTint)
+                    Icon(Icons.Filled.KeyboardArrowDown, stringResource(R.string.next_error), tint = navTint)
                 }
             }
             errors.forEach { err ->
-                val prefix = err.line?.let { "Zeile $it: " } ?: ""
+                val prefix = err.line?.let { stringResource(R.string.error_line_prefix, it) } ?: ""
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = "• $prefix${err.message}",
@@ -1444,7 +1454,7 @@ private fun ErrorPanel(
                     // QW A4: KI direkt am Fehler – öffnet den Assistenten mit vorbefüllter Frage.
                     AssistChip(
                         onClick = { onExplainError(err) },
-                        label = { Text("Erklären") },
+                        label = { Text(stringResource(R.string.explain)) },
                         leadingIcon = {
                             Icon(
                                 Icons.Filled.AutoAwesome,
@@ -1479,8 +1489,7 @@ private fun PreviewPane(
                 if (firstCompile) {
                     Spacer(Modifier.height(20.dp))
                     Text(
-                        text = "Lade TeX-Pakete …\n" +
-                            "Das passiert nur beim ersten Mal und kann eine Minute dauern.",
+                        text = stringResource(R.string.loading_bundle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = TextAlign.Center,
@@ -1488,7 +1497,7 @@ private fun PreviewPane(
                 }
             }
             else -> Text(
-                text = "Noch nicht kompiliert.\nTippe auf „Kompilieren“.",
+                text = stringResource(R.string.preview_not_compiled),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

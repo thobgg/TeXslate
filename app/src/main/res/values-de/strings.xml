@@ -123,4 +123,75 @@
     <string name="ai_scope_none">Ohne Kontext</string>
     <string name="ai_scope_selection">Markierung</string>
     <string name="ai_scope_document">Ganzes Dokument</string>
+
+    <!-- Geteilt (Hauptscreen) -->
+    <string name="open">Öffnen</string>
+    <string name="undo">Rückgängig</string>
+    <string name="redo">Wiederherstellen</string>
+    <string name="close">Schließen</string>
+    <string name="more">Mehr</string>
+    <string name="stop">Stopp</string>
+    <string name="compile">Kompilieren</string>
+
+    <!-- App-Kopfzeile -->
+    <string name="header_project">Projekt</string>
+    <string name="header_title_with_file">TexDroid — %1$s</string>
+    <string name="search_replace_title">Suchen &amp; Ersetzen</string>
+    <string name="ai_assistant">KI-Assistent</string>
+
+    <!-- Tabs (Handy-Layout) -->
+    <string name="tab_editor">Editor</string>
+    <string name="tab_preview">Vorschau</string>
+
+    <!-- Überlaufmenü -->
+    <string name="menu_new">Neu</string>
+    <string name="menu_save_pdf">PDF speichern</string>
+    <string name="menu_share">Teilen …</string>
+    <string name="menu_view_log">Log ansehen</string>
+    <string name="menu_goto_line">Gehe zu Zeile …</string>
+    <string name="menu_outline">Dokumentstruktur …</string>
+    <string name="menu_toggle_comment">Kommentar ein/aus</string>
+    <string name="menu_autocompile">Auto-Compile</string>
+    <string name="menu_settings">Einstellungen</string>
+    <string name="menu_about">Über TexDroid</string>
+
+    <!-- Teilen-Dialog -->
+    <string name="share_title">Teilen</string>
+    <string name="share_tex_source">TeX-Quelle (.tex)</string>
+    <string name="share_pdf">PDF (.pdf)</string>
+    <string name="share_compile_first_hint">Erst kompilieren</string>
+
+    <!-- Snackbars / Meldungen -->
+    <string name="snackbar_opened">Geöffnet: %1$s</string>
+    <string name="snackbar_saved">Gespeichert: %1$s</string>
+    <string name="snackbar_pdf_saved">PDF gespeichert: %1$s</string>
+    <string name="snackbar_compile_first">Erst kompilieren – es gibt noch kein PDF.</string>
+    <string name="snackbar_nothing_to_share">Nichts zum Teilen ausgewählt.</string>
+    <string name="snackbar_compile_cancelled">Compile abgebrochen</string>
+    <string name="snackbar_multifile_hint">„%1$s“ bindet weitere Dateien ein (\\input …). Zum Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ den enthaltenden Ordner wählen.</string>
+    <string name="fallback_document">Dokument</string>
+    <string name="fallback_project">Projekt</string>
+
+    <!-- KI-Fehlererklärung (Vorbelegung) -->
+    <string name="ai_explain_error">Erkläre kurz diesen LaTeX-Compile-Fehler und wie ich ihn behebe%1$s:\n%2$s</string>
+    <string name="error_line_paren"> (Zeile %1$d)</string>
+
+    <!-- Über-Dialog -->
+    <string name="about_version">Version %1$s</string>
+    <string name="about_description">Nativer LaTeX-/XeTeX-Editor für Android-Tablets — Editor, Tectonic-Compiler und PDF-Vorschau, komplett offline.</string>
+    <string name="about_developer">Entwickler: Thomas Bugge (thobgg)</string>
+    <string name="about_license">Lizenz: GPL-3.0-or-later</string>
+    <string name="about_components_header">Enthaltene Open-Source-Komponenten</string>
+    <string name="about_components">• Tectonic / XeTeX — MIT\n• Latin Modern &amp; TeX Gyre (Schriften) — GUST Font License (LPPL)\n• sora-editor — LGPL-2.1\n• vscode-latex-basics (Syntax) — MIT</string>
+
+    <!-- Compile-Log &amp; Fehler -->
+    <string name="compile_log">Compile-Log</string>
+    <string name="log_empty">(kein Log vorhanden)</string>
+    <string name="errors_count">Fehler (%1$d)</string>
+    <string name="prev_error">Vorheriger Fehler</string>
+    <string name="next_error">Nächster Fehler</string>
+    <string name="error_line_prefix">Zeile %1$d: </string>
+    <string name="explain">Erklären</string>
+    <string name="loading_bundle">Lade TeX-Pakete …\nDas passiert nur beim ersten Mal und kann eine Minute dauern.</string>
+    <string name="preview_not_compiled">Noch nicht kompiliert.\nTippe auf „Kompilieren“.</string>
 </resources>
