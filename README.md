@@ -4,193 +4,212 @@
 
 <h1 align="center">TexDroid</h1>
 
-<p align="center"><strong>Nativer LaTeX/XeTeX-Editor für Android — Tablet-first.</strong></p>
+<p align="center"><strong>Native LaTeX/XeTeX editor for Android — tablet-first.</strong></p>
 
-Schreibe LaTeX direkt auf dem Tablet und sieh live nebenan das PDF — ohne Terminal,
-ohne Cloud-Zwang. TexDroid verbindet Editor, lokalen Compiler und PDF-Vorschau in
-einer nativen Android-Oberfläche — mit deutscher Fehlerausgabe und einem
-**optionalen** KI-Assistenten (eigener API-Key, standardmäßig aus).
+Write LaTeX right on your tablet and watch the PDF render live beside it — no
+terminal, no cloud, no companion PC. TexDroid combines an editor, an **on-device**
+compiler and a PDF preview in one native Android UI, with localized error output
+and an **optional** AI assistant (bring your own API key, off by default).
 
-![TexDroid: Editor mit LaTeX-Syntax-Highlighting links, Live-PDF-Vorschau rechts, Auto-Compile](./docs/screenshots/01-editor-vorschau.png)
+The app ships in **English (default) and German**; it follows your device
+language automatically.
 
-_Split-View auf dem Tablet: LaTeX-Editor mit Syntax-Highlighting links, live gerendertes PDF rechts — lokal via Tectonic kompiliert (hier ein Satz mit vollständigem Induktionsbeweis)._
+![TexDroid: LaTeX editor with syntax highlighting on the left, live PDF preview on the right, auto-compile](./docs/screenshots/01-editor-vorschau.png)
 
-![TexDroid: LaTeX-Einfüge-Palette als Bottom-Sheet mit Kategorien Struktur, Umgebungen, Mathe](./docs/screenshot-palette.jpg)
+_Split view on a tablet: the LaTeX editor with syntax highlighting on the left, the live-rendered PDF on the right — compiled locally via Tectonic._
 
-_Touch-Palette: häufige Bausteine per Tap einfügen (Umgebungen, Mathe-Symbole, Struktur) — der Cursor landet automatisch an der richtigen Stelle._
+![TexDroid: \setmainfont resolves bundled and system fonts by name](./docs/screenshots/04-fonts-setmainfont.png)
 
-![TexDroid: Projektbaum-Sidebar für Mehrdatei-Projekte](./docs/screenshots/02-datei-sidebar.png)
+_Fonts by name: `\setmainfont{TeX Gyre Termes}` and friends just work — bundled Latin Modern & TeX Gyre plus your Android system fonts, all resolvable by name._
 
-_Mehrdatei-Projekte: Projektordner als Sidebar (Dateibaum), Datei-Wechsel per Tap — `\input` aus Unterordnern und `.bib` inklusive._
+![TexDroid: LaTeX insert palette as a bottom sheet with Structure, Environments, Math categories](./docs/screenshot-palette.jpg)
 
-![TexDroid: optionaler KI-Assistent mit Vorschau-Bestätigung](./docs/screenshots/03-ki-assistent.png)
+_Touch palette: insert common building blocks with one tap (environments, math symbols, structure) — the cursor lands in the right place automatically._
 
-_Optionaler KI-Assistent (BYOK): Frage stellen, Kontext wählen (Markierung oder ganzes Dokument), Modell sichtbar — gesendet wird erst nach ausdrücklicher Vorschau-Bestätigung._
+![TexDroid: project-tree sidebar for multi-file projects](./docs/screenshots/02-datei-sidebar.png)
 
-## Funktionen
+_Multi-file projects: the project folder as a sidebar (file tree), switch files with a tap — `\input` from subfolders and `.bib` included._
 
-- **Editor** mit LaTeX-Syntaxhervorhebung (TextMate-Grammatik) und Touch-Palette
-  für häufige Bausteine, Umgebungen und Mathe-Symbole; Cursor landet automatisch
-  an der richtigen Stelle.
-- **Lokaler Compiler** (Tectonic/XeTeX) direkt auf dem Gerät — kein Terminal,
-  kein Cloud-Zwang. Optionaler **Auto-Compile** beim Tippen.
-- **PDF-Vorschau** nebenan (Tablet-Split-View mit verschiebbarem Trenner) bzw.
-  per Tab auf schmalen Displays.
-- **Fehler auf Deutsch**: die häufigsten TeX-Meldungen werden ins Deutsche
-  übersetzt; Tippen springt zur Fehlerzeile.
-- **Mehrdatei-Projekte**: Projektordner-Sidebar (Dateibaum), Datei-Wechsel per Tap,
-  `\input`/`\include` und Bibliografie (`bibtex`, sowie `biblatex` mit `backend=bibtex`).
-- **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile,
-  **Dokumentstruktur** (Gliederung der Sektionen zum Anspringen wie in Kile),
-  Kommentar ein/aus für Zeile oder Auswahl, gut greifbarer Scroll-Griff.
-- **Assistenten & Vorlagen**: Dokument- und Tabellen-Assistent, kuratierte
-  Vorlagen (Beamer, Thesis, Brief, Klausur) sowie **eigene Vorlagen** — das
-  aktuelle Dokument als benannte Vorlage ablegen (offline, interner Speicher)
-  und jederzeit wieder laden oder löschen.
-- **Teilen & Speichern**: PDF und/oder `.tex`-Quelle teilen, PDF exportieren,
-  Dateien via Storage Access Framework öffnen und speichern.
-- **KI-Assistent (optional, Opt-in)**: eigener API-Key (**BYOK**) für Anthropic,
-  OpenAI oder Google Gemini; Kontext wahlweise Markierung oder ganzes Dokument;
-  **Rückfragen im Gespräch** (die letzten Runden werden mitgeschickt, die KI
-  kennt den Zusammenhang); **„Fehler erklären"** direkt an jedem Compile-Fehler;
-  Ergebnis einfügen/ersetzen oder kopieren. Verpflichtender Vorschau-Dialog vor
-  jedem Aufruf. Keys bleiben **verschlüsselt lokal** (Android Keystore). Die
-  Kern-App funktioniert **vollständig offline**.
+![TexDroid: optional AI assistant with preview confirmation](./docs/screenshots/03-ki-assistent.png)
 
-## Ziel (v1.0)
+_Optional AI assistant (BYOK): ask a question, choose the context (selection or whole document), see the model — nothing is sent until you confirm in the preview dialog._
 
-Eine Person mit Android-Tablet kann: App aus F-Droid installieren → Projektordner
-wählen → `.tex` schreiben → live nebenan das PDF sehen → bei Fehlern zur Zeile
-springen.
+## Features
 
-## Warum
+- **Editor** with LaTeX syntax highlighting (TextMate grammar) and a touch palette
+  for common building blocks, environments and math symbols; the cursor lands in
+  the right place automatically.
+- **On-device compiler** (Tectonic/XeTeX) — no terminal, no cloud. Optional
+  **auto-compile** as you type.
+- **PDF preview** alongside (tablet split view with a draggable divider) or as a
+  tab on narrow displays.
+- **Fonts by name**: `\setmainfont{…}` works offline — a curated set (Latin
+  Modern Roman, TeX Gyre Termes/Pagella/Heros) is bundled and resolvable by name,
+  as are your Android system fonts and any `.otf`/`.ttf` you drop into the app's
+  font folder.
+- **Localized errors**: the most common TeX messages are rewritten as short,
+  readable sentences in the UI language; tapping jumps to the error line.
+- **Multi-file projects**: project-folder sidebar (file tree), tap to switch files,
+  `\input`/`\include` and bibliography (`bibtex`, and `biblatex` with `backend=bibtex`).
+- **Editor comfort**: search & replace (incl. regex), go to line, **document
+  outline** (jump to sections like in Kile), toggle comment for a line or a
+  selection, a grabbable scroll thumb.
+- **Wizards & templates**: document and table wizards, curated templates (Beamer,
+  thesis, letter, exam) plus **your own templates** — save the current document as
+  a named template (offline, internal storage) and reload or delete it anytime.
+- **Share & save**: share the PDF and/or the `.tex` source, export the PDF, open
+  and save files via the Storage Access Framework.
+- **AI assistant (optional, opt-in)**: your own API key (**BYOK**) for Anthropic,
+  OpenAI or Google Gemini; context is a selection or the whole document;
+  **follow-up questions in a conversation** (the last rounds are included so the
+  model keeps context); **“Explain error”** right on any compile error;
+  insert/replace or copy the result. A mandatory preview dialog before every call.
+  Keys stay **encrypted locally** (Android Keystore). The core app works
+  **fully offline**, and the assistant replies in the UI language.
+- **About screen** (overflow menu): version, developer, license and the bundled
+  open-source components.
 
-Auf Android/F-Droid gibt es bisher **keine** Open-Source-App, die Editor,
-PDF-Vorschau und einen lokalen, XeTeX-fähigen Compiler nahtlos in einer Oberfläche
-vereint. Vorhandenes ist entweder reine Terminal-Bedienung (Termux + TeX Live),
-proprietär/cloud-abhängig (VerbTeX) oder nur ein Formel-Renderer.
+## Why
 
-## Tech-Stack
+There is no open-source Android app that combines an editor, a PDF preview and an
+**on-device, offline, XeTeX-capable** compiler in one UI. LaTeX editors for
+Android do exist — what is missing is the combination of *open source + compiles
+truly on the device, without a cloud or a PC*:
 
-| Komponente   | Technologie |
-|--------------|-------------|
-| UI           | Jetpack Compose (Kotlin), adaptive Layouts via `WindowSizeClass` |
-| Editor       | [`sora-editor`](https://github.com/Rosemoe/sora-editor) — Syntax-Highlighting |
-| Compiler     | [Tectonic](https://tectonic-typesetting.github.io/) (Rust, MIT) via `cargo-ndk` als `.so`, JNI-Bindung Rust ↔ Kotlin |
-| PDF-Anzeige  | Android `PdfRenderer` (Bordmittel) |
-| Dateizugriff | Storage Access Framework (SAF), Teilen via `FileProvider` |
-| KI-Assistent | optional, BYOK — Anthropic · OpenAI · Gemini über `HttpURLConnection` (keine Netzwerk-Dependency); Keys via Android Keystore verschlüsselt |
+- **Termux + TeX Live / Tectonic**: fully capable, but pure terminal use — no
+  integrated UX, a high barrier to entry.
+- **VerbTeX** (the best-known direct comparison): proprietary, and it **never
+  compiles on the device** — the free version sends your project to the Verbosus
+  **cloud** (account + internet required), and “VerbTeX Local” needs a server you
+  run on a **PC on the same network**. No real offline/on-device compile, not open
+  source. This is exactly where TexDroid comes in.
+- Formula-only renderers (e.g. jlatexmath): not a full engine.
 
-**ABI-Targets:** `arm64-v8a` (echte Geräte) + `x86_64` (Emulator), je als eigene
-APK (ABI-Splits). `armeabi-v7a` (alte 32-bit-Geräte) noch offen.
+## Tech stack
+
+| Component     | Technology |
+|---------------|------------|
+| UI            | Jetpack Compose (Kotlin), adaptive layouts via `WindowSizeClass` |
+| Editor        | [`sora-editor`](https://github.com/Rosemoe/sora-editor) — syntax highlighting |
+| Compiler      | [Tectonic](https://tectonic-typesetting.github.io/) (Rust, MIT) via `cargo-ndk` as an `.so`, JNI bridge Rust ↔ Kotlin |
+| PDF rendering | Android `PdfRenderer` (built-in) |
+| File access   | Storage Access Framework (SAF), sharing via `FileProvider` |
+| AI assistant  | optional, BYOK — Anthropic · OpenAI · Gemini over `HttpURLConnection` (no networking dependency); keys encrypted via Android Keystore |
+
+**ABI targets:** `arm64-v8a` (real devices) + `x86_64` (emulator), each as its own
+APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 
 ## Status
 
-🧪 **Alpha** — auf echten Geräten nutzbar (Galaxy Tab S8 Ultra, S9, S5e; Android
-11 & 16). Roadmap und Milestones siehe [`PROJECT.md`](./PROJECT.md).
+🧪 **Alpha** — usable on real devices (Galaxy Tab S8 Ultra, S9, S5e; Android 11 &
+16). Roadmap and milestones: see [`PROJECT.md`](./PROJECT.md).
 
-- [x] **M0** — Proof of Concept (Rust↔Kotlin-Brücke, erstes PDF lokal erzeugt)
-- [x] **M1** — Basis-Editor + Compile-Loop
-- [x] **M2** — PDF-Preview + Tablet-Split-View
-- [x] **M3** — Live/Auto-Compile & UX
-- [x] **Extras** — Assistenten & Vorlagen, PDF/`.tex` teilen, deutsche Fehlermeldungen
-- [x] **MA — KI-Assistent** — optionaler BYOK-Assistent (Anthropic · OpenAI · Gemini), „Fehler erklären"
-- [x] **M4** — Projektverwaltung (Multi-File, Bibliografie)
-- [x] **ME** — Editor-Komfort (Suchen & Ersetzen, Gehe zu Zeile, Kommentar) + TeX-Branding
-- [x] **MR** — Alpha-Release: signierte APK, auf 3 Geräten verifiziert
-- [ ] **M5** — F-Droid-Release
-- [ ] **M6** — Play-Store-Release (optional)
+- [x] **M0** — proof of concept (Rust↔Kotlin bridge, first PDF produced locally)
+- [x] **M1** — basic editor + compile loop
+- [x] **M2** — PDF preview + tablet split view
+- [x] **M3** — live/auto-compile & UX
+- [x] **Extras** — wizards & templates, share PDF/`.tex`, localized errors, fonts by name
+- [x] **MA — AI assistant** — optional BYOK assistant (Anthropic · OpenAI · Gemini), “Explain error”
+- [x] **M4** — project management (multi-file, bibliography)
+- [x] **ME** — editor comfort (search & replace, go to line, comment) + TeX branding
+- [x] **MR** — alpha releases: signed APKs, verified on three devices; English + German UI
+- [ ] **M5** — F-Droid release (IzzyOnDroid first — takes the prebuilt release APKs, no reproducible build required)
+- [ ] **M6** — Play Store release (optional)
 
-> Der KI-Assistent ist **standardmäßig aus** und rein optional. Nur wenn du ihn
-> aktivierst und einen eigenen API-Key hinterlegst, spricht die App mit einem
-> externen Dienst (F-Droid-Anti-Feature `NonFreeNetwork`). Ohne ihn bleibt
-> TexDroid vollständig offline und quelloffen nutzbar.
+> The AI assistant is **off by default** and entirely optional. Only if you enable
+> it and add your own API key does the app talk to an external service (F-Droid
+> anti-feature `NonFreeNetwork`). Without it, TexDroid stays fully offline and
+> open-source.
 
-## Installieren (Alpha)
+## Install (alpha)
 
-Vorgebaute, signierte APKs gibt es unter
-[**Releases**](https://github.com/thobgg/TexDroid/releases):
+Prebuilt, signed APKs are on the
+[**Releases**](https://github.com/thobgg/TexDroid/releases) page:
 
-- **Tablet/Handy:** `…-arm64-v8a.apk` · **Emulator:** `…-x86_64.apk`
-- **Auto-Updates:** dieses Repo als Quelle in [Obtainium](https://github.com/ImranR98/Obtainium) hinzufügen.
-- Voraussetzung: **Android 8.0+**, „Installation aus unbekannten Quellen" erlauben.
+- **Tablet/phone:** `…-arm64-v8a.apk` · **emulator:** `…-x86_64.apk`
+- **Auto-updates:** add this repo as a source in [Obtainium](https://github.com/ImranR98/Obtainium)
+  (an IzzyOnDroid listing is in preparation).
+- Requirements: **Android 8.0+**, allow “install from unknown sources”.
 
-> Der **erste Compile** lädt einmalig das TeX-Paket-Bundle übers Netz (~1–2 Min);
-> ein Hinweis erscheint. Danach arbeitet TexDroid vollständig offline.
+> The **first compile** downloads the TeX package bundle once over the network
+> (~1–2 min); a hint is shown. After that TexDroid works fully offline.
 
-## Native Build (Tectonic)
+## Native build (Tectonic)
 
-Die native Bibliothek (`rust/` → `libtexdroid_native.so`) bettet den Tectonic-Compiler
-ein. Tectonic braucht einen für Android cross-kompilierten C-Stack (ICU, HarfBuzz,
-FreeType, graphite2, libpng, fontconfig) — dafür nutzen wir **vcpkg** als
+The native library (`rust/` → `libtexdroid_native.so`) embeds the Tectonic
+compiler. Tectonic needs an Android cross-compiled C stack (ICU, HarfBuzz,
+FreeType, graphite2, libpng, fontconfig) — we use **vcpkg** as
 `TECTONIC_DEP_BACKEND`.
 
-**Einmalige Einrichtung:**
+**One-time setup:**
 
 ```bash
-# Rust + Android-Targets + cargo-ndk
+# Rust + Android targets + cargo-ndk
 rustup target add x86_64-linux-android aarch64-linux-android
 cargo install cargo-ndk
 
 # NDK: via Android Studio → SDK Manager → SDK Tools → "NDK (Side by side)"
 
-# Host-Tools (Debian/Ubuntu)
+# Host tools (Debian/Ubuntu)
 sudo apt install -y cmake ninja-build pkg-config autoconf automake \
   libtool libtool-bin bison gperf autoconf-archive
 
-# vcpkg + C-Stack für das gewünschte Android-Triplet (Beispiel: Emulator = x64-android)
+# vcpkg + C stack for the desired Android triplet (example: emulator = x64-android)
 git clone https://github.com/microsoft/vcpkg ~/vcpkg && ~/vcpkg/bootstrap-vcpkg.sh
 ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> ~/vcpkg/vcpkg install --triplet x64-android \
   "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
-# für echte Tablets zusätzlich: --triplet arm64-android
+# for real tablets also: --triplet arm64-android
 ```
 
-**Bauen:**
+**Build:**
 
 ```bash
-./build-native.sh                    # x86_64 (Emulator)
-./build-native.sh x86_64 arm64-v8a   # beide (arm64 braucht den arm64-android-Stack)
-./gradlew :app:assembleDebug         # baut je ABI eine eigene APK (ABI-Splits)
-./gradlew :app:installDebug          # installiert die zum Gerät passende Variante
+./build-native.sh                    # x86_64 (emulator)
+./build-native.sh x86_64 arm64-v8a   # both (arm64 needs the arm64-android stack)
+./gradlew :app:assembleDebug         # builds one APK per ABI (ABI splits)
+./gradlew :app:installDebug          # installs the variant matching the device
 ```
 
-Das Skript legt `libtexdroid_native.so` **und** `libc++_shared.so` in
-`app/src/main/jniLibs/<abi>/` ab (HarfBuzz/ICU sind C++ und brauchen die NDK-Laufzeit).
+The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
+`app/src/main/jniLibs/<abi>/` (HarfBuzz/ICU are C++ and need the NDK runtime).
 
-Über **ABI-Splits** entstehen getrennte APKs pro Architektur (jede native
-Tectonic-Lib ist ~60 MB), z.B. `app-arm64-v8a-debug.apk` (~80 MB, fürs Tablet)
-und `app-x86_64-debug.apk` (fürs Emulator) unter `app/build/outputs/apk/debug/`.
+**ABI splits** produce separate APKs per architecture (each native Tectonic lib is
+~60 MB), e.g. `app-arm64-v8a-debug.apk` (~80 MB, for the tablet) and
+`app-x86_64-debug.apk` (for the emulator) under `app/build/outputs/apk/debug/`.
 
-> **Status:** `x86_64` (Emulator) und `arm64-v8a` (echte Geräte) sind gebaut und
-> getestet — der arm64-Build läuft auf Galaxy Tab S8 Ultra, S9 (Android 16) und
-> Tab S5e (Android 11), inkl. lokalem Compile. `armeabi-v7a` (32-bit) weiterhin offen.
+> **Status:** `x86_64` (emulator) and `arm64-v8a` (real devices) are built and
+> tested — the arm64 build runs on Galaxy Tab S8 Ultra, S9 (Android 16) and Tab
+> S5e (Android 11), including local compile. `armeabi-v7a` (32-bit) is still open.
 
-## Lizenz
+## License
 
-[GNU General Public License v3.0](./LICENSE) (GPLv3). Kompatibel mit Tectonic (MIT).
-Der Quellcode bleibt frei; Play-Store-Distribution bleibt erlaubt.
+[GNU General Public License v3.0](./LICENSE) (GPLv3). Compatible with Tectonic
+(MIT). The source stays free; Play Store distribution remains permitted.
 
-### Drittanbieter / mitgelieferte Assets
+### Third-party / bundled assets
 
-- **LaTeX-/TeX-TextMate-Grammatik** (`app/src/main/assets/textmate/latex/`):
-  `LaTeX.tmLanguage.json`, `TeX.tmLanguage.json` und `language-configuration.json`
-  stammen aus **[jlelong/vscode-latex-basics](https://github.com/jlelong/vscode-latex-basics)**
-  und stehen unter der **MIT-Lizenz**.
-  Copyright © jlelong/vscode-latex-basics contributors.
-  Vollständiger Lizenztext: [`app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt`](./app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt).
-  Minimale Anpassung (von der MIT-Lizenz gedeckt): In `TeX.tmLanguage.json` wurde
-  das Muster `(?<=^\s*)` (variable-length Look-behind in den `\if…\fi`-Regeln)
-  entfernt, weil die von sora-editor genutzte `joni`-Regex-Engine (Java-Oniguruba-Port)
-  — anders als Oniguruma in VS Code — kein variables Look-behind unterstützt und
-  sonst die gesamte Syntax-Hervorhebung ausfällt.
-- **sora-editor** (Editor-View) ist als Dependency eingebunden (LGPL v2.1),
-  **ohne Modifikation der Bibliothek** – LGPL-konform.
-- **Editor-Farbschemata** (`app/src/main/assets/textmate/themes/`): „Quiet Light"
-  (hell) und „Darcula" (dunkel) stammen aus den Beispiel-Assets von sora-editor
-  bzw. den zugrundeliegenden VS-Code-Themes und werden im TextMate-JSON-Format
-  geladen.
+- **Bundled fonts** (`app/src/main/assets/fonts/`): **Latin Modern Roman** and
+  **TeX Gyre Termes/Pagella/Heros** (regular/bold/italic/bold-italic) are shipped
+  so `\setmainfont{…}` resolves them by name. They are licensed under the
+  **GUST Font License (LPPL-based)**; the license text is included at
+  [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
+- **LaTeX/TeX TextMate grammar** (`app/src/main/assets/textmate/latex/`):
+  `LaTeX.tmLanguage.json`, `TeX.tmLanguage.json` and `language-configuration.json`
+  come from **[jlelong/vscode-latex-basics](https://github.com/jlelong/vscode-latex-basics)**
+  under the **MIT license**. Copyright © jlelong/vscode-latex-basics contributors.
+  Full text: [`app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt`](./app/src/main/assets/textmate/latex/LICENSE-vscode-latex-basics.txt).
+  Minimal change (permitted by MIT): in `TeX.tmLanguage.json` the pattern
+  `(?<=^\s*)` (variable-length look-behind in the `\if…\fi` rules) was removed
+  because the `joni` regex engine used by sora-editor (a Java Oniguruma port) —
+  unlike Oniguruma in VS Code — does not support variable-length look-behind and
+  would otherwise break the entire syntax highlighting.
+- **sora-editor** (editor view) is a dependency (LGPL v2.1), **without modifying
+  the library** — LGPL-compliant.
+- **Editor color schemes** (`app/src/main/assets/textmate/themes/`): “Quiet Light”
+  (light) and “Darcula” (dark) come from the sora-editor sample assets / the
+  underlying VS Code themes and are loaded in TextMate JSON format.
 
 ---
 
-_Nicht verwechseln mit der gleichnamigen, inaktiven Render-Library `hansihe/TexDroid` —
-TexDroid ist eine eigenständige Editor-App._
+_Not to be confused with the inactive render library of the same name
+`hansihe/TexDroid` — this TexDroid is a standalone editor app._
