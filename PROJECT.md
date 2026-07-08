@@ -74,9 +74,10 @@ je als eigene APK (ABI-Splits). `armeabi-v7a` (alte 32-bit-Geräte) noch offen.
 ## 3. Milestones
 
 > **Stand:** M0–M4, MA (KI), ME (Editor-Komfort), MR (Alpha-Release) ✅ —
-> `v1.0-alpha1` als GitHub-Prerelease veröffentlicht, auf 3 echten Geräten
-> (Android 11 & 16) verifiziert. Offen: M5 (F-Droid), M6 (Play Store),
-> Rest-Testabdeckung (Handy, 32-bit, S-Pen).
+> aktuell **`v1.0-alpha6`** als normales GitHub-Release (kein Pre-Release mehr),
+> auf 3 echten Geräten (Android 11 & 16) verifiziert. UI **Englisch (Default) +
+> Deutsch** (i18n). Offen: IzzyOnDroid-Aufnahme (RFP einreichen), M5 (F-Droid),
+> M6 (Play Store), Rest-Testabdeckung (Handy, 32-bit, S-Pen).
 
 **Pro Milestone eine eigene Session/Branch.**
 
@@ -236,6 +237,29 @@ Erfolgserlebnis gibt:
 - [x] **GitHub-Prerelease `v1.0-alpha2`** (versionCode 2): Eigene Vorlagen,
       Dokumentstruktur/Gliederung, greifbarer Scroll-Griff. In-place-Update
       (gleiche Signatur), von Obtainium automatisch erkannt.
+- [x] **`v1.0-alpha3`** (versionCode 3): `\today`-Datum-Fix (lokale Wanduhrzeit als
+      UTC-kodierte Epoch aus Kotlin + `TZ=UTC` nativ).
+- [x] **`v1.0-alpha4`** (versionCode 4): Projekt-Tree-Fußangel behoben
+      (`ProjectStore.isWithinTree`; nur die wirklich zugehörige Datei synchronisiert
+      den Tree, sonst gezielte Snackbar-Warnung).
+- [x] **`v1.0-alpha5`** (versionCode 5): `\setmainfont{<Name>}` über gebündelte +
+      System-Fonts (fontconfig, siehe Befund unten); „Über TexDroid"-Dialog
+      (Version, Entwickler, Lizenz, Open-Source-Komponenten).
+- [x] **Ab `v1.0-alpha5`: normale GitHub-Releases** (kein `--prerelease` mehr).
+      Grund: Update-Tools (IzzyOnDroid, generische Checker, später F-Droid) ziehen
+      standardmäßig „latest non-prerelease"; die Alpha-Natur trägt der `versionName`.
+- [x] **`v1.0-alpha6`** (versionCode 6): **Internationalisierung (i18n)** — komplette
+      UI **Englisch (Default, `res/values`) + Deutsch (`res/values-de`)**, Gerät wählt
+      automatisch. TeX-Fehler, KI-Netz-/HTTP-Fehler und der KI-System-Prompt sind
+      Locale-abhängig (`Locale.getDefault`); KI antwortet in der UI-Sprache;
+      Beispiel-Dokument DE/EN; `localeConfig` (App-Sprache in den Systemeinstellungen).
+      README auf **Englisch** umgestellt (internationale Landing-Seite).
+- [x] **IzzyOnDroid vorbereitet:** Fastlane-Metadaten (`fastlane/metadata/android/`
+      en-US + de-DE: Titel, Kurz-/Langbeschreibung, Icon, Screenshots, Changelog)
+      im Repo. Distributionsweg für Alpha/Beta, weil IzzyOnDroid die fertigen
+      Release-APKs nimmt (**kein reproducible Build** nötig – anders als M5).
+      **Offen (User-Aktion):** RFP („Request for Packaging") bei
+      https://gitlab.com/IzzyOnDroid/repo/-/issues einreichen.
 
 ### Befunde & offene Punkte aus Alpha-Tests (07.07.2026, Tab S8 Ultra)
 Test mit einem echten, anspruchsvollen Dokument (66-KB-`.tex` mit eigener
