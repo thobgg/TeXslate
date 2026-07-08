@@ -207,6 +207,10 @@ Erfolgserlebnis gibt:
 - [x] **Branding:** eigenes TeX-Icon (Latin Modern / Computer Modern) als reines
       Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
       Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.
+- [x] **QW E.6:** „Über TexDroid" (Kebab → Info): App-Version (aus `PackageInfo`),
+      Kurzbeschreibung, Entwickler, Lizenz (GPL-3.0-or-later), klickbarer Repo-Link
+      und Nennung der Open-Source-Komponenten. Erfüllt zugleich die
+      Namensnennungs-Pflicht der GUST Font License (LPPL) für die gebündelten Fonts.
 
 ### MR — Alpha-Release & Multi-Device-Tests
 - [x] **Multi-Device-Tests:** Galaxy Tab S8 Ultra (Android 16), Tab S9 (16),
@@ -231,12 +235,20 @@ Tectonic sauber — KOMA `scrartcl`, `scrlayer-scrpage`, `geometry`, `csquotes`,
 `hyperref` und `fontspec`-Default (Latin Modern) laufen; die `.cls` wird korrekt
 mitsynchronisiert. Dabei drei offene Punkte gefunden:
 
-- [ ] **Fonts per Name (`\setmainfont`):** `\setmainfont{<Name>}` (z.B. „TeX Gyre
+- [x] **Fonts per Name (`\setmainfont`):** `\setmainfont{<Name>}` (z.B. „TeX Gyre
       Termes", „Latin Modern Roman") scheitert auf Android — XeTeX/fontspec löst
-      Schriften über die OS-Fontdatenbank (fontconfig) auf, die dort fehlt. Der
-      fontspec-**Default** (ohne `\setmainfont`) funktioniert dagegen. Fix-Idee:
-      gängige Fonts (Latin Modern, TeX Gyre) bündeln und per Datei-Pfad
-      (`\setmainfont[Path=…]{…}`) bzw. Fontconfig-Cache verfügbar machen.
+      Schriften über fontconfig auf, das dort weder eine populierte DB noch einen
+      beschreibbaren Cache hatte (nur `/system/fonts`). Fix: kuratiertes Set
+      (Latin Modern Roman + TeX Gyre Termes/Pagella/Heros, je 4 Schnitte, ~2,4 MB)
+      als `assets/fonts` bündeln → `FontStore` packt es einmalig nach `filesDir/fonts`
+      aus und schreibt eine `fonts.conf` (mitgelieferte Fonts + eigener Fonts-Ordner
+      + `/system/fonts`, beschreibbarer Cache). Die native Seite reicht den Pfad via
+      `FONTCONFIG_FILE` an fontconfig durch. **Stolperfalle:** die `<?xml?>`-Deklaration
+      MUSS an Byte 0 stehen — `trimIndent()` ließ Leerzeichen davor, expat lehnte ab,
+      fontconfig fiel still auf den Default zurück (jetzt per `buildString` gebaut).
+      Live verifiziert (Tab S8 Ultra): alle vier Familien lösen per Name auf. ✅
+      Nebeneffekt: `/system/fonts` (Roboto, Noto …) sind ebenfalls per Name nutzbar,
+      und ein eigener Fonts-Ordner (`…/Android/data/<pkg>/files/fonts`) wird gescannt.
 - [x] **Projekt-Tree-Fußangel:** Eine *Einzeldatei* über den Datei-Picker
       (`ACTION_OPEN_DOCUMENT`) zu öffnen setzt die Projekt-Freigabe (SAF-Tree)
       **nicht** – aus einer Einzeldatei lässt SAF auch kein Tree-Recht ableiten.
