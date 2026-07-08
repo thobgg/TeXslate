@@ -32,7 +32,7 @@ _Multi-file projects: the project folder as a sidebar (file tree), switch files 
 
 ![TexDroid: optional AI assistant with preview confirmation](./docs/screenshots/03-ki-assistent.png)
 
-_Optional AI assistant (BYOK): ask a question, choose the context (selection or whole document), see the model — nothing is sent until you confirm in the preview dialog._
+_Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and have it explained line by line (here the Gaussian integral). It clarifies source code — it is not a general chatbot. Nothing is sent until you confirm in the preview dialog._
 
 ## Features
 
