@@ -32,13 +32,23 @@ data class CompileResult(
     val engineError: String,
     val errors: List<CompileError>,
 ) {
-    /** Kurze Zusammenfassung für die Snackbar. */
-    fun summary(): String = when {
-        ok && errors.isEmpty() -> "Kompiliert ✓"
-        ok -> "Kompiliert ✓ (mit ${errors.size} Warnung/Hinweis)"
-        errors.isNotEmpty() -> "Fehler: ${errors.first().message}"
-        engineError.isNotEmpty() -> "Fehler: ${engineError.lineSequence().firstOrNull().orEmpty()}"
-        else -> "Compile fehlgeschlagen"
+    /** Kurze Zusammenfassung für die Snackbar (UI-Sprache via Locale). */
+    fun summary(): String {
+        val de = java.util.Locale.getDefault().language == "de"
+        return when {
+            ok && errors.isEmpty() -> if (de) "Kompiliert ✓" else "Compiled ✓"
+            ok -> if (de) {
+                "Kompiliert ✓ (mit ${errors.size} Warnung/Hinweis)"
+            } else {
+                "Compiled ✓ (${errors.size} warning/note)"
+            }
+            errors.isNotEmpty() ->
+                (if (de) "Fehler: " else "Error: ") + errors.first().message
+            engineError.isNotEmpty() ->
+                (if (de) "Fehler: " else "Error: ") +
+                    engineError.lineSequence().firstOrNull().orEmpty()
+            else -> if (de) "Compile fehlgeschlagen" else "Compile failed"
+        }
     }
 
     companion object {
