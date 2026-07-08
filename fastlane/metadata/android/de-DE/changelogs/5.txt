@@ -1,0 +1,2 @@
+* \setmainfont{<Name>} funktioniert jetzt: kuratierte Fonts (Latin Modern, TeX Gyre Termes/Pagella/Heros) gebündelt und per Name nutzbar; Android-Systemschriften und ein eigener Font-Ordner ebenfalls.
+* Neuer „Über TexDroid"-Dialog (Überlaufmenü): Version, Entwickler, Lizenz und die gebündelten Open-Source-Komponenten.

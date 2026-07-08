@@ -1,0 +1,1 @@
+On-device LaTeX/XeTeX editor: compile & PDF preview offline, no cloud

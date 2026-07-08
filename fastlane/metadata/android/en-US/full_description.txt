@@ -1,0 +1,20 @@
+TexDroid is a native LaTeX/XeTeX editor for Android tablets (and phones) that compiles your documents right on the device — no cloud service, no account, no companion PC. Editor, LaTeX compiler and PDF preview live together in one screen.
+
+It is powered by the Tectonic engine (XeTeX), so modern Unicode and fontspec/\setmainfont just work.
+
+Features:
+
+* Full LaTeX/XeTeX compilation on-device, offline
+* Live PDF preview — split view on tablets, tabbed layout on phones
+* LaTeX syntax highlighting, auto-compile on pause, jump-to-error
+* Multi-file projects: \input / \include and bibliography
+* Curated fonts bundled (Latin Modern, TeX Gyre) usable by name via \setmainfont; Android system fonts and your own font folder also work
+* Search & replace, go-to-line, comment toggle, document outline, custom templates
+* Optional AI assistant (Anthropic / OpenAI / Gemini) — off by default, used only if you add your own API key
+
+Good to know:
+
+* The very first compile downloads the TeX package bundle once (needs internet that one time); afterwards everything runs offline.
+* The optional AI assistant contacts third-party services only when you enable it with your own key.
+
+Free software, licensed under GPL-3.0-or-later. Built for tablets first: split view, external keyboard and stylus.

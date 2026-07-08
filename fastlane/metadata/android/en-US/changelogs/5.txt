@@ -1,0 +1,2 @@
+* \setmainfont{<name>} now works: curated fonts bundled (Latin Modern, TeX Gyre Termes/Pagella/Heros) and resolvable by name; Android system fonts and a user font folder also work.
+* New "About TexDroid" screen (overflow menu): version, developer, license and the bundled open-source components.
