@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Vom System für die „App-Sprache"-Auswahl (Einstellungen → Apps → TexDroid)
+     genutzt. Englisch ist Default (res/values), Deutsch als res/values-de. -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="de" />
+</locale-config>
