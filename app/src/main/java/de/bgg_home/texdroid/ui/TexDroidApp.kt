@@ -63,6 +63,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -106,6 +107,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -273,6 +275,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var lastLog by remember { mutableStateOf("") }
     var showLog by remember { mutableStateOf(false) }
     var showShare by remember { mutableStateOf(false) }
+    var showAbout by remember { mutableStateOf(false) }
     var compileJob by remember { mutableStateOf<Job?>(null) }
     var errorIndex by remember { mutableIntStateOf(0) }
 
@@ -666,6 +669,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
                 onSettings = { showSettings = true },
+                onAbout = { showAbout = true },
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
                 onCompile = ::runCompile,
@@ -931,6 +935,9 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             onShare = { tex, pdf -> showShare = false; shareSelected(tex, pdf) },
         )
     }
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
+    }
     } // ModalNavigationDrawer
 }
 
@@ -990,6 +997,75 @@ private fun ShareDialog(
     )
 }
 
+/**
+ * „Über TexDroid": App-Version, Entwickler, Lizenz und die Nennung der
+ * enthaltenen Open-Source-Komponenten. Die Fonts (Latin Modern / TeX Gyre) stehen
+ * unter der GUST Font License (LPPL) und MÜSSEN genannt werden – dieser Dialog ist
+ * damit auch die Lizenz-Erfüllung, nicht nur Deko.
+ */
+@Composable
+private fun AboutDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
+    val repoUrl = "https://github.com/thobgg/TexDroid"
+
+    @Suppress("DEPRECATION")
+    val version = runCatching {
+        val pi = context.packageManager.getPackageInfo(context.packageName, 0)
+        "${pi.versionName} (${pi.versionCode})"
+    }.getOrDefault("")
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = { AppLogo() },
+        title = { Text("TexDroid") },
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (version.isNotBlank()) {
+                    Text("Version $version", style = MaterialTheme.typography.bodyMedium)
+                }
+                Text(
+                    "Nativer LaTeX-/XeTeX-Editor für Android-Tablets — Editor, " +
+                        "Tectonic-Compiler und PDF-Vorschau, komplett offline.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "Entwickler: Thomas Bugge (thobgg)",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "Lizenz: GPL-3.0-or-later",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    repoUrl,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { uriHandler.openUri(repoUrl) },
+                )
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+
+                Text(
+                    "Enthaltene Open-Source-Komponenten",
+                    style = MaterialTheme.typography.titleSmall,
+                )
+                Text(
+                    "• Tectonic / XeTeX — MIT\n" +
+                        "• Latin Modern & TeX Gyre (Schriften) — GUST Font License (LPPL)\n" +
+                        "• sora-editor — LGPL-2.1\n" +
+                        "• vscode-latex-basics (Syntax) — MIT",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Schließen") } },
+    )
+}
+
 @Composable
 private fun AppHeader(
     fileName: String?,
@@ -1011,6 +1087,7 @@ private fun AppHeader(
     onShowLog: () -> Unit,
     canShowLog: Boolean,
     onSettings: () -> Unit,
+    onAbout: () -> Unit,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onCompile: () -> Unit,
@@ -1072,6 +1149,7 @@ private fun AppHeader(
                     onToggleComment = onToggleComment,
                     onOutline = onOutline,
                     onSettings = onSettings,
+                    onAbout = onAbout,
                     onAutoCompileChange = onAutoCompileChange,
                 )
             }
@@ -1126,6 +1204,7 @@ private fun OverflowMenu(
     onToggleComment: () -> Unit,
     onOutline: () -> Unit,
     onSettings: () -> Unit,
+    onAbout: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -1187,6 +1266,11 @@ private fun OverflowMenu(
                 text = { Text("Einstellungen") },
                 leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                 onClick = { expanded = false; onSettings() },
+            )
+            DropdownMenuItem(
+                text = { Text("Über TexDroid") },
+                leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
+                onClick = { expanded = false; onAbout() },
             )
         }
     }
