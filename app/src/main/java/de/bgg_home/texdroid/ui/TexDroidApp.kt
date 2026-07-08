@@ -147,8 +147,15 @@ import java.io.File
 /** Wartezeit nach dem letzten Tastendruck, bevor automatisch kompiliert wird. */
 private const val AUTO_COMPILE_DEBOUNCE_MS = 800L
 
-/** Beispiel-Dokument beim ersten Start – zeigt alle gehighlighteten Elemente. */
-private val SAMPLE_TEX = """
+/**
+ * Beispiel-Dokument beim ersten Start – zeigt alle gehighlighteten Elemente.
+ * Der *Inhalt* folgt der UI-Sprache (Deutsch bei deutscher Locale, sonst Englisch);
+ * die LaTeX-Struktur bleibt identisch.
+ */
+private val SAMPLE_TEX: String
+    get() = if (java.util.Locale.getDefault().language == "de") SAMPLE_TEX_DE else SAMPLE_TEX_EN
+
+private val SAMPLE_TEX_DE = """
 \documentclass{article}
 \usepackage{amsmath}
 
@@ -169,6 +176,32 @@ Willkommen bei \textbf{TexDroid}! Inline-Mathe: ${'$'}E = mc^2${'$'}.
     \item Editor mit LaTeX-Syntax-Highlighting
     \item Lokaler Compile via Tectonic
     \item PDF-Vorschau nebenan
+\end{itemize}
+
+\end{document}
+""".trimIndent()
+
+private val SAMPLE_TEX_EN = """
+\documentclass{article}
+\usepackage{amsmath}
+
+\title{TexDroid}
+\author{Written on the tablet}
+
+\begin{document}
+\maketitle
+
+% A comment: everything after a percent sign is grey.
+Welcome to \textbf{TexDroid}! Inline math: ${'$'}E = mc^2${'$'}.
+
+\begin{equation}
+    \int_0^\infty e^{-x^2}\,\mathrm{d}x = \frac{\sqrt{\pi}}{2}
+\end{equation}
+
+\begin{itemize}
+    \item Editor with LaTeX syntax highlighting
+    \item Local compile via Tectonic
+    \item PDF preview alongside
 \end{itemize}
 
 \end{document}
