@@ -30,9 +30,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.ai.AiClient
 import de.bgg_home.texdroid.ai.AiMessage
 import de.bgg_home.texdroid.ai.AiPrompt
@@ -137,7 +139,7 @@ fun AiAssistantSheet(
 
     KeyboardAwareDialog(onDismiss = onDismiss) {
         Text(
-            "KI-Assistent (Beta)",
+            stringResource(R.string.ai_settings_title),
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(vertical = 8.dp),
         )
@@ -145,9 +147,9 @@ fun AiAssistantSheet(
         if (!ready) {
             Text(
                 if (!settings.enabled) {
-                    "Der KI-Assistent ist noch nicht aktiviert."
+                    stringResource(R.string.ai_not_enabled)
                 } else {
-                    "Für ${settings.provider.displayName} ist noch kein API-Key hinterlegt."
+                    stringResource(R.string.ai_no_key, settings.provider.displayName)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(top = 8.dp),
@@ -155,7 +157,7 @@ fun AiAssistantSheet(
             Button(
                 onClick = { onDismiss(); onOpenSettings() },
                 modifier = Modifier.padding(top = 12.dp),
-            ) { Text("Einstellungen öffnen") }
+            ) { Text(stringResource(R.string.ai_open_settings)) }
             return@KeyboardAwareDialog
         }
 
@@ -186,7 +188,7 @@ fun AiAssistantSheet(
                 modifier = Modifier.padding(vertical = 24.dp),
             ) {
                 CircularProgressIndicator()
-                Text("Frage wird gesendet …", modifier = Modifier.padding(start = 16.dp))
+                Text(stringResource(R.string.ai_sending), modifier = Modifier.padding(start = 16.dp))
             }
 
             Stage.CHAT -> ChatStage(
@@ -212,9 +214,9 @@ fun AiAssistantSheet(
                     modifier = Modifier.padding(top = 12.dp),
                 ) {
                     Button(onClick = { stage = if (isFollowUp) Stage.CHAT else Stage.INPUT }) {
-                        Text("Zurück")
+                        Text(stringResource(R.string.ai_back))
                     }
-                    TextButton(onClick = { showPreview = true }) { Text("Erneut senden") }
+                    TextButton(onClick = { showPreview = true }) { Text(stringResource(R.string.ai_resend)) }
                 }
             }
         }
@@ -224,13 +226,15 @@ fun AiAssistantSheet(
     if (showPreview) {
         AlertDialog(
             onDismissRequest = { showPreview = false },
-            title = { Text("Das wird gesendet") },
+            title = { Text(stringResource(R.string.ai_preview_title)) },
             text = {
                 Column(Modifier.verticalScroll(rememberScrollState())) {
                     Text(
-                        "An ${settings.provider.displayName} (${settings.activeModel}). " +
-                            "Es können Kosten anfallen." +
-                            if (isFollowUp) " Die letzten Runden werden als Kontext mitgeschickt." else "",
+                        stringResource(
+                            R.string.ai_preview_note,
+                            settings.provider.displayName,
+                            settings.activeModel,
+                        ) + if (isFollowUp) stringResource(R.string.ai_preview_context_suffix) else "",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -250,9 +254,13 @@ fun AiAssistantSheet(
                 }
             },
             confirmButton = {
-                Button(onClick = { send() }, enabled = question.isNotBlank()) { Text("Senden") }
+                Button(onClick = { send() }, enabled = question.isNotBlank()) {
+                    Text(stringResource(R.string.ai_send))
+                }
             },
-            dismissButton = { TextButton(onClick = { showPreview = false }) { Text("Abbrechen") } },
+            dismissButton = {
+                TextButton(onClick = { showPreview = false }) { Text(stringResource(R.string.cancel)) }
+            },
         )
     }
 }
@@ -271,7 +279,7 @@ private fun Conversation(turn: Turn) {
         modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
     ) {
         Text(
-            turn.answer.ifBlank { "(leere Antwort)" },
+            turn.answer.ifBlank { stringResource(R.string.ai_empty_answer) },
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(12.dp),
         )
@@ -292,13 +300,13 @@ private fun InputStage(
     OutlinedTextField(
         value = question,
         onValueChange = onQuestionChange,
-        label = { Text("Frage an die KI") },
-        placeholder = { Text("z. B. „Erzeuge eine 3×3-Tabelle mit Kopfzeile\"") },
+        label = { Text(stringResource(R.string.ai_question_label)) },
+        placeholder = { Text(stringResource(R.string.ai_question_placeholder)) },
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
     )
 
     Text(
-        "Kontext",
+        stringResource(R.string.ai_context),
         style = MaterialTheme.typography.labelLarge,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
@@ -314,7 +322,7 @@ private fun InputStage(
                 selected = contextScope == s,
                 enabled = enabled,
                 onClick = { onScopeChange(s) },
-                label = { Text(s.label) },
+                label = { Text(stringResource(scopeLabelRes(s))) },
             )
         }
     }
@@ -323,7 +331,14 @@ private fun InputStage(
         onClick = onAsk,
         enabled = question.isNotBlank(),
         modifier = Modifier.padding(top = 16.dp),
-    ) { Text("Vorschau & senden") }
+    ) { Text(stringResource(R.string.ai_preview_and_send)) }
+}
+
+/** UI-Beschriftung eines [ContextScope] (Prompt-seitige Sprache steckt in [AiPrompt]). */
+private fun scopeLabelRes(scope: ContextScope): Int = when (scope) {
+    ContextScope.NONE -> R.string.ai_scope_none
+    ContextScope.SELECTION -> R.string.ai_scope_selection
+    ContextScope.DOCUMENT -> R.string.ai_scope_document
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -343,21 +358,25 @@ private fun ChatStage(
     OutlinedTextField(
         value = followUp,
         onValueChange = onFollowUpChange,
-        label = { Text("Nachfragen …") },
-        placeholder = { Text("z. B. „Und wie mache ich die Kopfzeile fett?\"") },
+        label = { Text(stringResource(R.string.ai_followup_label)) },
+        placeholder = { Text(stringResource(R.string.ai_followup_placeholder)) },
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
     )
     FlowRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.padding(top = 12.dp),
     ) {
-        Button(onClick = onAsk, enabled = followUp.isNotBlank()) { Text("Nachfragen") }
+        Button(onClick = onAsk, enabled = followUp.isNotBlank()) {
+            Text(stringResource(R.string.ai_followup_button))
+        }
         // Nur reinen Code-Block einfügen (Markdown-Zäune werden entfernt).
         if (canInsertBody && !hasSelection) {
-            TextButton(onClick = onInsertBody) { Text("Am Dokumentende") }
+            TextButton(onClick = onInsertBody) { Text(stringResource(R.string.ai_insert_end)) }
         }
-        TextButton(onClick = onInsert) { Text(if (hasSelection) "Ersetzen" else "Am Cursor") }
-        TextButton(onClick = onCopy) { Text("Kopieren") }
-        TextButton(onClick = onNewConversation) { Text("Neue Frage") }
+        TextButton(onClick = onInsert) {
+            Text(stringResource(if (hasSelection) R.string.ai_replace else R.string.ai_insert_cursor))
+        }
+        TextButton(onClick = onCopy) { Text(stringResource(R.string.ai_copy)) }
+        TextButton(onClick = onNewConversation) { Text(stringResource(R.string.ai_new_question)) }
     }
 }

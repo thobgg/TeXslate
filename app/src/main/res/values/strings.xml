@@ -97,4 +97,32 @@
     <string name="ai_model">Model</string>
     <string name="ai_model_id_label">Model ID (freely editable)</string>
     <string name="ai_privacy_note">Note: Your text is only sent to the selected provider after explicit confirmation (preview dialog). Keys stay encrypted on the device. API costs may apply. The core app works fully offline.</string>
+
+    <!-- AI assistant sheet -->
+    <string name="ai_not_enabled">The AI assistant is not enabled yet.</string>
+    <string name="ai_no_key">No API key is set for %1$s yet.</string>
+    <string name="ai_open_settings">Open settings</string>
+    <string name="ai_sending">Sending question …</string>
+    <string name="ai_back">Back</string>
+    <string name="ai_resend">Send again</string>
+    <string name="ai_preview_title">This will be sent</string>
+    <string name="ai_preview_note">To %1$s (%2$s). Costs may apply.</string>
+    <string name="ai_preview_context_suffix"> The last rounds are included as context.</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_empty_answer">(empty answer)</string>
+    <string name="ai_question_label">Question for the AI</string>
+    <string name="ai_question_placeholder">e.g. “Create a 3×3 table with a header row”</string>
+    <string name="ai_context">Context</string>
+    <string name="ai_preview_and_send">Preview &amp; send</string>
+    <string name="ai_followup_label">Follow-up …</string>
+    <string name="ai_followup_placeholder">e.g. “And how do I make the header bold?”</string>
+    <string name="ai_followup_button">Follow up</string>
+    <string name="ai_insert_end">At document end</string>
+    <string name="ai_replace">Replace</string>
+    <string name="ai_insert_cursor">At cursor</string>
+    <string name="ai_copy">Copy</string>
+    <string name="ai_new_question">New question</string>
+    <string name="ai_scope_none">No context</string>
+    <string name="ai_scope_selection">Selection</string>
+    <string name="ai_scope_document">Whole document</string>
 </resources>

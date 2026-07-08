@@ -95,4 +95,32 @@
     <string name="ai_model">Modell</string>
     <string name="ai_model_id_label">Modell-ID (frei überschreibbar)</string>
     <string name="ai_privacy_note">Hinweis: Dein Text wird nur nach ausdrücklicher Bestätigung (Vorschau-Dialog) an den gewählten Anbieter gesendet. Keys bleiben verschlüsselt auf dem Gerät. Es können API-Kosten anfallen. Die Kern-App funktioniert vollständig offline.</string>
+
+    <!-- KI-Assistent-Sheet -->
+    <string name="ai_not_enabled">Der KI-Assistent ist noch nicht aktiviert.</string>
+    <string name="ai_no_key">Für %1$s ist noch kein API-Key hinterlegt.</string>
+    <string name="ai_open_settings">Einstellungen öffnen</string>
+    <string name="ai_sending">Frage wird gesendet …</string>
+    <string name="ai_back">Zurück</string>
+    <string name="ai_resend">Erneut senden</string>
+    <string name="ai_preview_title">Das wird gesendet</string>
+    <string name="ai_preview_note">An %1$s (%2$s). Es können Kosten anfallen.</string>
+    <string name="ai_preview_context_suffix"> Die letzten Runden werden als Kontext mitgeschickt.</string>
+    <string name="ai_send">Senden</string>
+    <string name="ai_empty_answer">(leere Antwort)</string>
+    <string name="ai_question_label">Frage an die KI</string>
+    <string name="ai_question_placeholder">z. B. „Erzeuge eine 3×3-Tabelle mit Kopfzeile“</string>
+    <string name="ai_context">Kontext</string>
+    <string name="ai_preview_and_send">Vorschau &amp; senden</string>
+    <string name="ai_followup_label">Nachfragen …</string>
+    <string name="ai_followup_placeholder">z. B. „Und wie mache ich die Kopfzeile fett?“</string>
+    <string name="ai_followup_button">Nachfragen</string>
+    <string name="ai_insert_end">Am Dokumentende</string>
+    <string name="ai_replace">Ersetzen</string>
+    <string name="ai_insert_cursor">Am Cursor</string>
+    <string name="ai_copy">Kopieren</string>
+    <string name="ai_new_question">Neue Frage</string>
+    <string name="ai_scope_none">Ohne Kontext</string>
+    <string name="ai_scope_selection">Markierung</string>
+    <string name="ai_scope_document">Ganzes Dokument</string>
 </resources>
