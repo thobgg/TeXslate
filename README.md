@@ -16,7 +16,7 @@ language automatically.
 
 ![TexDroid: LaTeX editor with syntax highlighting on the left, live PDF preview on the right, auto-compile](./docs/screenshots/01-editor-vorschau.png)
 
-_Split view on a tablet: the LaTeX editor with syntax highlighting on the left, the live-rendered PDF on the right — compiled locally via Tectonic._
+_Split view on a tablet: the LaTeX editor on the left, the live-rendered PDF on the right — a real multi-file project (`\input`) proving the general binomial theorem by induction, compiled locally via Tectonic._
 
 ![TexDroid: \setmainfont resolves bundled and system fonts by name](./docs/screenshots/04-fonts-setmainfont.png)
 
