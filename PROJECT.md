@@ -10,12 +10,21 @@
 ## 1. Motivation & Marktlücke
 
 Es gibt auf Android/F-Droid **keine** Open-Source-App, die Editor, PDF-Vorschau
-und lokalen LaTeX-Compiler (XeTeX-fähig) nahtlos in einer Oberfläche verbindet.
+und einen **on-device (offline) LaTeX-Compiler (XeTeX-fähig)** nahtlos in einer
+Oberfläche verbindet. LaTeX-Editoren für Android gibt es durchaus — was fehlt, ist
+die Kombination *quelloffen + kompiliert wirklich auf dem Gerät, ohne Cloud/PC*.
 
 Vorhandene Alternativen und warum sie nicht reichen:
 - **Termux + TeX Live / Tectonic**: Voll funktionsfähig, aber reine
   Terminal-Bedienung — keine integrierte UX, hohe Einstiegshürde.
-- **VerbTeX u.ä.**: Proprietär bzw. Cloud-abhängig.
+- **VerbTeX** (der bekannteste direkte Vergleich): proprietär und kompiliert
+  **nie auf dem Gerät** — die Gratis-Version schickt das Projekt an die
+  Verbosus-**Cloud** (Konto + Internet nötig), „VerbTeX Local" braucht einen
+  selbst betriebenen Server auf einem **PC im LAN**. Kein echtes Offline-/
+  On-Device-Compile, nicht Open Source. Genau hier setzt TexDroid an.
+- **Weitere LaTeX-Editor-Apps im Play Store**: durchweg nach demselben Muster —
+  Cloud- oder Remote-Compile und/oder proprietär; keine quelloffene, rein
+  lokale Engine auf dem Gerät.
 - **jlatexmath / AndroidMath**: Nur Formel-Renderer, keine vollständige Engine.
 - **Kile-Portierung**: Verworfen — KDE-Frameworks/Qt-Widgets sind auf Android
   schlecht unterstützt und nicht touch-tauglich.
