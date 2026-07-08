@@ -3,6 +3,7 @@
     <string name="cancel">Abbrechen</string>
     <string name="save">Speichern</string>
     <string name="delete">Löschen</string>
+    <string name="insert">Einfügen</string>
 
     <!-- Vorlagen -->
     <string name="templates_title">Vorlagen</string>
@@ -60,4 +61,38 @@
     <string name="palette_cat_environments">Umgebungen</string>
     <string name="palette_cat_math">Mathe</string>
     <string name="palette_cat_greek">Griechisch</string>
+
+    <!-- Tabellen-Assistent -->
+    <string name="table_wizard_title">Tabellen-Assistent</string>
+    <string name="table_columns">Spalten</string>
+    <string name="table_rows">Zeilen</string>
+    <string name="table_alignment">Ausrichtung</string>
+    <string name="align_left">links</string>
+    <string name="align_center">zentriert</string>
+    <string name="align_right">rechts</string>
+    <string name="table_borders">Rahmen (Linien)</string>
+    <string name="stepper_decrease">weniger</string>
+    <string name="stepper_increase">mehr</string>
+
+    <!-- Dokument-Assistent -->
+    <string name="doc_wizard_title">Dokument-Assistent</string>
+    <string name="doc_class">Dokumentklasse</string>
+    <string name="doc_font_size">Schriftgröße</string>
+    <string name="doc_language">Sprache</string>
+    <string name="doc_packages">Pakete</string>
+    <string name="doc_title_block">Titelblock (\\maketitle)</string>
+    <string name="doc_title">Titel</string>
+    <string name="doc_author">Autor</string>
+    <string name="doc_create">Erstellen</string>
+
+    <!-- KI-Einstellungen -->
+    <string name="ai_settings_title">KI-Assistent (Beta)</string>
+    <string name="ai_enable_optin">Aktivieren (Opt-in)</string>
+    <string name="ai_provider">Anbieter</string>
+    <string name="ai_api_key_label">API-Key (%1$s)</string>
+    <string name="ai_key_hide">Key verbergen</string>
+    <string name="ai_key_show">Key anzeigen</string>
+    <string name="ai_model">Modell</string>
+    <string name="ai_model_id_label">Modell-ID (frei überschreibbar)</string>
+    <string name="ai_privacy_note">Hinweis: Dein Text wird nur nach ausdrücklicher Bestätigung (Vorschau-Dialog) an den gewählten Anbieter gesendet. Keys bleiben verschlüsselt auf dem Gerät. Es können API-Kosten anfallen. Die Kern-App funktioniert vollständig offline.</string>
 </resources>

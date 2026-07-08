@@ -5,6 +5,7 @@
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="insert">Insert</string>
 
     <!-- Templates -->
     <string name="templates_title">Templates</string>
@@ -62,4 +63,38 @@
     <string name="palette_cat_environments">Environments</string>
     <string name="palette_cat_math">Math</string>
     <string name="palette_cat_greek">Greek</string>
+
+    <!-- Table wizard -->
+    <string name="table_wizard_title">Table wizard</string>
+    <string name="table_columns">Columns</string>
+    <string name="table_rows">Rows</string>
+    <string name="table_alignment">Alignment</string>
+    <string name="align_left">left</string>
+    <string name="align_center">centered</string>
+    <string name="align_right">right</string>
+    <string name="table_borders">Borders (lines)</string>
+    <string name="stepper_decrease">less</string>
+    <string name="stepper_increase">more</string>
+
+    <!-- Document wizard -->
+    <string name="doc_wizard_title">Document wizard</string>
+    <string name="doc_class">Document class</string>
+    <string name="doc_font_size">Font size</string>
+    <string name="doc_language">Language</string>
+    <string name="doc_packages">Packages</string>
+    <string name="doc_title_block">Title block (\\maketitle)</string>
+    <string name="doc_title">Title</string>
+    <string name="doc_author">Author</string>
+    <string name="doc_create">Create</string>
+
+    <!-- AI settings -->
+    <string name="ai_settings_title">AI assistant (beta)</string>
+    <string name="ai_enable_optin">Enable (opt-in)</string>
+    <string name="ai_provider">Provider</string>
+    <string name="ai_api_key_label">API key (%1$s)</string>
+    <string name="ai_key_hide">Hide key</string>
+    <string name="ai_key_show">Show key</string>
+    <string name="ai_model">Model</string>
+    <string name="ai_model_id_label">Model ID (freely editable)</string>
+    <string name="ai_privacy_note">Note: Your text is only sent to the selected provider after explicit confirmation (preview dialog). Keys stay encrypted on the device. API costs may apply. The core app works fully offline.</string>
 </resources>

@@ -22,7 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 
 /**
  * Dokument-Assistent (Kiles „Wizard → Document"): Dokumentklasse, Schriftgröße,
@@ -48,20 +50,20 @@ fun DocumentWizardDialog(onCreate: (String, Int) -> Unit, onDismiss: () -> Unit)
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Dokument-Assistent") },
+        title = { Text(stringResource(R.string.doc_wizard_title)) },
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
-                ChipRow("Dokumentklasse", CLASSES, docClass) { docClass = it }
-                ChipRow("Schriftgröße", SIZES, fontSize) { fontSize = it }
+                ChipRow(stringResource(R.string.doc_class), CLASSES, docClass) { docClass = it }
+                ChipRow(stringResource(R.string.doc_font_size), SIZES, fontSize) { fontSize = it }
 
-                Label("Sprache")
+                Label(stringResource(R.string.doc_language))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     LANGS.forEach { (label, value) ->
                         FilterChip(selected = lang == value, onClick = { lang = value }, label = { Text(label) })
                     }
                 }
 
-                Label("Pakete")
+                Label(stringResource(R.string.doc_packages))
                 PACKAGES.forEach { pkg ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = packages[pkg] == true, onCheckedChange = { packages[pkg] = it })
@@ -74,17 +76,17 @@ fun DocumentWizardDialog(onCreate: (String, Int) -> Unit, onDismiss: () -> Unit)
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
                     Checkbox(checked = includeTitle, onCheckedChange = { includeTitle = it })
-                    Text("Titelblock (\\maketitle)")
+                    Text(stringResource(R.string.doc_title_block))
                 }
                 if (includeTitle) {
                     OutlinedTextField(
                         value = title, onValueChange = { title = it },
-                        label = { Text("Titel") }, singleLine = true,
+                        label = { Text(stringResource(R.string.doc_title)) }, singleLine = true,
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     )
                     OutlinedTextField(
                         value = author, onValueChange = { author = it },
-                        label = { Text("Autor") }, singleLine = true,
+                        label = { Text(stringResource(R.string.doc_author)) }, singleLine = true,
                         modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
                     )
                 }
@@ -98,9 +100,9 @@ fun DocumentWizardDialog(onCreate: (String, Int) -> Unit, onDismiss: () -> Unit)
                 )
                 onCreate(text, line)
                 onDismiss()
-            }) { Text("Erstellen") }
+            }) { Text(stringResource(R.string.doc_create)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 

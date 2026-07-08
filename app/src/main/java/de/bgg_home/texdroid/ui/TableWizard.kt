@@ -24,8 +24,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 
 /**
  * Tabellen-Assistent (Kiles „Wizard → Tabular", tablet-tauglich): Spalten,
@@ -41,19 +43,27 @@ fun TableWizardDialog(onInsert: (String, Int) -> Unit, onDismiss: () -> Unit) {
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Tabellen-Assistent") },
+        title = { Text(stringResource(R.string.table_wizard_title)) },
         text = {
             Column {
-                Stepper("Spalten", cols, 1, 12) { cols = it }
-                Stepper("Zeilen", rows, 1, 30) { rows = it }
+                Stepper(stringResource(R.string.table_columns), cols, 1, 12) { cols = it }
+                Stepper(stringResource(R.string.table_rows), rows, 1, 30) { rows = it }
                 Text(
-                    "Ausrichtung",
+                    stringResource(R.string.table_alignment),
                     style = MaterialTheme.typography.labelLarge,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    listOf('l' to "links", 'c' to "zentriert", 'r' to "rechts").forEach { (a, label) ->
-                        FilterChip(selected = align == a, onClick = { align = a }, label = { Text(label) })
+                    listOf(
+                        'l' to R.string.align_left,
+                        'c' to R.string.align_center,
+                        'r' to R.string.align_right,
+                    ).forEach { (a, labelRes) ->
+                        FilterChip(
+                            selected = align == a,
+                            onClick = { align = a },
+                            label = { Text(stringResource(labelRes)) },
+                        )
                     }
                 }
                 Row(
@@ -61,7 +71,7 @@ fun TableWizardDialog(onInsert: (String, Int) -> Unit, onDismiss: () -> Unit) {
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
                     Checkbox(checked = borders, onCheckedChange = { borders = it })
-                    Text("Rahmen (Linien)")
+                    Text(stringResource(R.string.table_borders))
                 }
             }
         },
@@ -70,9 +80,9 @@ fun TableWizardDialog(onInsert: (String, Int) -> Unit, onDismiss: () -> Unit) {
                 val (text, caret) = generateTable(cols, rows, align, borders)
                 onInsert(text, caret)
                 onDismiss()
-            }) { Text("Einfügen") }
+            }) { Text(stringResource(R.string.insert)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Abbrechen") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -81,11 +91,11 @@ private fun Stepper(label: String, value: Int, min: Int, max: Int, onChange: (In
     Row(verticalAlignment = Alignment.CenterVertically) {
         Text(label, modifier = Modifier.weight(1f))
         IconButton(onClick = { if (value > min) onChange(value - 1) }) {
-            Icon(Icons.Filled.Remove, contentDescription = "weniger")
+            Icon(Icons.Filled.Remove, contentDescription = stringResource(R.string.stepper_decrease))
         }
         Text("$value", modifier = Modifier.widthIn(min = 28.dp), textAlign = TextAlign.Center)
         IconButton(onClick = { if (value < max) onChange(value + 1) }) {
-            Icon(Icons.Filled.Add, contentDescription = "mehr")
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.stepper_increase))
         }
     }
 }

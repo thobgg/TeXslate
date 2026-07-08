@@ -25,9 +25,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.ai.AiProvider
 import de.bgg_home.texdroid.ai.AiSettings
 
@@ -58,17 +60,17 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
 
     KeyboardAwareDialog(onDismiss = onDismiss) {
             Text(
-                "KI-Assistent (Beta)",
+                stringResource(R.string.ai_settings_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Switch(checked = enabled, onCheckedChange = { enabled = it })
-                Text("Aktivieren (Opt-in)", modifier = Modifier.padding(start = 8.dp))
+                Text(stringResource(R.string.ai_enable_optin), modifier = Modifier.padding(start = 8.dp))
             }
 
-            SectionLabel("Anbieter")
+            SectionLabel(stringResource(R.string.ai_provider))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 AiProvider.entries.forEach { p ->
                     FilterChip(
@@ -82,21 +84,23 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
             OutlinedTextField(
                 value = key,
                 onValueChange = { key = it },
-                label = { Text("API-Key (${provider.displayName})") },
+                label = { Text(stringResource(R.string.ai_api_key_label, provider.displayName)) },
                 singleLine = true,
                 visualTransformation = if (showKey) VisualTransformation.None else PasswordVisualTransformation(),
                 trailingIcon = {
                     IconButton(onClick = { showKey = !showKey }) {
                         Icon(
                             if (showKey) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = if (showKey) "Key verbergen" else "Key anzeigen",
+                            contentDescription = stringResource(
+                                if (showKey) R.string.ai_key_hide else R.string.ai_key_show,
+                            ),
                         )
                     }
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
 
-            SectionLabel("Modell")
+            SectionLabel(stringResource(R.string.ai_model))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 provider.modelPresets.forEach { preset ->
                     FilterChip(
@@ -109,15 +113,13 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
             OutlinedTextField(
                 value = model,
                 onValueChange = { model = it },
-                label = { Text("Modell-ID (frei überschreibbar)") },
+                label = { Text(stringResource(R.string.ai_model_id_label)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             )
 
             Text(
-                "Hinweis: Dein Text wird nur nach ausdrücklicher Bestätigung (Vorschau-Dialog) " +
-                    "an den gewählten Anbieter gesendet. Keys bleiben verschlüsselt auf dem Gerät. " +
-                    "Es können API-Kosten anfallen. Die Kern-App funktioniert vollständig offline.",
+                stringResource(R.string.ai_privacy_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 12.dp),
@@ -132,7 +134,7 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                     onDismiss()
                 },
                 modifier = Modifier.padding(top = 16.dp),
-            ) { Text("Speichern") }
+            ) { Text(stringResource(R.string.save)) }
     }
 }
 
