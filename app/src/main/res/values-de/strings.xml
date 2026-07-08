@@ -1,0 +1,40 @@
+<resources>
+    <!-- Shared -->
+    <string name="cancel">Abbrechen</string>
+
+    <!-- Gehe zu Zeile -->
+    <string name="goto_line_title">Gehe zu Zeile</string>
+    <string name="goto_line_label">Zeile (1–%1$d)</string>
+    <string name="goto_line_jump">Springen</string>
+
+    <!-- Suchen &amp; Ersetzen -->
+    <string name="search_hint">Suchen</string>
+    <string name="search_prev_match">Vorheriger Treffer</string>
+    <string name="search_next_match">Nächster Treffer</string>
+    <string name="search_close">Suche schließen</string>
+    <string name="search_replace_hint">Ersetzen durch</string>
+    <string name="search_replace">Ersetzen</string>
+    <string name="search_replace_all">Alle</string>
+    <string name="search_invalid_pattern">Muster?</string>
+
+    <!-- Projekt-Sidebar -->
+    <string name="project_none">Kein Projekt</string>
+    <string name="open_folder">Ordner öffnen</string>
+    <string name="project_drawer_hint">Tippe auf das Ordner-Symbol, um einen Projektordner zu öffnen. Alle .tex-Dateien darin erscheinen hier.</string>
+
+    <!-- PDF-Vorschau -->
+    <string name="pdf_none_loaded">Kein PDF geladen</string>
+    <string name="pdf_page">PDF-Seite %1$d</string>
+
+    <!-- LaTeX-Einfüge-Palette -->
+    <string name="palette_more">Mehr LaTeX-Bausteine</string>
+    <string name="palette_title">LaTeX einfügen</string>
+    <string name="palette_wizards">Assistenten</string>
+    <string name="palette_template">Vorlage …</string>
+    <string name="palette_document_wizard">Dokument-Assistent …</string>
+    <string name="palette_table_wizard">Tabellen-Assistent …</string>
+    <string name="palette_cat_structure">Struktur</string>
+    <string name="palette_cat_environments">Umgebungen</string>
+    <string name="palette_cat_math">Mathe</string>
+    <string name="palette_cat_greek">Griechisch</string>
+</resources>

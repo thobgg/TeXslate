@@ -1,3 +1,42 @@
 <resources>
     <string name="app_name">TexDroid</string>
+
+    <!-- Shared -->
+    <string name="cancel">Cancel</string>
+
+    <!-- Go to line -->
+    <string name="goto_line_title">Go to line</string>
+    <string name="goto_line_label">Line (1–%1$d)</string>
+    <string name="goto_line_jump">Go</string>
+
+    <!-- Search &amp; replace -->
+    <string name="search_hint">Search</string>
+    <string name="search_prev_match">Previous match</string>
+    <string name="search_next_match">Next match</string>
+    <string name="search_close">Close search</string>
+    <string name="search_replace_hint">Replace with</string>
+    <string name="search_replace">Replace</string>
+    <string name="search_replace_all">All</string>
+    <string name="search_invalid_pattern">Pattern?</string>
+
+    <!-- Project drawer -->
+    <string name="project_none">No project</string>
+    <string name="open_folder">Open folder</string>
+    <string name="project_drawer_hint">Tap the folder icon to open a project folder. All .tex files inside will appear here.</string>
+
+    <!-- PDF preview -->
+    <string name="pdf_none_loaded">No PDF loaded</string>
+    <string name="pdf_page">PDF page %1$d</string>
+
+    <!-- LaTeX insert palette -->
+    <string name="palette_more">More LaTeX snippets</string>
+    <string name="palette_title">Insert LaTeX</string>
+    <string name="palette_wizards">Wizards</string>
+    <string name="palette_template">Template …</string>
+    <string name="palette_document_wizard">Document wizard …</string>
+    <string name="palette_table_wizard">Table wizard …</string>
+    <string name="palette_cat_structure">Structure</string>
+    <string name="palette_cat_environments">Environments</string>
+    <string name="palette_cat_math">Math</string>
+    <string name="palette_cat_greek">Greek</string>
 </resources>

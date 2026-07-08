@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import de.bgg_home.texdroid.R
 
 /**
  * Suchen-&-Ersetzen-Leiste (Editor-Komfort). Bindet nur die Bedienung an – die
@@ -77,13 +79,16 @@ fun SearchBar(
                     onValueChange = onQueryChange,
                     singleLine = true,
                     isError = invalidRegex,
-                    placeholder = { Text("Suchen") },
+                    placeholder = { Text(stringResource(R.string.search_hint)) },
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     keyboardActions = KeyboardActions(onSearch = { onNext() }),
                     modifier = Modifier.weight(1f).focusRequester(focusRequester),
                 )
                 Text(
-                    text = matchLabel(query, matchIndex, matchCount, invalidRegex),
+                    text = matchLabel(
+                        query, matchIndex, matchCount, invalidRegex,
+                        stringResource(R.string.search_invalid_pattern),
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (invalidRegex) {
                         MaterialTheme.colorScheme.error
@@ -93,10 +98,16 @@ fun SearchBar(
                     modifier = Modifier.widthIn(min = 44.dp).padding(horizontal = 2.dp),
                 )
                 IconButton(onClick = onPrev, enabled = matchCount > 0) {
-                    Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Vorheriger Treffer")
+                    Icon(
+                        Icons.Filled.KeyboardArrowUp,
+                        contentDescription = stringResource(R.string.search_prev_match),
+                    )
                 }
                 IconButton(onClick = onNext, enabled = matchCount > 0) {
-                    Icon(Icons.Filled.KeyboardArrowDown, contentDescription = "Nächster Treffer")
+                    Icon(
+                        Icons.Filled.KeyboardArrowDown,
+                        contentDescription = stringResource(R.string.search_next_match),
+                    )
                 }
                 FilterChip(
                     selected = !caseInsensitive,
@@ -109,7 +120,7 @@ fun SearchBar(
                     label = { Text(".*") },
                 )
                 IconButton(onClick = { keyboard?.hide(); onClose() }) {
-                    Icon(Icons.Filled.Close, contentDescription = "Suche schließen")
+                    Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.search_close))
                 }
             }
             // Zeile 2: Ersetzen-Feld + Aktionen.
@@ -122,18 +133,28 @@ fun SearchBar(
                     value = replacement,
                     onValueChange = onReplacementChange,
                     singleLine = true,
-                    placeholder = { Text("Ersetzen durch") },
+                    placeholder = { Text(stringResource(R.string.search_replace_hint)) },
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onReplace, enabled = matchCount > 0) { Text("Ersetzen") }
-                TextButton(onClick = onReplaceAll, enabled = matchCount > 0) { Text("Alle") }
+                TextButton(onClick = onReplace, enabled = matchCount > 0) {
+                    Text(stringResource(R.string.search_replace))
+                }
+                TextButton(onClick = onReplaceAll, enabled = matchCount > 0) {
+                    Text(stringResource(R.string.search_replace_all))
+                }
             }
         }
     }
 }
 
-private fun matchLabel(query: String, index: Int, count: Int, invalidRegex: Boolean): String = when {
-    invalidRegex -> "Muster?"
+private fun matchLabel(
+    query: String,
+    index: Int,
+    count: Int,
+    invalidRegex: Boolean,
+    invalidLabel: String,
+): String = when {
+    invalidRegex -> invalidLabel
     query.isEmpty() -> ""
     count == 0 -> "0"
     else -> "${index + 1}/$count"

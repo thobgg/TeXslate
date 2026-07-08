@@ -28,8 +28,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 
 /**
  * LaTeX-Einfüge-UI (Kiles „LaTeX"-Menü + Wizards, tablet-tauglich):
@@ -44,7 +46,7 @@ import androidx.compose.ui.unit.dp
 private const val CARET = '◇'
 
 data class LatexInsert(val label: String, val snippet: String)
-data class InsertCategory(val name: String, val items: List<LatexInsert>)
+data class InsertCategory(val nameRes: Int, val items: List<LatexInsert>)
 
 /** Wendet einen Baustein an: bereinigt die Cursor-Marke und meldet den Offset. */
 private fun LatexInsert.applyTo(onInsert: (String, Int) -> Unit) {
@@ -54,7 +56,7 @@ private fun LatexInsert.applyTo(onInsert: (String, Int) -> Unit) {
 }
 
 private val STRUKTUR = InsertCategory(
-    "Struktur", listOf(
+    R.string.palette_cat_structure, listOf(
         LatexInsert("\\section", "\\section{$CARET}"),
         LatexInsert("\\subsection", "\\subsection{$CARET}"),
         LatexInsert("textbf", "\\textbf{$CARET}"),
@@ -68,7 +70,7 @@ private val STRUKTUR = InsertCategory(
 )
 
 private val UMGEBUNGEN = InsertCategory(
-    "Umgebungen", listOf(
+    R.string.palette_cat_environments, listOf(
         LatexInsert("itemize", "\\begin{itemize}\n    \\item $CARET\n\\end{itemize}"),
         LatexInsert("enumerate", "\\begin{enumerate}\n    \\item $CARET\n\\end{enumerate}"),
         LatexInsert("equation", "\\begin{equation}\n    $CARET\n\\end{equation}"),
@@ -82,7 +84,7 @@ private val UMGEBUNGEN = InsertCategory(
 )
 
 private val MATHE = InsertCategory(
-    "Mathe", listOf(
+    R.string.palette_cat_math, listOf(
         LatexInsert("\$…\$", "\$$CARET\$"),
         LatexInsert("frac", "\\frac{$CARET}{}"),
         LatexInsert("sqrt", "\\sqrt{$CARET}"),
@@ -105,7 +107,7 @@ private val MATHE = InsertCategory(
 )
 
 private val GRIECHISCH = InsertCategory(
-    "Griechisch", listOf(
+    R.string.palette_cat_greek, listOf(
         LatexInsert("α", "\\alpha"), LatexInsert("β", "\\beta"), LatexInsert("γ", "\\gamma"),
         LatexInsert("δ", "\\delta"), LatexInsert("ε", "\\epsilon"), LatexInsert("θ", "\\theta"),
         LatexInsert("λ", "\\lambda"), LatexInsert("μ", "\\mu"), LatexInsert("π", "\\pi"),
@@ -161,7 +163,7 @@ fun LatexFavoritesBar(
                 IconButton(onClick = onOpenMore) {
                     Icon(
                         Icons.Filled.GridView,
-                        contentDescription = "Mehr LaTeX-Bausteine",
+                        contentDescription = stringResource(R.string.palette_more),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
@@ -195,13 +197,13 @@ fun LatexInsertSheet(
                 .padding(bottom = 24.dp),
         ) {
             Text(
-                "LaTeX einfügen",
+                stringResource(R.string.palette_title),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.padding(vertical = 8.dp),
             )
             // Assistenten (Dialoge statt Syntax tippen).
             Text(
-                "Assistenten",
+                stringResource(R.string.palette_wizards),
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
@@ -209,23 +211,23 @@ fun LatexInsertSheet(
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 AssistChip(
                     onClick = onOpenTemplates,
-                    label = { Text("Vorlage …") },
+                    label = { Text(stringResource(R.string.palette_template)) },
                     leadingIcon = { Icon(Icons.Filled.Dashboard, contentDescription = null) },
                 )
                 AssistChip(
                     onClick = onOpenDocumentWizard,
-                    label = { Text("Dokument-Assistent …") },
+                    label = { Text(stringResource(R.string.palette_document_wizard)) },
                     leadingIcon = { Icon(Icons.Filled.Description, contentDescription = null) },
                 )
                 AssistChip(
                     onClick = onOpenTableWizard,
-                    label = { Text("Tabellen-Assistent …") },
+                    label = { Text(stringResource(R.string.palette_table_wizard)) },
                     leadingIcon = { Icon(Icons.Filled.GridOn, contentDescription = null) },
                 )
             }
             CATEGORIES.forEach { category ->
                 Text(
-                    category.name,
+                    stringResource(category.nameRes),
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),

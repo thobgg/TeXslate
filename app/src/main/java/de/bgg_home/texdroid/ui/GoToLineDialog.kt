@@ -15,8 +15,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import de.bgg_home.texdroid.R
 
 /**
  * „Gehe zu Zeile" (Editor-Komfort). Nimmt eine Zeilennummer (1-basiert) entgegen
@@ -38,13 +40,13 @@ fun GoToLineDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Gehe zu Zeile") },
+        title = { Text(stringResource(R.string.goto_line_title)) },
         text = {
             OutlinedTextField(
                 value = text,
                 onValueChange = { s -> text = s.filter { it.isDigit() }.take(7) },
                 singleLine = true,
-                label = { Text("Zeile (1–$lineCount)") },
+                label = { Text(stringResource(R.string.goto_line_label, lineCount)) },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number,
                     imeAction = ImeAction.Go,
@@ -55,11 +57,11 @@ fun GoToLineDialog(
         },
         confirmButton = {
             TextButton(onClick = { if (valid) onGo(line!!) }, enabled = valid) {
-                Text("Springen")
+                Text(stringResource(R.string.goto_line_jump))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Abbrechen") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }

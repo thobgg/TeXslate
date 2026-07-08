@@ -35,7 +35,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.Closeable
@@ -101,7 +103,7 @@ fun PdfPreview(
 
     if (document == null || document.pageCount == 0) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("Kein PDF geladen", style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(R.string.pdf_none_loaded), style = MaterialTheme.typography.bodyMedium)
         }
         return
     }
@@ -166,7 +168,7 @@ private fun PdfPageItem(document: PdfDocument, index: Int, targetWidthPx: Int) {
     } else {
         Image(
             bitmap = bmp.asImageBitmap(),
-            contentDescription = "PDF-Seite ${index + 1}",
+            contentDescription = stringResource(R.string.pdf_page, index + 1),
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()

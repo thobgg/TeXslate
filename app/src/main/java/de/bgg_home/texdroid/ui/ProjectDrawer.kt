@@ -23,9 +23,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import android.net.Uri
+import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.storage.ProjectEntry
 
 /**
@@ -49,21 +51,20 @@ fun ProjectDrawer(
             modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 8.dp, top = 12.dp),
         ) {
             Text(
-                folderName ?: "Kein Projekt",
+                folderName ?: stringResource(R.string.project_none),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f),
             )
             IconButton(onClick = onOpenFolder) {
-                Icon(Icons.Filled.FolderOpen, contentDescription = "Ordner öffnen")
+                Icon(Icons.Filled.FolderOpen, contentDescription = stringResource(R.string.open_folder))
             }
         }
         HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
         if (folderName == null) {
             Text(
-                "Tippe auf das Ordner-Symbol, um einen Projektordner zu öffnen. " +
-                    "Alle .tex-Dateien darin erscheinen hier.",
+                stringResource(R.string.project_drawer_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp),
