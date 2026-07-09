@@ -259,6 +259,12 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     val darkTheme = isSystemInDarkTheme()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Breitenklassen: Expanded (Tablet quer) → Split-View; Compact (Phone hoch)
+    // → zusätzlich reduzierter Header, sonst quetscht die volle Toolbar den
+    // Compile-Button auf Null-Breite und sein Text bricht zeichenweise um.
+    val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isCompact = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Compact
+
     // Referenz auf den konkreten Editor (für das Auslesen des Textes beim Compile).
     var editor by remember { mutableStateOf<CodeEditor?>(null) }
     var compiling by remember { mutableStateOf(false) }
@@ -590,7 +596,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         currentInProject = false
     }
 
-    fun runCompile() {
+    fun runCompile(manual: Boolean = false) {
         val source = editor?.text?.toString()
         if (source == null || compiling) return
         compiling = true
@@ -605,6 +611,13 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 if (result.ok && result.pdfPath.isNotEmpty()) {
                     pdfFile = File(result.pdfPath)
                     reloadToken++ // Preview neu laden, Scroll-Position bleibt erhalten.
+                    // Tab-Layout: Ein bewusst gedrückter Compile will das Ergebnis
+                    // sehen → zur Vorschau wechseln. Beim Auto-Compile nicht –
+                    // der Nutzer tippt gerade und würde aus dem Editor gerissen.
+                    if (manual && !isWide) selectedTab = Tab.Preview
+                } else if (!isWide && result.errors.isNotEmpty()) {
+                    // Fehlerpanel sitzt unter dem Editor → dorthin wechseln.
+                    selectedTab = Tab.Editor
                 }
                 snackbarHostState.showSnackbar(result.summary())
             } finally {
@@ -665,8 +678,6 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         showAi = true
     }
 
-    val isWide = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
-
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -687,6 +698,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         modifier = Modifier.fillMaxSize(),
         topBar = {
             AppHeader(
+                compact = isCompact,
                 fileName = currentName,
                 compiling = compiling,
                 autoCompile = autoCompile,
@@ -712,7 +724,7 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 onAbout = { showAbout = true },
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
-                onCompile = ::runCompile,
+                onCompile = { runCompile(manual = true) },
                 onStop = ::stopCompile,
             )
         },
@@ -1111,6 +1123,7 @@ private fun AboutDialog(onDismiss: () -> Unit) {
 
 @Composable
 private fun AppHeader(
+    compact: Boolean,
     fileName: String?,
     compiling: Boolean,
     autoCompile: Boolean,
@@ -1153,9 +1166,11 @@ private fun AppHeader(
                 Icons.Filled.Menu, stringResource(R.string.header_project), true,
                 MaterialTheme.colorScheme.onPrimaryContainer, onMenu,
             )
-            // App-Logo (Branding): TeX-Monogramm als kleines Icon-Badge.
-            AppLogo()
-            Spacer(Modifier.width(8.dp))
+            if (!compact) {
+                // App-Logo (Branding): TeX-Monogramm als kleines Icon-Badge.
+                AppLogo()
+                Spacer(Modifier.width(8.dp))
+            }
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
             // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
@@ -1164,31 +1179,44 @@ private fun AppHeader(
                 } else {
                     stringResource(R.string.app_name)
                 },
-                style = MaterialTheme.typography.titleLarge,
+                style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f).padding(end = 8.dp),
             )
             // Häufige Aktionen direkt sichtbar; Seltenes im Kebab-Überlauf (⋮).
+            // Compact (Phone hoch): nur Speichern · Undo · Compile-Icon passen
+            // neben den Titel – der Rest wandert zusätzlich ins Kebab-Menü.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val tint = MaterialTheme.colorScheme.onPrimaryContainer
-                ToolbarIcon(Icons.Filled.FolderOpen, stringResource(R.string.open), !compiling, tint, onOpen)
-                ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
-                ToolbarSeparator(tint)
-                ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
-                ToolbarIcon(Icons.AutoMirrored.Filled.Redo, stringResource(R.string.redo), !compiling, tint, onRedo)
-                ToolbarSeparator(tint)
-                ToolbarIcon(Icons.Filled.Search, stringResource(R.string.search_replace_title), true, tint, onSearch)
-                ToolbarIcon(Icons.Filled.AutoAwesome, stringResource(R.string.ai_assistant), !compiling, tint, onAi)
-                CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
+                if (compact) {
+                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
+                    ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
+                    CompileIconButton(compiling = compiling, tint = tint, onCompile = onCompile, onStop = onStop)
+                } else {
+                    ToolbarIcon(Icons.Filled.FolderOpen, stringResource(R.string.open), !compiling, tint, onOpen)
+                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
+                    ToolbarSeparator(tint)
+                    ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
+                    ToolbarIcon(Icons.AutoMirrored.Filled.Redo, stringResource(R.string.redo), !compiling, tint, onRedo)
+                    ToolbarSeparator(tint)
+                    ToolbarIcon(Icons.Filled.Search, stringResource(R.string.search_replace_title), true, tint, onSearch)
+                    ToolbarIcon(Icons.Filled.AutoAwesome, stringResource(R.string.ai_assistant), !compiling, tint, onAi)
+                    CompileButton(compiling = compiling, onCompile = onCompile, onStop = onStop)
+                }
                 OverflowMenu(
                     tint = tint,
+                    compact = compact,
                     compiling = compiling,
                     autoCompile = autoCompile,
                     canExportPdf = canExportPdf,
                     canShowLog = canShowLog,
                     onNew = onNew,
+                    onOpen = onOpen,
+                    onRedo = onRedo,
+                    onSearch = onSearch,
+                    onAi = onAi,
                     onExportPdf = onExportPdf,
                     onShare = onShare,
                     onShowLog = onShowLog,
@@ -1235,15 +1263,24 @@ private fun SplitHandle(onDragDelta: (Float) -> Unit) {
     }
 }
 
-/** Kebab-Überlauf (⋮) für seltene Aktionen: Neu · PDF speichern · Auto-Compile. */
+/**
+ * Kebab-Überlauf (⋮) für seltene Aktionen: Neu · PDF speichern · Auto-Compile.
+ * Im [compact]-Modus (Phone hoch) zusätzlich die Aktionen, die dort nicht mehr
+ * als eigene Toolbar-Icons passen: Öffnen · Redo · Suchen · KI-Assistent.
+ */
 @Composable
 private fun OverflowMenu(
     tint: Color,
+    compact: Boolean,
     compiling: Boolean,
     autoCompile: Boolean,
     canExportPdf: Boolean,
     canShowLog: Boolean,
     onNew: () -> Unit,
+    onOpen: () -> Unit,
+    onRedo: () -> Unit,
+    onSearch: () -> Unit,
+    onAi: () -> Unit,
     onExportPdf: () -> Unit,
     onShare: () -> Unit,
     onShowLog: () -> Unit,
@@ -1260,6 +1297,32 @@ private fun OverflowMenu(
             Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more), tint = tint)
         }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            if (compact) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.open)) },
+                    leadingIcon = { Icon(Icons.Filled.FolderOpen, contentDescription = null) },
+                    enabled = !compiling,
+                    onClick = { expanded = false; onOpen() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.redo)) },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Filled.Redo, contentDescription = null) },
+                    enabled = !compiling,
+                    onClick = { expanded = false; onRedo() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.search_replace_title)) },
+                    leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+                    onClick = { expanded = false; onSearch() },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.ai_assistant)) },
+                    leadingIcon = { Icon(Icons.Filled.AutoAwesome, contentDescription = null) },
+                    enabled = !compiling,
+                    onClick = { expanded = false; onAi() },
+                )
+                HorizontalDivider()
+            }
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.menu_new)) },
                 leadingIcon = { Icon(Icons.Filled.NoteAdd, contentDescription = null) },
@@ -1364,6 +1427,41 @@ private fun ToolbarSeparator(tint: Color) {
             .width(1.dp)
             .background(tint.copy(alpha = 0.3f)),
     )
+}
+
+/**
+ * Platzsparender Compile-Button für den Compact-Header (Phone hoch): nur ein
+ * Icon statt Text-Button. Während des Compiles wird er zum Stopp-Button mit
+ * umlaufendem Fortschrittsring.
+ */
+@Composable
+private fun CompileIconButton(
+    compiling: Boolean,
+    tint: Color,
+    onCompile: () -> Unit,
+    onStop: () -> Unit,
+) {
+    if (compiling) {
+        IconButton(onClick = onStop) {
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(modifier = Modifier.size(28.dp), strokeWidth = 2.dp)
+                Icon(
+                    Icons.Filled.Stop,
+                    contentDescription = stringResource(R.string.stop),
+                    tint = tint,
+                    modifier = Modifier.size(16.dp),
+                )
+            }
+        }
+    } else {
+        IconButton(onClick = onCompile) {
+            Icon(
+                Icons.Filled.PlayArrow,
+                contentDescription = stringResource(R.string.compile),
+                tint = tint,
+            )
+        }
+    }
 }
 
 @Composable

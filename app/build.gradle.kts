@@ -44,6 +44,15 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Debug-Builds mit dem Release-Key signieren (nur wenn der Keystore
+            // lokal liegt): erlaubt In-place-Updates über die per Obtainium
+            // installierte Release-APK auf den Testgeräten, ohne App-Daten
+            // (TeX-Bundle-Cache, Vorlagen, Projekt-Freigaben) zu verlieren.
+            if (keystorePropsFile.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
+        }
         release {
             optimization {
                 enable = false

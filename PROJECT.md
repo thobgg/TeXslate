@@ -233,7 +233,16 @@ Erfolgserlebnis gibt:
 - [x] **GitHub-Prerelease `v1.0-alpha1`** mit arm64-v8a- + x86_64-APK, per
       Obtainium abonnierbar. Erste Tester können loslegen.
       🎉 Sichtbar: signierte APK öffentlich installierbar.
-- [ ] Offene Test-Lücken: Handy-Format (Hochformat), `armeabi-v7a` (32-bit), S-Pen.
+- [ ] Offene Test-Lücken: `armeabi-v7a` (32-bit), S-Pen.
+- [x] **Handy-Format (09.07.2026, Galaxy S25 Ultra, Android 16):** Hochformat
+      (Compact) bekam einen kompakten Header (Speichern · Undo · Compile-Dreieck ·
+      Kebab; Öffnen/Redo/Suchen/KI wandern ins Kebab) – vorher quetschte die volle
+      Toolbar den Compile-Button auf Null-Breite und sprengte den Header. Im
+      Tab-Layout wechselt ein manueller Compile jetzt automatisch zur Vorschau
+      (bei Fehlern zum Editor); Auto-Compile wechselt bewusst nicht. Querformat
+      (Medium) war bereits in Ordnung. Debug-Builds werden mit dem Release-Key
+      signiert, wenn `keystore.properties` lokal liegt (In-place-Update über die
+      Obtainium-Installation auf Testgeräten, ohne App-Daten zu verlieren).
 - [x] **GitHub-Prerelease `v1.0-alpha2`** (versionCode 2): Eigene Vorlagen,
       Dokumentstruktur/Gliederung, greifbarer Scroll-Griff. In-place-Update
       (gleiche Signatur), von Obtainium automatisch erkannt.
