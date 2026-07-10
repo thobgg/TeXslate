@@ -1,2 +1,2 @@
-* TexDroid gibt es jetzt auf Englisch (Standard) und Deutsch — die App folgt automatisch der Gerätesprache.
+* TeXDroid gibt es jetzt auf Englisch (Standard) und Deutsch — die App folgt automatisch der Gerätesprache.
 * Alle Oberflächen, Menüs, Fehlermeldungen und der KI-Assistent sind lokalisiert; die App-Sprache lässt sich auch in den Android-Einstellungen wählen (Android 13+).

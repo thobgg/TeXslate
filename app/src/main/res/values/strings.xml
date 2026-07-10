@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TexDroid</string>
+    <string name="app_name">TeXDroid</string>
 
     <!-- Shared -->
     <string name="cancel">Cancel</string>
@@ -137,7 +137,7 @@
 
     <!-- App header -->
     <string name="header_project">Project</string>
-    <string name="header_title_with_file">TexDroid — %1$s</string>
+    <string name="header_title_with_file">TeXDroid — %1$s</string>
     <string name="search_replace_title">Search &amp; replace</string>
     <string name="ai_assistant">AI assistant</string>
 
@@ -155,7 +155,7 @@
     <string name="menu_toggle_comment">Toggle comment</string>
     <string name="menu_autocompile">Auto-compile</string>
     <string name="menu_settings">Settings</string>
-    <string name="menu_about">About TexDroid</string>
+    <string name="menu_about">About TeXDroid</string>
 
     <!-- Share dialog -->
     <string name="share_title">Share</string>

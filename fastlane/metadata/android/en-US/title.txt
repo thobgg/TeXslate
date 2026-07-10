@@ -1,1 +1,1 @@
-TexDroid
+TeXDroid

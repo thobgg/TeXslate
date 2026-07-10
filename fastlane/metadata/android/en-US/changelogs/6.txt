@@ -1,2 +1,2 @@
-* TexDroid is now available in English (default) and German — it follows your device language automatically.
+* TeXDroid is now available in English (default) and German — it follows your device language automatically.
 * Every screen, menu, error message and the AI assistant are localized; you can also pick the app language in Android Settings (Android 13+).
