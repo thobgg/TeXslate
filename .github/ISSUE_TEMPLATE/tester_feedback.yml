@@ -1,0 +1,39 @@
+name: 🧪 Alpha tester feedback
+description: Worked / didn't work on my device — quick report, no bug required (German is fine too / gerne auch auf Deutsch)
+labels: ["alpha-feedback"]
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Device & Android version
+      placeholder: e.g. Pixel 8, Android 15
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TexDroid version
+      placeholder: e.g. 1.0-alpha6 (arm64-v8a)
+    validations:
+      required: true
+  - type: dropdown
+    id: compile
+    attributes:
+      label: Did a document compile to PDF on your device?
+      options:
+        - "Yes — including the first-run bundle download"
+        - "Yes — but with problems (please describe below)"
+        - "No (please describe below)"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Impressions & rough edges
+      description: What felt good, what felt clumsy? Phone or tablet? Which features did you try (auto-compile, multi-file, fonts, palette, AI assistant…)?
+    validations:
+      required: true
+  - type: textarea
+    id: wishes
+    attributes:
+      label: Missing features / wishes

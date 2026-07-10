@@ -1,0 +1,37 @@
+name: 🐛 Bug report
+description: Something broke or behaved unexpectedly (German is fine too / gerne auch auf Deutsch)
+labels: ["bug"]
+body:
+  - type: input
+    id: device
+    attributes:
+      label: Device & Android version
+      placeholder: e.g. Galaxy Tab S9, Android 16
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: TexDroid version
+      description: See the About screen (overflow menu) or the release tag.
+      placeholder: e.g. 1.0-alpha6 (arm64-v8a)
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: latex
+    attributes:
+      label: Minimal LaTeX example (if compile-related)
+      description: The smallest .tex snippet that reproduces the problem.
+      render: latex
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, compile log excerpt, whether it happens every time…

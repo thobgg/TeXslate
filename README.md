@@ -121,6 +121,22 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 > anti-feature `NonFreeNetwork`). Without it, TexDroid stays fully offline and
 > open-source.
 
+## 🧪 Alpha testers wanted!
+
+TexDroid works on the developer's devices — now it needs **yours**. If you write
+LaTeX and own an Android tablet or phone, five minutes of your time help a lot:
+
+1. Install the latest APK from the [**Releases**](https://github.com/thobgg/TexDroid/releases) page (see below).
+2. Compile any document — the first compile downloads the TeX bundle once (~1–2 min).
+3. Tell us how it went: [**tester feedback**](https://github.com/thobgg/TexDroid/issues/new?template=tester_feedback.yml)
+   (two minutes, no bug required) or a [**bug report**](https://github.com/thobgg/TexDroid/issues/new?template=bug_report.yml).
+   For open questions and ideas there are [**Discussions**](https://github.com/thobgg/TexDroid/discussions).
+
+Especially valuable right now: **non-Samsung devices**, phones (the tab layout is
+newer than the tablet split view), Android 8–10, and real-world documents (theses,
+Beamer decks, `biblatex` bibliographies). _Feedback auf Deutsch ist genauso
+willkommen._
+
 ## Install (alpha)
 
 Prebuilt, signed APKs are on the
