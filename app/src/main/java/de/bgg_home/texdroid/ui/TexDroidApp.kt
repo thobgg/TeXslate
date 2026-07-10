@@ -161,14 +161,14 @@ private val SAMPLE_TEX_DE = """
 \documentclass{article}
 \usepackage{amsmath}
 
-\title{TexDroid}
+\title{TeXslate}
 \author{Auf dem Tablet geschrieben}
 
 \begin{document}
 \maketitle
 
 % Ein Kommentar: alles ab Prozentzeichen ist grau.
-Willkommen bei \textbf{TexDroid}! Inline-Mathe: ${'$'}E = mc^2${'$'}.
+Willkommen bei \textbf{TeXslate}! Inline-Mathe: ${'$'}E = mc^2${'$'}.
 
 \begin{equation}
     \int_0^\infty e^{-x^2}\,\mathrm{d}x = \frac{\sqrt{\pi}}{2}
@@ -187,14 +187,14 @@ private val SAMPLE_TEX_EN = """
 \documentclass{article}
 \usepackage{amsmath}
 
-\title{TexDroid}
+\title{TeXslate}
 \author{Written on the tablet}
 
 \begin{document}
 \maketitle
 
 % A comment: everything after a percent sign is grey.
-Welcome to \textbf{TexDroid}! Inline math: ${'$'}E = mc^2${'$'}.
+Welcome to \textbf{TeXslate}! Inline math: ${'$'}E = mc^2${'$'}.
 
 \begin{equation}
     \int_0^\infty e^{-x^2}\,\mathrm{d}x = \frac{\sqrt{\pi}}{2}
@@ -1063,7 +1063,7 @@ private fun ShareDialog(
 }
 
 /**
- * „Über TexDroid": App-Version, Entwickler, Lizenz und die Nennung der
+ * „Über TeXslate": App-Version, Entwickler, Lizenz und die Nennung der
  * enthaltenen Open-Source-Komponenten. Die Fonts (Latin Modern / TeX Gyre) stehen
  * unter der GUST Font License (LPPL) und MÜSSEN genannt werden – dieser Dialog ist
  * damit auch die Lizenz-Erfüllung, nicht nur Deko.
