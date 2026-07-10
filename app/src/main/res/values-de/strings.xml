@@ -180,6 +180,7 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_description">Nativer LaTeX-/XeTeX-Editor für Android-Tablets — Editor, Tectonic-Compiler und PDF-Vorschau, komplett offline.</string>
     <string name="about_developer">Entwickler: Thomas Bugge (thobgg)</string>
+    <string name="about_contact">Kontakt: %1$s</string>
     <string name="about_license">Lizenz: GPL-3.0-or-later</string>
     <string name="about_components_header">Enthaltene Open-Source-Komponenten</string>
     <string name="about_components">• Tectonic / XeTeX — MIT\n• Latin Modern &amp; TeX Gyre (Schriften) — GUST Font License (LPPL)\n• sora-editor — LGPL-2.1\n• vscode-latex-basics (Syntax) — MIT</string>

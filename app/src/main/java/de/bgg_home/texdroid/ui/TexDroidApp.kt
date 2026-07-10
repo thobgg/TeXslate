@@ -1072,7 +1072,8 @@ private fun ShareDialog(
 private fun AboutDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
     val uriHandler = LocalUriHandler.current
-    val repoUrl = "https://github.com/thobgg/TexDroid"
+    val repoUrl = "https://github.com/thobgg/TeXslate"
+    val contactMail = "texslate@bgg-mail.de"
 
     @Suppress("DEPRECATION")
     val version = runCatching {
@@ -1102,6 +1103,12 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                 Text(
                     stringResource(R.string.about_developer),
                     style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    stringResource(R.string.about_contact, contactMail),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { uriHandler.openUri("mailto:$contactMail") },
                 )
                 Text(
                     stringResource(R.string.about_license),
