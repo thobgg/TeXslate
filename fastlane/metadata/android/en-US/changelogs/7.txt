@@ -1,0 +1,4 @@
+* New name: TexDroid is now TeXslate — platform-neutral, with a new app identity. Please uninstall the old alpha once; this release installs fresh (same features, same data folder handling).
+* New logo: a chalk ∑ on a slate, plus the TeXslate wordmark.
+* Phone layout: compact header, auto-switch to the PDF preview after a compile, and the tab row hides while the keyboard is open.
+* About screen: contact e-mail added.

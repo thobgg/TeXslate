@@ -1,0 +1,4 @@
+* Neuer Name: Aus TexDroid wird TeXslate — plattformneutral, mit neuer App-Identität. Bitte die alte Alpha einmal deinstallieren; dieses Release installiert sich frisch (gleiche Funktionen).
+* Neues Logo: Kreide-∑ auf Schiefertafel, dazu die TeXslate-Wortmarke.
+* Phone-Layout: kompakter Header, automatischer Wechsel zur PDF-Vorschau nach dem Kompilieren, Tab-Zeile wird bei offener Tastatur ausgeblendet.
+* Über-Dialog: Kontakt-E-Mail ergänzt.
