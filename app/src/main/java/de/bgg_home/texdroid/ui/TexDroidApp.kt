@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -252,6 +254,7 @@ private fun stripLatexComment(line: String): String {
  * Wurzel-Composable der App. Entscheidet anhand der [WindowSizeClass] zwischen
  * Split-View (breite Tablets) und Tab-Umschaltung (Phone/Portrait).
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     val context = LocalContext.current
@@ -800,18 +803,24 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 }
             } else {
                 // Phone / schmal: Tab-Umschaltung Editor ↔ Vorschau.
+                // Bei offener Tastatur ist auf Compact-Höhe kaum Editor übrig –
+                // die Tab-Zeile braucht beim Tippen niemand und wird ausgeblendet
+                // (zurückwechseln geht erst nach dem Schließen der Tastatur).
+                val imeVisible = WindowInsets.isImeVisible
                 Column(Modifier.fillMaxSize()) {
-                    TabRow(selectedTabIndex = selectedTab.ordinal) {
-                        Tab(
-                            selected = selectedTab == Tab.Editor,
-                            onClick = { selectedTab = Tab.Editor },
-                            text = { Text(stringResource(R.string.tab_editor)) },
-                        )
-                        Tab(
-                            selected = selectedTab == Tab.Preview,
-                            onClick = { selectedTab = Tab.Preview },
-                            text = { Text(stringResource(R.string.tab_preview)) },
-                        )
+                    if (!(isCompact && imeVisible)) {
+                        TabRow(selectedTabIndex = selectedTab.ordinal) {
+                            Tab(
+                                selected = selectedTab == Tab.Editor,
+                                onClick = { selectedTab = Tab.Editor },
+                                text = { Text(stringResource(R.string.tab_editor)) },
+                            )
+                            Tab(
+                                selected = selectedTab == Tab.Preview,
+                                onClick = { selectedTab = Tab.Preview },
+                                text = { Text(stringResource(R.string.tab_preview)) },
+                            )
+                        }
                     }
                     when (selectedTab) {
                         Tab.Editor -> EditorPane(
