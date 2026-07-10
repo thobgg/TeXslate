@@ -1395,7 +1395,7 @@ private fun OverflowMenu(
     }
 }
 
-/** App-Logo fürs Header-Branding: TeX-Monogramm auf blauem Verlauf-Badge. */
+/** App-Logo fürs Header-Branding: ∑-Monogramm auf Schiefer-Badge. */
 @Composable
 private fun AppLogo() {
     Box(
@@ -1403,11 +1403,11 @@ private fun AppLogo() {
             .size(30.dp)
             .clip(RoundedCornerShape(7.dp))
             .background(
-                Brush.linearGradient(listOf(Color(0xFF4A7BC8), Color(0xFF5EA3E8))),
+                Brush.linearGradient(listOf(Color(0xFF2B3940), Color(0xFF3A4C58))),
             ),
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
+            painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = stringResource(R.string.app_name),
             modifier = Modifier.fillMaxSize(),
         )

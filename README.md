@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="./docs/logo.png" alt="TeXslate" width="128">
+  <img src="./docs/wordmark.png" alt="TeXslate" width="440">
 </p>
-
-<h1 align="center">TeXslate</h1>
 
 <p align="center"><strong>Native LaTeX/XeTeX editor for Android — tablet-first.</strong></p>
 
