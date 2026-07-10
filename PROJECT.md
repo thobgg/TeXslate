@@ -76,8 +76,9 @@ je als eigene APK (ABI-Splits). `armeabi-v7a` (alte 32-bit-Geräte) noch offen.
 > **Stand:** M0–M4, MA (KI), ME (Editor-Komfort), MR (Alpha-Release) ✅ —
 > aktuell **`v1.0-alpha6`** als normales GitHub-Release (kein Pre-Release mehr),
 > auf 3 echten Geräten (Android 11 & 16) verifiziert. UI **Englisch (Default) +
-> Deutsch** (i18n). Offen: IzzyOnDroid-Aufnahme (RFP einreichen), M5 (F-Droid),
-> M6 (Play Store), Rest-Testabdeckung (Handy, 32-bit, S-Pen).
+> Deutsch** (i18n). Offen: M5 (F-Droid, Haupt-Repo), M6 (Play Store),
+> Rest-Testabdeckung (Handy, 32-bit, S-Pen). Alpha-Verteilung:
+> GitHub-Releases + Obtainium.
 
 **Pro Milestone eine eigene Session/Branch.**
 
@@ -255,7 +256,7 @@ Erfolgserlebnis gibt:
       System-Fonts (fontconfig, siehe Befund unten); „Über TeXDroid"-Dialog
       (Version, Entwickler, Lizenz, Open-Source-Komponenten).
 - [x] **Ab `v1.0-alpha5`: normale GitHub-Releases** (kein `--prerelease` mehr).
-      Grund: Update-Tools (IzzyOnDroid, generische Checker, später F-Droid) ziehen
+      Grund: Update-Tools (Obtainium, generische Checker, später F-Droid) ziehen
       standardmäßig „latest non-prerelease"; die Alpha-Natur trägt der `versionName`.
 - [x] **`v1.0-alpha6`** (versionCode 6): **Internationalisierung (i18n)** — komplette
       UI **Englisch (Default, `res/values`) + Deutsch (`res/values-de`)**, Gerät wählt
@@ -263,12 +264,11 @@ Erfolgserlebnis gibt:
       Locale-abhängig (`Locale.getDefault`); KI antwortet in der UI-Sprache;
       Beispiel-Dokument DE/EN; `localeConfig` (App-Sprache in den Systemeinstellungen).
       README auf **Englisch** umgestellt (internationale Landing-Seite).
-- [x] **IzzyOnDroid vorbereitet:** Fastlane-Metadaten (`fastlane/metadata/android/`
-      en-US + de-DE: Titel, Kurz-/Langbeschreibung, Icon, Screenshots, Changelog)
-      im Repo. Distributionsweg für Alpha/Beta, weil IzzyOnDroid die fertigen
-      Release-APKs nimmt (**kein reproducible Build** nötig – anders als M5).
-      **Offen (User-Aktion):** RFP („Request for Packaging") bei
-      https://gitlab.com/IzzyOnDroid/repo/-/issues einreichen.
+- [x] **Fastlane-Metadaten** (`fastlane/metadata/android/` en-US + de-DE: Titel,
+      Kurz-/Langbeschreibung, Icon, Screenshots, Changelog) im Repo — nützlich
+      für F-Droid (M5) und alle Kataloge, die sie auslesen.
+- [x] **Alpha-Verteilung:** GitHub-Releases + Obtainium (README dokumentiert
+      den Weg). Katalog-Ziel ist das Haupt-F-Droid (M5).
 
 ### Befunde & offene Punkte aus Alpha-Tests (07.07.2026, Tab S8 Ultra)
 Test mit einem echten, anspruchsvollen Dokument (66-KB-`.tex` mit eigener

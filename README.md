@@ -113,7 +113,7 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 - [x] **M4** — project management (multi-file, bibliography)
 - [x] **ME** — editor comfort (search & replace, go to line, comment) + TeX branding
 - [x] **MR** — alpha releases: signed APKs, verified on three devices; English + German UI
-- [ ] **M5** — F-Droid release (IzzyOnDroid first — takes the prebuilt release APKs, no reproducible build required)
+- [ ] **M5** — F-Droid release
 - [ ] **M6** — Play Store release (optional)
 
 > The AI assistant is **off by default** and entirely optional. Only if you enable
@@ -144,7 +144,7 @@ Prebuilt, signed APKs are on the
 
 - **Tablet/phone:** `…-arm64-v8a.apk` · **emulator:** `…-x86_64.apk`
 - **Auto-updates:** add this repo as a source in [Obtainium](https://github.com/ImranR98/Obtainium)
-  (an IzzyOnDroid listing is in preparation).
+  — the recommended install path during the alpha.
 - Requirements: **Android 8.0+**, allow “install from unknown sources”.
 
 > The **first compile** downloads the TeX package bundle once over the network
