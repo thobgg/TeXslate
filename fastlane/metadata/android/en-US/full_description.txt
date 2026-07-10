@@ -1,4 +1,4 @@
-TeXDroid is a native LaTeX/XeTeX editor for Android tablets (and phones) that compiles your documents right on the device — no cloud service, no account, no companion PC. Editor, LaTeX compiler and PDF preview live together in one screen.
+TeXslate is a native LaTeX/XeTeX editor for Android tablets (and phones) that compiles your documents right on the device — no cloud service, no account, no companion PC. Editor, LaTeX compiler and PDF preview live together in one screen.
 
 It is powered by the Tectonic engine (XeTeX), so modern Unicode and fontspec/\setmainfont just work.
 

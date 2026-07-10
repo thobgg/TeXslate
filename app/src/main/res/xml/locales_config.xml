@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Vom System für die „App-Sprache"-Auswahl (Einstellungen → Apps → TeXDroid)
+<!-- Vom System für die „App-Sprache"-Auswahl (Einstellungen → Apps → TeXslate)
      genutzt. Englisch ist Default (res/values), Deutsch als res/values-de. -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="en" />

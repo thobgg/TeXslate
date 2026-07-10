@@ -1,36 +1,36 @@
 <p align="center">
-  <img src="./docs/logo.png" alt="TeXDroid" width="128">
+  <img src="./docs/logo.png" alt="TeXslate" width="128">
 </p>
 
-<h1 align="center">TeXDroid</h1>
+<h1 align="center">TeXslate</h1>
 
 <p align="center"><strong>Native LaTeX/XeTeX editor for Android — tablet-first.</strong></p>
 
 Write LaTeX right on your tablet and watch the PDF render live beside it — no
-terminal, no cloud, no companion PC. TeXDroid combines an editor, an **on-device**
+terminal, no cloud, no companion PC. TeXslate combines an editor, an **on-device**
 compiler and a PDF preview in one native Android UI, with localized error output
 and an **optional** AI assistant (bring your own API key, off by default).
 
 The app ships in **English (default) and German**; it follows your device
 language automatically.
 
-![TeXDroid: LaTeX editor with syntax highlighting on the left, live PDF preview on the right, auto-compile](./docs/screenshots/01-editor-vorschau.png)
+![TeXslate: LaTeX editor with syntax highlighting on the left, live PDF preview on the right, auto-compile](./docs/screenshots/01-editor-vorschau.png)
 
 _Split view on a tablet: the LaTeX editor on the left, the live-rendered PDF on the right — a real multi-file project (`\input`) proving the general binomial theorem by induction, compiled locally via Tectonic._
 
-![TeXDroid: \setmainfont resolves bundled and system fonts by name](./docs/screenshots/04-fonts-setmainfont.png)
+![TeXslate: \setmainfont resolves bundled and system fonts by name](./docs/screenshots/04-fonts-setmainfont.png)
 
 _Fonts by name: `\setmainfont{TeX Gyre Termes}` and friends just work — bundled Latin Modern & TeX Gyre plus your Android system fonts, all resolvable by name._
 
-![TeXDroid: LaTeX insert palette as a bottom sheet with Structure, Environments, Math categories](./docs/screenshot-palette.jpg)
+![TeXslate: LaTeX insert palette as a bottom sheet with Structure, Environments, Math categories](./docs/screenshot-palette.jpg)
 
 _Touch palette: insert common building blocks with one tap (environments, math symbols, structure) — the cursor lands in the right place automatically._
 
-![TeXDroid: project-tree sidebar for multi-file projects](./docs/screenshots/02-datei-sidebar.png)
+![TeXslate: project-tree sidebar for multi-file projects](./docs/screenshots/02-datei-sidebar.png)
 
 _Multi-file projects: the project folder as a sidebar (file tree), switch files with a tap — `\input` from subfolders and `.bib` included._
 
-![TeXDroid: optional AI assistant with preview confirmation](./docs/screenshots/03-ki-assistent.png)
+![TeXslate: optional AI assistant with preview confirmation](./docs/screenshots/03-ki-assistent.png)
 
 _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and have it explained line by line (here the Gaussian integral). It clarifies source code — it is not a general chatbot. Nothing is sent until you confirm in the preview dialog._
 
@@ -82,7 +82,7 @@ truly on the device, without a cloud or a PC*:
   compiles on the device** — the free version sends your project to the Verbosus
   **cloud** (account + internet required), and “VerbTeX Local” needs a server you
   run on a **PC on the same network**. No real offline/on-device compile, not open
-  source. This is exactly where TeXDroid comes in.
+  source. This is exactly where TeXslate comes in.
 - Formula-only renderers (e.g. jlatexmath): not a full engine.
 
 ## Tech stack
@@ -118,19 +118,19 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 
 > The AI assistant is **off by default** and entirely optional. Only if you enable
 > it and add your own API key does the app talk to an external service (F-Droid
-> anti-feature `NonFreeNetwork`). Without it, TeXDroid stays fully offline and
+> anti-feature `NonFreeNetwork`). Without it, TeXslate stays fully offline and
 > open-source.
 
 ## 🧪 Alpha testers wanted!
 
-TeXDroid works on the developer's devices — now it needs **yours**. If you write
+TeXslate works on the developer's devices — now it needs **yours**. If you write
 LaTeX and own an Android tablet or phone, five minutes of your time help a lot:
 
-1. Install the latest APK from the [**Releases**](https://github.com/thobgg/TeXDroid/releases) page (see below).
+1. Install the latest APK from the [**Releases**](https://github.com/thobgg/TeXslate/releases) page (see below).
 2. Compile any document — the first compile downloads the TeX bundle once (~1–2 min).
-3. Tell us how it went: [**tester feedback**](https://github.com/thobgg/TeXDroid/issues/new?template=tester_feedback.yml)
-   (two minutes, no bug required) or a [**bug report**](https://github.com/thobgg/TeXDroid/issues/new?template=bug_report.yml).
-   For open questions and ideas there are [**Discussions**](https://github.com/thobgg/TeXDroid/discussions).
+3. Tell us how it went: [**tester feedback**](https://github.com/thobgg/TeXslate/issues/new?template=tester_feedback.yml)
+   (two minutes, no bug required) or a [**bug report**](https://github.com/thobgg/TeXslate/issues/new?template=bug_report.yml).
+   For open questions and ideas there are [**Discussions**](https://github.com/thobgg/TeXslate/discussions).
 
 Especially valuable right now: **non-Samsung devices**, phones (the tab layout is
 newer than the tablet split view), Android 8–10, and real-world documents (theses,
@@ -140,7 +140,7 @@ willkommen._
 ## Install (alpha)
 
 Prebuilt, signed APKs are on the
-[**Releases**](https://github.com/thobgg/TeXDroid/releases) page:
+[**Releases**](https://github.com/thobgg/TeXslate/releases) page:
 
 - **Tablet/phone:** `…-arm64-v8a.apk` · **emulator:** `…-x86_64.apk`
 - **Auto-updates:** add this repo as a source in [Obtainium](https://github.com/ImranR98/Obtainium)
@@ -148,7 +148,7 @@ Prebuilt, signed APKs are on the
 - Requirements: **Android 8.0+**, allow “install from unknown sources”.
 
 > The **first compile** downloads the TeX package bundle once over the network
-> (~1–2 min); a hint is shown. After that TeXDroid works fully offline.
+> (~1–2 min); a hint is shown. After that TeXslate works fully offline.
 
 ## Native build (Tectonic)
 
@@ -225,7 +225,3 @@ The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
   (light) and “Darcula” (dark) come from the sora-editor sample assets / the
   underlying VS Code themes and are loaded in TextMate JSON format.
 
----
-
-_Not to be confused with the inactive render library of the same name
-`hansihe/TexDroid` — this TeXDroid is a standalone editor app._

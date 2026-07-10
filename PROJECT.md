@@ -1,4 +1,4 @@
-# Projekt: TeXDroid — Nativer LaTeX/XeTeX-Editor für Android (Tablet-first)
+# Projekt: TeXslate — Nativer LaTeX/XeTeX-Editor für Android (Tablet-first)
 
 > **Dieses Dokument ist der vollständige Projektkontext.** Es entstand aus einer
 > Planungs-Session und enthält alles Nötige: Motivation, Architektur, Milestones,
@@ -21,7 +21,7 @@ Vorhandene Alternativen und warum sie nicht reichen:
   **nie auf dem Gerät** — die Gratis-Version schickt das Projekt an die
   Verbosus-**Cloud** (Konto + Internet nötig), „VerbTeX Local" braucht einen
   selbst betriebenen Server auf einem **PC im LAN**. Kein echtes Offline-/
-  On-Device-Compile, nicht Open Source. Genau hier setzt TeXDroid an.
+  On-Device-Compile, nicht Open Source. Genau hier setzt TeXslate an.
 - **Weitere LaTeX-Editor-Apps im Play Store**: durchweg nach demselben Muster —
   Cloud- oder Remote-Compile und/oder proprietär; keine quelloffene, rein
   lokale Engine auf dem Gerät.
@@ -92,7 +92,7 @@ entsteht. Bewusst so geschnitten, dass es schon nach der ersten Stunde ein
 Erfolgserlebnis gibt:
 
 - [x] **QW 0.1:** GitHub-Repo (thobgg, öffentlich) + leere
-      Compose-App "TeXDroid" in Android Studio anlegen, auf Emulator/Tablet
+      Compose-App "TeXslate" in Android Studio anlegen, auf Emulator/Tablet
       starten, erster Push.
       🎉 Sichtbar: eigene App mit Namen und Hello-Screen läuft auf dem Gerät,
       Projekt ist ab Minute 1 auf GitHub.
@@ -218,7 +218,7 @@ Erfolgserlebnis gibt:
 - [x] **Branding:** eigenes TeX-Icon (Latin Modern / Computer Modern) als reines
       Vektor-Adaptive-Icon (Vordergrund + blauer Verlauf + monochrom), ohne
       Bugdroid → F-Droid-tauglich; 512×512-Store-PNG; TeX-Badge im App-Header.
-- [x] **QW E.6:** „Über TeXDroid" (Kebab → Info): App-Version (aus `PackageInfo`),
+- [x] **QW E.6:** „Über TeXslate" (Kebab → Info): App-Version (aus `PackageInfo`),
       Kurzbeschreibung, Entwickler, Lizenz (GPL-3.0-or-later), klickbarer Repo-Link
       und Nennung der Open-Source-Komponenten. Erfüllt zugleich die
       Namensnennungs-Pflicht der GUST Font License (LPPL) für die gebündelten Fonts.
@@ -253,7 +253,7 @@ Erfolgserlebnis gibt:
       (`ProjectStore.isWithinTree`; nur die wirklich zugehörige Datei synchronisiert
       den Tree, sonst gezielte Snackbar-Warnung).
 - [x] **`v1.0-alpha5`** (versionCode 5): `\setmainfont{<Name>}` über gebündelte +
-      System-Fonts (fontconfig, siehe Befund unten); „Über TeXDroid"-Dialog
+      System-Fonts (fontconfig, siehe Befund unten); „Über TeXslate"-Dialog
       (Version, Entwickler, Lizenz, Open-Source-Komponenten).
 - [x] **Ab `v1.0-alpha5`: normale GitHub-Releases** (kein `--prerelease` mehr).
       Grund: Update-Tools (Obtainium, generische Checker, später F-Droid) ziehen

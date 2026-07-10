@@ -23,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "de.bgg_home.texdroid"
+        applicationId = "de.bgg_home.texslate"
         minSdk = 26
         targetSdk = 36
         versionCode = 6
