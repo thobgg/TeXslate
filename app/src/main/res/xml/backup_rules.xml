@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+   Backup-Regeln für Geräte bis API 30 (ab API 31 gilt data_extraction_rules.xml).
+   Die KI-Einstellungen (ai_settings.xml) enthalten die verschlüsselten API-Keys;
+   der zugehörige Keystore-Schlüssel verlässt das Gerät nie — ein gesicherter
+   Chiffretext wäre auf anderen Geräten wertlos und hat im Backup nichts verloren.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <exclude domain="sharedpref" path="ai_settings.xml" />
 </full-backup-content>
