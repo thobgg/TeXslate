@@ -46,6 +46,11 @@ object RustBridge {
      * `\setmainfont{<Name>}` gegen die mitgelieferten/eigenen Fonts +
      * `/system/fonts` auf. Leerer String → fontconfig-Default (nur Systemfonts).
      *
+     * [continueOnErrors] = Overleaf-artiges „Trotz Fehlern kompilieren": die
+     * Engine hält bei TeX-Fehlern nicht an, sondern läuft durch und schreibt
+     * .aux/PDF trotzdem. Da Tectonic automatisch bis zur Stabilität nachläuft,
+     * lösen sich .aux-Zweipass-Konstrukte damit in einem einzigen Aufruf auf.
+     *
      * Rückgabe: ein JSON-String
      *   {"ok":Boolean,"pdfPath":String,"synctexPath":String,"log":String,"error":String}
      * → auf Kotlin-Seite von [de.bgg_home.texdroid.compile.CompileResult.fromJson] geparst.
@@ -57,5 +62,6 @@ object RustBridge {
         jobDir: String,
         buildEpochSeconds: Long,
         fontconfigFile: String,
+        continueOnErrors: Boolean,
     ): String
 }

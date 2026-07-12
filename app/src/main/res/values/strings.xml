@@ -154,6 +154,8 @@
     <string name="menu_outline">Document outline …</string>
     <string name="menu_toggle_comment">Toggle comment</string>
     <string name="menu_autocompile">Auto-compile</string>
+    <string name="menu_continue_on_errors">Compile despite errors</string>
+    <string name="error_biber_unsupported">biber is not supported: TeXslate runs bibtex only. Please use \\usepackage[backend=bibtex]{biblatex}.</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About TeXslate</string>
 

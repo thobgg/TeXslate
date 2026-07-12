@@ -98,5 +98,20 @@ data class CompileResult(
                 ),
             )
         }
+
+        /**
+         * Fehl-Ergebnis einer Vorprüfung VOR dem eigentlichen Compile (z.B.
+         * biblatex mit biber-Backend, das Tectonic nicht ausführen kann).
+         * [line] macht den Fehler in der Fehlerliste anspringbar.
+         */
+        fun preflightError(line: Int?, message: String): CompileResult =
+            CompileResult(
+                ok = false,
+                pdfPath = "",
+                synctexPath = "",
+                log = message,
+                engineError = message,
+                errors = listOf(CompileError(line, message)),
+            )
     }
 }

@@ -4,7 +4,7 @@
 // Später hängt an genau diesem Mechanismus der Tectonic-Compiler.
 
 use jni::objects::{JClass, JString};
-use jni::sys::{jint, jlong, jstring};
+use jni::sys::{jboolean, jint, jlong, jstring};
 use jni::JNIEnv;
 use std::path::Path;
 use std::time::{Duration, SystemTime};
@@ -147,6 +147,11 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
     // Absoluter Pfad einer fonts.conf (siehe FontStore). Wird via FONTCONFIG_FILE
     // an fontconfig durchgereicht, damit \setmainfont{<Name>} auflöst. Leer → aus.
     fontconfig_file: JString<'a>,
+    // Overleaf-artiges „Trotz Fehlern kompilieren": Engine hält bei TeX-Fehlern
+    // nicht an (halt_on_error aus). Da Tectonic ohnehin mehrere Läufe bis zur
+    // Stabilität macht, funktionieren damit auch .aux-Zweipass-Tricks in einem
+    // einzigen Aufruf.
+    continue_on_errors: jboolean,
 ) -> jstring {
     let source: String = match env.get_string(&tex_source) {
         Ok(s) => s.into(),
@@ -162,7 +167,7 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
         .map(|s| s.into())
         .unwrap_or_default();
 
-    let result = compile_to_dir(&source, &dir, build_epoch, &font_config);
+    let result = compile_to_dir(&source, &dir, build_epoch, &font_config, continue_on_errors != 0);
     let json = match result {
         Ok(out) => format!(
             r#"{{"ok":true,"pdfPath":"{}","synctexPath":"{}","log":"{}","error":""}}"#,
@@ -197,10 +202,12 @@ fn compile_to_dir(
     dir: &str,
     build_epoch: jlong,
     font_config: &str,
+    continue_on_errors: bool,
 ) -> Result<CompileOk, CompileErr> {
     use tectonic::config::PersistentConfig;
     use tectonic::driver::{OutputFormat, ProcessingSessionBuilder};
     use tectonic::status::NoopStatusBackend;
+    use tectonic::unstable_opts::UnstableOptions;
 
     // Wie in tectonicCompile: Tectonics Cache (app_dirs2/XDG) aufs beschreibbare
     // App-Verzeichnis biegen, sonst schlägt der Bundle-Cache fehl.
@@ -249,6 +256,16 @@ fn compile_to_dir(
         .keep_logs(true)
         .keep_intermediates(true) // nötig, damit die .synctex.gz erhalten bleibt
         .synctex(true); // ← SyncTeX-Ausgabe aktivieren (M3-Vorbereitung)
+
+    // „Trotz Fehlern kompilieren" (Issue #2): halt_on_error abschalten, damit der
+    // erste Lauf trotz Fehlern durchläuft und .aux schreibt — der automatische
+    // Folgelauf löst dann z.B. selbstdefinierte \@savedenv-Referenzen auf.
+    if continue_on_errors {
+        builder.unstables(UnstableOptions {
+            continue_on_errors: true,
+            ..Default::default()
+        });
+    }
 
     // Compile-Datum: ohne dies fällt Tectonic auf UNIX_EPOCH zurück → \today
     // ergäbe „1. Januar 1970". Positive Epoch aus Kotlin verwenden; sonst

@@ -326,6 +326,10 @@ mitsynchronisiert. Dabei drei offene Punkte gefunden:
 ### M7 — Nice-to-have (bewusst außerhalb des Kernscopes)
 - Stift-Input für Formel-Skizzen, später evtl. Handwriting-to-LaTeX.
   **Nicht in M0–M6 ziehen** — Scope-Disziplin.
+- Git/GitHub-Import von Projekten (Tester-Wunsch, Issue #1, 07/2026).
+- biber als biblatex-Backend (Tester-Wunsch, Issue #1): biber ist Perl, kein
+  Drop-in für die Tectonic-Engine — bis dahin klare Fehlermeldung + Hinweis
+  auf `backend=bibtex` (seit alpha8 eingebaut).
 
 ## 4. Arbeitsweise & Branch-Strategie
 

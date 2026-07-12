@@ -284,6 +284,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     var autoCompile by remember { mutableStateOf(true) }
     var textVersion by remember { mutableIntStateOf(0) }
 
+    // „Trotz Fehlern kompilieren" (Issue #2, Overleaf-Vorbild): Engine läuft bei
+    // TeX-Fehlern durch statt anzuhalten. Persistiert — wer es braucht (z.B.
+    // .aux-Zweipass-Makros), braucht es in jeder Sitzung.
+    var continueOnErrors by remember { mutableStateOf(appPrefs.getBoolean("continueOnErrors", false)) }
+
     // Split-View: Anteil des Editors an der Breite (per Trenner verschiebbar, 0.2–0.8).
     var splitFraction by remember { mutableFloatStateOf(0.5f) }
 
@@ -607,7 +612,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
             try {
                 // Tree nur synchronisieren, wenn das offene Dokument wirklich dazu
                 // gehört – sonst kopierte syncToDir das falsche Projekt (Fußangel).
-                val result = LatexCompiler.compile(context, source, projectTree.takeIf { currentInProject })
+                val result = LatexCompiler.compile(
+                    context, source, projectTree.takeIf { currentInProject },
+                    continueOnErrors = continueOnErrors,
+                )
                 lastLog = result.log.ifBlank { result.engineError }
                 errors = result.errors
                 errorIndex = 0
@@ -706,6 +714,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 compiling = compiling,
                 autoCompile = autoCompile,
                 onAutoCompileChange = { autoCompile = it },
+                continueOnErrors = continueOnErrors,
+                onContinueOnErrorsChange = {
+                    continueOnErrors = it
+                    appPrefs.edit().putBoolean("continueOnErrors", it).apply()
+                },
                 onMenu = { scope.launch { drawerState.open() } },
                 onNew = ::newDocument,
                 onOpen = ::openDocument,
@@ -1144,6 +1157,8 @@ private fun AppHeader(
     compiling: Boolean,
     autoCompile: Boolean,
     onAutoCompileChange: (Boolean) -> Unit,
+    continueOnErrors: Boolean,
+    onContinueOnErrorsChange: (Boolean) -> Unit,
     onMenu: () -> Unit,
     onNew: () -> Unit,
     onOpen: () -> Unit,
@@ -1226,6 +1241,8 @@ private fun AppHeader(
                     compact = compact,
                     compiling = compiling,
                     autoCompile = autoCompile,
+                    continueOnErrors = continueOnErrors,
+                    onContinueOnErrorsChange = onContinueOnErrorsChange,
                     canExportPdf = canExportPdf,
                     canShowLog = canShowLog,
                     onNew = onNew,
@@ -1290,6 +1307,8 @@ private fun OverflowMenu(
     compact: Boolean,
     compiling: Boolean,
     autoCompile: Boolean,
+    continueOnErrors: Boolean,
+    onContinueOnErrorsChange: (Boolean) -> Unit,
     canExportPdf: Boolean,
     canShowLog: Boolean,
     onNew: () -> Unit,
@@ -1387,6 +1406,16 @@ private fun OverflowMenu(
                     )
                 },
                 onClick = { onAutoCompileChange(!autoCompile) }, // offen lassen: Haken-Wechsel sichtbar
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.menu_continue_on_errors)) },
+                leadingIcon = {
+                    Icon(
+                        if (continueOnErrors) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
+                        contentDescription = null,
+                    )
+                },
+                onClick = { onContinueOnErrorsChange(!continueOnErrors) }, // offen lassen: Haken-Wechsel sichtbar
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.menu_settings)) },
