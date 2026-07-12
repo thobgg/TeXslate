@@ -1,0 +1,3 @@
+* Neu: „Trotz Fehlern kompilieren" (⋮-Menü) — die Engine läuft bei TeX-Fehlern durch; .aux-Zweipass-Konstrukte gelingen so in einem einzigen Lauf. Danke für das Tester-Feedback!
+* Klare Fehlermeldung mit Zeilenangabe, wenn biblatex ohne backend=bibtex verwendet wird (biber wird nicht unterstützt).
+* Sicherheit: KI-Einstellungen (verschlüsselte API-Schlüssel) sind von Backup und Gerätetransfer ausgeschlossen.

@@ -1,15 +1,35 @@
 package de.bgg_home.texdroid.compile
 
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Before
 import org.junit.Test
+import java.util.Locale
 
 /**
  * Unit-Tests für den TeX-Log-Parser. Reine, deterministische Logik – die
  * Grundlage für die Zeilennummern-Zuordnung (QW 3.2, Jump-to-Error).
+ *
+ * Locale wird auf Englisch gepinnt: Seit QW A6 übersetzt LatexLog die
+ * Meldungen nach Systemsprache — ohne Pin schlagen die (englischen)
+ * Erwartungen auf jedem deutschen Entwicklungsrechner fehl.
  */
 class LatexLogTest {
+
+    private lateinit var originalLocale: Locale
+
+    @Before
+    fun pinLocale() {
+        originalLocale = Locale.getDefault()
+        Locale.setDefault(Locale.ENGLISH)
+    }
+
+    @After
+    fun restoreLocale() {
+        Locale.setDefault(originalLocale)
+    }
 
     @Test
     fun classicForm_extractsMessageAndLine() {
@@ -24,7 +44,8 @@ class LatexLogTest {
 
         assertEquals(1, errors.size)
         assertEquals(12, errors[0].line)
-        assertEquals("Undefined control sequence.", errors[0].message)
+        // Seit QW A6 formuliert LatexErrorGerman die Roh-Meldung nutzerfreundlich um.
+        assertEquals("Unknown command (undefined control sequence) – typo or missing package?", errors[0].message)
     }
 
     @Test
@@ -35,7 +56,7 @@ class LatexLogTest {
 
         assertEquals(1, errors.size)
         assertEquals(5, errors[0].line)
-        assertEquals("LaTeX Error: Missing \\begin{document}.", errors[0].message)
+        assertEquals("LaTeX error: Missing \\begin{document}.", errors[0].message)
     }
 
     @Test
@@ -44,7 +65,7 @@ class LatexLogTest {
 
         assertEquals(1, errors.size)
         assertNull(errors[0].line)
-        assertEquals("Emergency stop.", errors[0].message)
+        assertEquals("Emergency stop – TeX could not continue (see the previous errors).", errors[0].message)
     }
 
     @Test

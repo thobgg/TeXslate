@@ -1,0 +1,3 @@
+* New: "Compile despite errors" (⋮ menu) — the engine keeps going past TeX errors, so .aux two-pass tricks work in a single run. Thanks to tester feedback!
+* Clear error message with line number when biblatex is used without backend=bibtex (biber is not supported).
+* Security: AI settings (encrypted API keys) are excluded from backups and device transfers.
