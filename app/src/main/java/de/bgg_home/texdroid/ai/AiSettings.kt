@@ -3,6 +3,18 @@ package de.bgg_home.texdroid.ai
 import android.content.Context
 
 /**
+ * Heuristik: Sieht [s] nach einem API-Key aus (statt nach einem Modellnamen)?
+ * Modellnamen sind kurz (`claude-sonnet-5`, `gpt-4o`); Keys tragen ein
+ * Provider-Präfix (`sk-…` Anthropic/OpenAI, `AIza…` Google) oder sind sehr lang.
+ * Schützt davor, dass ein versehentlich ins Modell-Feld getippter Key als
+ * **unverschlüsselter** Klartext-Modellname gespeichert wird.
+ */
+fun looksLikeApiKey(s: String): Boolean {
+    val t = s.trim()
+    return t.startsWith("sk-") || t.startsWith("AIza") || t.length > 64
+}
+
+/**
  * Einstellungen der KI-Assistenz (multi-provider, BYOK). Flags/Provider/Modelle
  * liegen in normalen SharedPreferences; die **API-Keys** verschlüsselt über
  * [SecureKeyStore] — **je Provider** ein eigener Key, damit man ohne
@@ -33,7 +45,17 @@ class AiSettings(context: Context) {
         prefs.getString(modelName(p), null)?.takeIf { it.isNotBlank() } ?: p.defaultModel
 
     fun setModelFor(p: AiProvider, value: String) = prefs.edit()
-        .putString(modelName(p), value.ifBlank { p.defaultModel })
+        .putString(
+            modelName(p),
+            // Sicherheitsnetz: einen (unverschlüsselten) Modellnamen, der wie ein
+            // API-Key aussieht, niemals persistieren — sonst läge der Key im
+            // Klartext in den Prefs. Auf den Default zurückfallen.
+            when {
+                value.isBlank() -> p.defaultModel
+                looksLikeApiKey(value) -> p.defaultModel
+                else -> value
+            },
+        )
         .apply()
 
     /** Key/Modell des aktuell gewählten Providers. */

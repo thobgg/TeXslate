@@ -96,6 +96,8 @@
     <string name="ai_key_show">Show key</string>
     <string name="ai_model">Model</string>
     <string name="ai_model_id_label">Model ID (freely editable)</string>
+    <string name="ai_model_looks_like_key">This looks like an API key. It belongs in the “API key” field above, where it is stored encrypted.</string>
+    <string name="ai_move_to_key_field">Move to API key field</string>
     <string name="ai_privacy_note">Note: Your text is only sent to the selected provider after explicit confirmation (preview dialog). Keys stay encrypted on the device. API costs may apply. The core app works fully offline.</string>
 
     <!-- AI assistant sheet -->

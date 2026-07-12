@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.ai.AiProvider
 import de.bgg_home.texdroid.ai.AiSettings
+import de.bgg_home.texdroid.ai.looksLikeApiKey
 
 /**
  * KI-Einstellungen (QW A1+): Opt-in, **Anbieter-Auswahl** (Anthropic · OpenAI ·
@@ -110,13 +112,29 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                     )
                 }
             }
+            // Schutz vor dem häufigen Fehler, den API-Key ins Modell-Feld zu tippen:
+            // Feld markieren, warnen und eine Ein-Klick-Korrektur anbieten.
+            val modelLooksLikeKey = looksLikeApiKey(model)
             OutlinedTextField(
                 value = model,
                 onValueChange = { model = it },
                 label = { Text(stringResource(R.string.ai_model_id_label)) },
                 singleLine = true,
+                isError = modelLooksLikeKey,
+                supportingText = if (modelLooksLikeKey) {
+                    { Text(stringResource(R.string.ai_model_looks_like_key)) }
+                } else {
+                    null
+                },
                 modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
             )
+            if (modelLooksLikeKey) {
+                TextButton(onClick = {
+                    key = model.trim()
+                    model = provider.defaultModel
+                    showKey = false
+                }) { Text(stringResource(R.string.ai_move_to_key_field)) }
+            }
 
             Text(
                 stringResource(R.string.ai_privacy_note),
@@ -133,6 +151,10 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                     settings.setModelFor(provider, model)
                     onDismiss()
                 },
+                // Speichern sperren, solange im Modell-Feld ein Key steht — sonst
+                // ginge er (per Sicherheitsnetz verworfen) verloren, statt korrekt
+                // ins verschlüsselte Key-Feld zu wandern.
+                enabled = !modelLooksLikeKey,
                 modifier = Modifier.padding(top = 16.dp),
             ) { Text(stringResource(R.string.save)) }
     }

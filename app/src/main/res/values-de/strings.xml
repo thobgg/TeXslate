@@ -94,6 +94,8 @@
     <string name="ai_key_show">Key anzeigen</string>
     <string name="ai_model">Modell</string>
     <string name="ai_model_id_label">Modell-ID (frei überschreibbar)</string>
+    <string name="ai_model_looks_like_key">Das sieht aus wie ein API-Key. Der gehört ins Feld „API-Key" oben – dort wird er verschlüsselt gespeichert.</string>
+    <string name="ai_move_to_key_field">In API-Key-Feld übernehmen</string>
     <string name="ai_privacy_note">Hinweis: Dein Text wird nur nach ausdrücklicher Bestätigung (Vorschau-Dialog) an den gewählten Anbieter gesendet. Keys bleiben verschlüsselt auf dem Gerät. Es können API-Kosten anfallen. Die Kern-App funktioniert vollständig offline.</string>
 
     <!-- KI-Assistent-Sheet -->
