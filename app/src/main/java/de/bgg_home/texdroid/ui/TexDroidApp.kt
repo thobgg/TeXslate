@@ -691,6 +691,11 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        // Wisch-Gesten NUR bei offener Sidebar (zum Zuwischen). Sonst fängt der
+        // Drawer jedes horizontale Ziehen im Editor ab – u.a. das Ziehen der
+        // Auswahlgriffe beim Markieren riss ständig die Sidebar auf. Geöffnet
+        // wird sie weiterhin über den ☰-Knopf.
+        gesturesEnabled = drawerState.isOpen,
         drawerContent = {
             ModalDrawerSheet {
                 ProjectDrawer(
