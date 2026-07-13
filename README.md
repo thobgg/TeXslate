@@ -4,6 +4,8 @@
 
 <p align="center"><strong>Native LaTeX/XeTeX editor for Android — tablet-first.</strong></p>
 
+<p align="center">🇬🇧 <strong>English</strong> · 🇩🇪 <a href="./README.de.md">Deutsch</a></p>
+
 Write LaTeX right on your tablet and watch the PDF render live beside it — no
 terminal, no cloud, no companion PC. TeXslate combines an editor, an **on-device**
 compiler and a PDF preview in one native Android UI, with localized error output
