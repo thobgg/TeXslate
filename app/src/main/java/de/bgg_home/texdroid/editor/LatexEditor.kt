@@ -17,6 +17,8 @@ import io.github.rosemoe.sora.langs.textmate.registry.ThemeRegistry
 import io.github.rosemoe.sora.langs.textmate.registry.model.ThemeModel
 import io.github.rosemoe.sora.langs.textmate.registry.provider.AssetsFileResolver
 import io.github.rosemoe.sora.widget.CodeEditor
+import io.github.rosemoe.sora.widget.component.Magnifier
+import io.github.rosemoe.sora.widget.style.builtin.HandleStyleSideDrop
 import org.eclipse.tm4e.core.registry.IThemeSource
 
 /** Scope-Name der LaTeX-Grammatik (aus LaTeX.tmLanguage.json). */
@@ -120,6 +122,17 @@ fun LatexEditor(
                         setSize((10f * d).toInt(), (56f * d).toInt())
                     },
                 )
+                // Präzisere Textauswahl mit dem Finger (Tester-Rückmeldung: fummelig):
+                // • Seitlich versetzte Griffe – der linke zeigt nach links, der rechte
+                //   nach rechts; sie überlappen den markierten Text NICHT mehr (der
+                //   Standard-„Drop"-Stil setzt beide Tropfen mittig unter die Auswahl).
+                setSelectionHandleStyle(HandleStyleSideDrop(ctx))
+                // • Lupe beim Ziehen: zeigt die Cursor-Umgebung vergrößert, sodass man
+                //   zeichengenau zwischen \command-Tokens treffen kann.
+                getComponent(Magnifier::class.java).apply {
+                    isEnabled = true
+                    scaleFactor = 1.5f
+                }
                 // 4) Inhaltsänderungen melden (Auto-Compile). Nach dem initialen
                 //    setText registriert – die Startbelegung löst also nichts aus.
                 subscribeEvent(ContentChangeEvent::class.java) { _, _ -> onTextChanged() }
