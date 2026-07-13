@@ -1,0 +1,1 @@
+* Markieren im Editor endlich flüssig: Die Sidebar-Wischgeste fängt das Ziehen der Auswahlgriffe nicht mehr ab (riss vorher beim Markieren ständig die Projekt-Sidebar auf). Zusammen mit den seitlichen Griffen + Lupe aus alpha9 ist die Textauswahl jetzt zeichengenau.

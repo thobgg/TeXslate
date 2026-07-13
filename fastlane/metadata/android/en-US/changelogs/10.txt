@@ -1,0 +1,1 @@
+* Text selection in the editor is finally smooth: the sidebar swipe gesture no longer hijacks the selection-handle drag (it kept yanking the project sidebar open while selecting). Together with the side handles + magnifier from alpha9, selection is now character-accurate.
