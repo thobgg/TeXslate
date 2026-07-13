@@ -1,0 +1,2 @@
+* More precise text selection by finger: side-offset selection handles (no longer covering the text) plus a magnifier while dragging – character-accurate selection in the editor.
+* Security: an API key accidentally typed into the Model ID field is detected, never stored in clear text, and can be moved to the encrypted key field with one tap.

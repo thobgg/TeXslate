@@ -1,0 +1,2 @@
+* Präzisere Textauswahl mit dem Finger: seitlich versetzte Auswahlgriffe (verdecken den Text nicht mehr) plus Lupe beim Ziehen – zeichengenaues Markieren im Editor.
+* Sicherheit: Ein versehentlich ins Modell-ID-Feld getippter API-Schlüssel wird erkannt, nicht im Klartext gespeichert und kann per Tipp ins verschlüsselte Schlüssel-Feld übernommen werden.
