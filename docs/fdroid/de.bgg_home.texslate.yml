@@ -1,0 +1,36 @@
+Categories:
+  - Writing
+License: GPL-3.0-or-later
+AuthorName: thobgg
+SourceCode: https://github.com/thobgg/TeXslate
+IssueTracker: https://github.com/thobgg/TeXslate/issues
+
+AntiFeatures:
+  - NonFreeNetwork
+
+RepoType: git
+Repo: https://github.com/thobgg/TeXslate.git
+
+Builds:
+  - versionName: 1.0-alpha10
+    versionCode: 10
+    commit: v1.0-alpha10
+    sudo:
+      - apt-get update
+      - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin bison gperf autoconf-archive
+    ndk: '27.2.12479018'
+    prebuild:
+      - sed -i 's/include("arm64-v8a", "x86_64")/include("arm64-v8a")/' app/build.gradle.kts
+      - rustup target add aarch64-linux-android
+      - cargo install cargo-ndk --version 3.5.4 --locked
+      - git clone --branch 2026.06.24 --depth 1 https://github.com/microsoft/vcpkg vcpkg
+      - ./vcpkg/bootstrap-vcpkg.sh -disableMetrics
+      - export VCPKG_ROOT="$(pwd)/vcpkg" && ./vcpkg/vcpkg install --triplet arm64-android "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
+      - export VCPKG_ROOT="$(pwd)/vcpkg" && ./build-native.sh arm64-v8a
+    gradle:
+      - yes
+
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: 1.0-alpha10
+CurrentVersionCode: 10
