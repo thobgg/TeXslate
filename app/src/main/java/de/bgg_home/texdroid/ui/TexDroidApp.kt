@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
@@ -98,11 +97,14 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -111,6 +113,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -134,6 +137,7 @@ import de.bgg_home.texdroid.editor.toggleLineComment
 import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
+import de.bgg_home.texdroid.storage.DraftStore
 import de.bgg_home.texdroid.storage.ProjectEntry
 import de.bgg_home.texdroid.storage.ProjectStore
 import de.bgg_home.texdroid.storage.UserTemplate
@@ -222,6 +226,20 @@ private val NEW_DOC_TEMPLATE = """
 private enum class Tab { Editor, Preview }
 
 /**
+ * Hält den Composable komponiert (sein Zustand – z.B. der Editor-Text – bleibt also
+ * erhalten), zeigt ihn aber nur, wenn [visible]. Der unsichtbare Pane wird aus dem
+ * sichtbaren Bereich heraus platziert: So bekommt er weder Pixel noch Touch-Events
+ * (kein versehentlicher Editor-Fokus hinter einer leeren Vorschau), verliert dabei
+ * aber seinen Zustand nicht. Grundlage des Tab-Wechsels ohne Editor-Neuaufbau.
+ */
+private fun Modifier.keepAlive(visible: Boolean): Modifier = layout { measurable, constraints ->
+    val placeable = measurable.measure(constraints)
+    layout(placeable.width, placeable.height) {
+        if (visible) placeable.place(0, 0) else placeable.place(x = -placeable.width * 2, y = 0)
+    }
+}
+
+/**
  * Befehle, die weitere Dateien einbinden (mehrteiliges Projekt). Trifft einer
  * davon zu, braucht der Compile die Geschwisterdateien im Arbeitsverzeichnis –
  * also einen als Projektordner geöffneten Tree, nicht nur die Einzeldatei.
@@ -256,11 +274,19 @@ private fun stripLatexComment(line: String): String {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TexDroidApp(windowSizeClass: WindowSizeClass) {
+fun TexDroidApp(
+    windowSizeClass: WindowSizeClass,
+    onRegisterDraftSaver: (() -> Unit) -> Unit = {},
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Zuletzt gesicherter Entwurf (überlebt Prozess-Tod). Einmalig beim Start gelesen;
+    // vorhanden → Startinhalt & Dateibezug wiederherstellen, sonst Beispiel-Dokument.
+    val startupDraft = remember { DraftStore.load(context) }
+    val startupText = startupDraft?.text ?: SAMPLE_TEX
 
     // Breitenklassen: Expanded (Tablet quer) → Split-View; Compact (Phone hoch)
     // → zusätzlich reduzierter Header, sonst quetscht die volle Toolbar den
@@ -355,6 +381,31 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
         projectWritable = perms.any { it.uri == saved && it.isWritePermission }
         projectFolderName = ProjectStore.folderName(context, saved) ?: context.getString(R.string.fallback_project)
         projectEntries = ProjectStore.list(context, saved)
+    }
+
+    // Entwurf wiederherstellen: Datei-Uri/Name/Schreibrecht des zuletzt offenen
+    // Dokuments, sofern das SAF-Recht noch gilt (sonst reiner Entwurf → „Speichern
+    // unter…"). Der Editor-Text selbst kommt bereits über startupText hinein.
+    LaunchedEffect(Unit) {
+        val d = startupDraft ?: return@LaunchedEffect
+        currentName = d.name
+        val uri = d.uri ?: return@LaunchedEffect
+        val perms = context.contentResolver.persistedUriPermissions
+        if (perms.none { it.uri == uri && it.isReadPermission }) return@LaunchedEffect
+        currentUri = uri
+        canWrite = d.canWrite && perms.any { it.uri == uri && it.isWritePermission }
+        projectTree?.let { currentInProject = ProjectStore.isWithinTree(uri, it) }
+    }
+
+    // Aktuellen Editor-Inhalt als Entwurf sichern lassen (Aufruf aus onStop). Der
+    // Rückruf liest Editor-/Datei-Zustand erst bei Ausführung → immer aktuell.
+    DisposableEffect(Unit) {
+        onRegisterDraftSaver {
+            editor?.text?.toString()?.let { text ->
+                DraftStore.save(context, text, currentUri, currentName, canWrite)
+            }
+        }
+        onDispose { onRegisterDraftSaver {} }
     }
 
     // Trefferzähler live halten: sora meldet fertige Suchergebnisse per Event.
@@ -487,8 +538,10 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
     }
 
     // SAF: „Speichern unter…" (ACTION_CREATE_DOCUMENT).
+    // MIME „text/x-tex": Der SAF-Picker leitet die Endung aus dem MIME-Typ ab –
+    // mit „text/plain" hängte er fälschlich „.txt" an den vorgeschlagenen „…​.tex"-Namen.
     val saveAsLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.CreateDocument("text/plain"),
+        ActivityResultContracts.CreateDocument("text/x-tex"),
     ) { uri ->
         val text = editor?.text?.toString()
         if (uri != null && text != null) {
@@ -787,6 +840,39 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 )
                 HorizontalDivider()
             }
+            // Editor und Vorschau als „movable content": Über den Tab-Wechsel (Phone)
+            // UND den Split↔Tab-Wechsel (Zoom/Fenstergröße) hinweg bleibt dieselbe
+            // Editor-Instanz (CodeEditor-View samt Text) erhalten. Früher entsorgte
+            // jeder solche Wechsel die AndroidView → Factory lief neu →
+            // setText(SAMPLE_TEX) überschrieb das Dokument mit dem Demo-Text.
+            val darkThemeState = rememberUpdatedState(darkTheme)
+            val editorPane = remember {
+                movableContentOf { paneModifier: Modifier ->
+                    EditorPane(
+                        initialText = startupText,
+                        errors = errors,
+                        darkTheme = darkThemeState.value,
+                        onEditorCreated = { editor = it },
+                        onTextChanged = { textVersion++ },
+                        onErrorClick = onErrorClick,
+                        onExplainError = onExplainError,
+                        onPrevError = { jumpToError(errorIndex - 1) },
+                        onNextError = { jumpToError(errorIndex + 1) },
+                        modifier = paneModifier,
+                    )
+                }
+            }
+            val previewPane = remember {
+                movableContentOf { paneModifier: Modifier ->
+                    PreviewPane(
+                        pdfFile = pdfFile,
+                        reloadToken = reloadToken,
+                        compiling = compiling,
+                        firstCompile = compiling && !compiledOnce,
+                        modifier = paneModifier,
+                    )
+                }
+            }
             Box(Modifier.weight(1f).fillMaxWidth()) {
             if (isWide) {
                 // Tablet-Landscape: echte Split-View (Editor | Preview) mit
@@ -794,71 +880,37 @@ fun TexDroidApp(windowSizeClass: WindowSizeClass) {
                 BoxWithConstraints(Modifier.fillMaxSize()) {
                     val totalPx = constraints.maxWidth.toFloat()
                     Row(Modifier.fillMaxSize()) {
-                        EditorPane(
-                            errors = errors,
-                            darkTheme = darkTheme,
-                            onEditorCreated = { editor = it },
-                            onTextChanged = { textVersion++ },
-                            onErrorClick = onErrorClick,
-                            onExplainError = onExplainError,
-                            onPrevError = { jumpToError(errorIndex - 1) },
-                            onNextError = { jumpToError(errorIndex + 1) },
-                            modifier = Modifier.weight(splitFraction).fillMaxSize(),
-                        )
+                        editorPane(Modifier.weight(splitFraction).fillMaxSize())
                         SplitHandle(
                             onDragDelta = { deltaPx ->
                                 splitFraction = (splitFraction + deltaPx / totalPx).coerceIn(0.2f, 0.8f)
                             },
                         )
-                        PreviewPane(
-                            pdfFile = pdfFile,
-                            reloadToken = reloadToken,
-                            compiling = compiling,
-                            firstCompile = compiling && !compiledOnce,
-                            modifier = Modifier.weight(1f - splitFraction).fillMaxSize(),
-                        )
+                        previewPane(Modifier.weight(1f - splitFraction).fillMaxSize())
                     }
                 }
             } else {
-                // Phone / schmal: Tab-Umschaltung Editor ↔ Vorschau.
-                // Bei offener Tastatur ist auf Compact-Höhe kaum Editor übrig –
-                // die Tab-Zeile braucht beim Tippen niemand und wird ausgeblendet
-                // (zurückwechseln geht erst nach dem Schließen der Tastatur).
-                val imeVisible = WindowInsets.isImeVisible
+                // Phone / schmal: Tab-Umschaltung Editor ↔ Vorschau. Beide Panes
+                // bleiben komponiert (Zustand bleibt); der aktive liegt sichtbar oben,
+                // der inaktive transparent darunter. Die Umschaltleiste bleibt IMMER
+                // sichtbar – sie früher bei offener Tastatur auszublenden konnte den
+                // Nutzer stranden lassen (hängende IME-Insets = kein Zurück).
                 Column(Modifier.fillMaxSize()) {
-                    if (!(isCompact && imeVisible)) {
-                        TabRow(selectedTabIndex = selectedTab.ordinal) {
-                            Tab(
-                                selected = selectedTab == Tab.Editor,
-                                onClick = { selectedTab = Tab.Editor },
-                                text = { Text(stringResource(R.string.tab_editor)) },
-                            )
-                            Tab(
-                                selected = selectedTab == Tab.Preview,
-                                onClick = { selectedTab = Tab.Preview },
-                                text = { Text(stringResource(R.string.tab_preview)) },
-                            )
-                        }
+                    TabRow(selectedTabIndex = selectedTab.ordinal) {
+                        Tab(
+                            selected = selectedTab == Tab.Editor,
+                            onClick = { selectedTab = Tab.Editor },
+                            text = { Text(stringResource(R.string.tab_editor)) },
+                        )
+                        Tab(
+                            selected = selectedTab == Tab.Preview,
+                            onClick = { selectedTab = Tab.Preview },
+                            text = { Text(stringResource(R.string.tab_preview)) },
+                        )
                     }
-                    when (selectedTab) {
-                        Tab.Editor -> EditorPane(
-                            errors = errors,
-                            darkTheme = darkTheme,
-                            onEditorCreated = { editor = it },
-                            onTextChanged = { textVersion++ },
-                            onErrorClick = onErrorClick,
-                            onExplainError = onExplainError,
-                            onPrevError = { jumpToError(errorIndex - 1) },
-                            onNextError = { jumpToError(errorIndex + 1) },
-                            modifier = Modifier.fillMaxSize(),
-                        )
-                        Tab.Preview -> PreviewPane(
-                            pdfFile = pdfFile,
-                            reloadToken = reloadToken,
-                            compiling = compiling,
-                            firstCompile = compiling && !compiledOnce,
-                            modifier = Modifier.fillMaxSize(),
-                        )
+                    Box(Modifier.weight(1f).fillMaxSize()) {
+                        editorPane(Modifier.fillMaxSize().keepAlive(selectedTab == Tab.Editor))
+                        previewPane(Modifier.fillMaxSize().keepAlive(selectedTab == Tab.Preview))
                     }
                 }
             }
@@ -1561,6 +1613,7 @@ private fun LogSheet(log: String, onDismiss: () -> Unit) {
 
 @Composable
 private fun EditorPane(
+    initialText: String,
     errors: List<CompileError>,
     darkTheme: Boolean,
     onEditorCreated: (CodeEditor) -> Unit,
@@ -1573,7 +1626,7 @@ private fun EditorPane(
 ) {
     Column(modifier) {
         LatexEditor(
-            initialText = SAMPLE_TEX,
+            initialText = initialText,
             darkTheme = darkTheme,
             onEditorCreated = onEditorCreated,
             onTextChanged = onTextChanged,
