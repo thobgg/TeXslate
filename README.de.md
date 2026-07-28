@@ -126,6 +126,24 @@ APK (ABI-Splits). `armeabi-v7a` (ältere 32-bit-Geräte) ist noch offen.
 > externen Dienst (F-Droid-Anti-Feature `NonFreeNetwork`). Ohne ihn bleibt TeXslate
 > vollständig offline und Open Source.
 
+## Editionen
+
+TeXslate baut aus einer Codebasis zwei Editionen (Gradle-Product-Flavors). Fixes
+und Features liegen im gemeinsamen `main`-Sourceset, beide Editionen haben sie also;
+der `thesis`-Flavor ergänzt nur biber.
+
+- **core** — die Basis-App (~48 MB). Literaturverzeichnisse laufen über `bibtex`
+  (`backend=bibtex`); ein Preflight erklärt das, falls ein Dokument biber verlangt.
+  Keine gebündelten Binaries, F-Droid-kompatibel.
+  Bauen: `installCoreDebug` / `assembleCoreRelease`.
+- **thesis** — core plus gebündelte biber-Runtime (Perl 5.36.3 + XS + biber 2.17,
+  cross-kompiliert für Android, ~14 MB), sodass `biblatex` mit `backend=biber` auf
+  dem Gerät läuft. Bauen: `installThesisDebug` / `assembleThesisRelease`. Die
+  Runtime-Binaries werden separat bereitgestellt, siehe
+  [`app/src/thesis/README.md`](./app/src/thesis/README.md).
+
+Die aktive Edition ist im Code als `BuildConfig.HAS_BIBER` verfügbar.
+
 ## 🧪 Alpha-Tester:innen gesucht!
 
 TeXslate läuft auf den Geräten des Entwicklers — jetzt braucht es **deine**. Wenn du
@@ -211,9 +229,13 @@ Der Quellcode bleibt frei; eine Play-Store-Verteilung bleibt erlaubt.
 
 ### Fremd-/gebündelte Bestandteile
 
-- **Gebündelte Schriften** (`app/src/main/assets/fonts/`): **Latin Modern Roman** und
-  **TeX Gyre Termes/Pagella/Heros** (regular/bold/italic/bold-italic) werden
-  mitgeliefert, damit `\setmainfont{…}` sie über den Namen auflöst. Sie stehen unter
+- **biber-Runtime** (nur `thesis`-Edition, `app/src/thesis/`): eine cross-kompilierte
+  Perl-5.36.3-+-XS-Kette (Text::BibTeX/btparse, XML::LibXML/XSLT, …) und **biber
+  2.17**. biber und Perl sind freie Software (**Artistic/GPL**); deshalb wird die
+  Runtime nur in der GPLv3-`thesis`-Edition mitgeliefert, nicht in `core`.
+- **Gebündelte Schriften** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono**
+  und **TeX Gyre Termes/Pagella/Heros** werden mitgeliefert, damit `\setmainfont{…}`,
+  `\setsansfont{…}` und `\setmonofont{…}` sie über den Namen auflösen. Sie stehen unter
   der **GUST Font License (LPPL-basiert)**; der Lizenztext liegt bei unter
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
 - **LaTeX/TeX-TextMate-Grammatik** (`app/src/main/assets/textmate/latex/`):

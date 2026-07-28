@@ -121,6 +121,23 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 > anti-feature `NonFreeNetwork`). Without it, TeXslate stays fully offline and
 > open-source.
 
+## Editions
+
+TeXslate builds from one codebase into two editions (Gradle product flavors). Fixes
+and features live in the shared `main` source set, so both editions have them; the
+`thesis` flavor only adds biber.
+
+- **core** — the base app (~48 MB). Bibliographies use `bibtex` (`backend=bibtex`);
+  a preflight explains this if a document requests biber. No bundled binaries,
+  F-Droid-compatible. Build: `installCoreDebug` / `assembleCoreRelease`.
+- **thesis** — core plus a bundled biber runtime (Perl 5.36.3 + XS + biber 2.17,
+  cross-compiled for Android, ~14 MB), so `biblatex` with `backend=biber` runs
+  on-device. Build: `installThesisDebug` / `assembleThesisRelease`. The runtime
+  binaries are provided separately, see
+  [`app/src/thesis/README.md`](./app/src/thesis/README.md).
+
+The current edition is available in code as `BuildConfig.HAS_BIBER`.
+
 ## 🧪 Alpha testers wanted!
 
 TeXslate works on the developer's devices — now it needs **yours**. If you write
@@ -204,11 +221,15 @@ The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
 
 ### Third-party / bundled assets
 
-- **Bundled fonts** (`app/src/main/assets/fonts/`): **Latin Modern Roman** and
-  **TeX Gyre Termes/Pagella/Heros** (regular/bold/italic/bold-italic) are shipped
-  so `\setmainfont{…}` resolves them by name. They are licensed under the
-  **GUST Font License (LPPL-based)**; the license text is included at
+- **Bundled fonts** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono**
+  and **TeX Gyre Termes/Pagella/Heros** are shipped so `\setmainfont{…}`,
+  `\setsansfont{…}` and `\setmonofont{…}` resolve them by name. They are licensed
+  under the **GUST Font License (LPPL-based)**; the license text is included at
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
+- **biber runtime** (`thesis` edition only, `app/src/thesis/`): a cross-compiled
+  Perl 5.36.3 + XS chain (Text::BibTeX/btparse, XML::LibXML/XSLT, …) and **biber
+  2.17**. biber and Perl are free software (**Artistic/GPL**); this is why the
+  runtime ships only in the GPLv3 `thesis` edition and not in `core`.
 - **LaTeX/TeX TextMate grammar** (`app/src/main/assets/textmate/latex/`):
   `LaTeX.tmLanguage.json`, `TeX.tmLanguage.json` and `language-configuration.json`
   come from **[jlelong/vscode-latex-basics](https://github.com/jlelong/vscode-latex-basics)**
