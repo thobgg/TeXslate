@@ -170,6 +170,7 @@
     <!-- Snackbars / messages -->
     <string name="snackbar_opened">Opened: %1$s</string>
     <string name="snackbar_saved">Saved: %1$s</string>
+    <string name="snackbar_save_failed">Could not save %1$s – the file may have been moved or deleted. Use “Save as…”.</string>
     <string name="snackbar_pdf_saved">PDF saved: %1$s</string>
     <string name="snackbar_compile_first">Compile first – there is no PDF yet.</string>
     <string name="snackbar_nothing_to_share">Nothing selected to share.</string>

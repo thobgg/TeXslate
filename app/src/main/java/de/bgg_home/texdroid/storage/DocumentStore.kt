@@ -7,6 +7,7 @@ import android.provider.OpenableColumns
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.OutputStream
 
 /**
  * Dünne Hilfsschicht über dem Storage Access Framework (SAF).
@@ -26,15 +27,37 @@ object DocumentStore {
 
     /**
      * Schreibt [text] in die [uri] (UTF-8) und kürzt vorhandenen Inhalt.
-     * "wt" = write + truncate; einige Provider können nur "w" – dann Fallback.
+     *
+     * @return `true`, wenn wirklich geschrieben wurde. Bisher meldete der Aufrufer
+     *   „gespeichert", auch wenn der Stream null war oder das SAF-Recht weg war
+     *   (Datei extern verschoben/gelöscht) → stille Datenverlust-Gefahr. Der
+     *   Boolean macht den Erfolg für den Aufrufer prüfbar.
      */
-    suspend fun write(context: Context, uri: Uri, text: String) = withContext(Dispatchers.IO) {
-        val bytes = text.toByteArray(Charsets.UTF_8)
-        val resolver = context.contentResolver
-        val mode = runCatching { resolver.openOutputStream(uri, "wt") }.getOrNull()
-        val stream = mode ?: resolver.openOutputStream(uri, "w")
-        stream?.use { it.write(bytes) }
+    suspend fun write(context: Context, uri: Uri, text: String): Boolean =
+        withContext(Dispatchers.IO) {
+            writeBytes(text.toByteArray(Charsets.UTF_8)) { mode ->
+                context.contentResolver.openOutputStream(uri, mode)
+            }
+        }
+
+    /**
+     * Kern der Schreiblogik, ohne Android-Abhängigkeit (JVM-testbar). Versucht die
+     * Modi der Reihe nach: "wt" (write+truncate) bevorzugt, dann "rwt", zuletzt "w".
+     * Trunkierende Modi zuerst, damit ein KÜRZERES Dokument keine alten Rest-Bytes
+     * am Ende behält. Jeder Öffnungs-/Schreibversuch ist abgesichert; erst wenn alle
+     * scheitern, wird `false` zurückgegeben.
+     */
+    internal fun writeBytes(bytes: ByteArray, open: (mode: String) -> OutputStream?): Boolean {
+        for (mode in WRITE_MODES) {
+            val ok = runCatching {
+                open(mode)?.use { it.write(bytes); it.flush() } != null
+            }.getOrDefault(false)
+            if (ok) return true
+        }
+        return false
     }
+
+    private val WRITE_MODES = listOf("wt", "rwt", "w")
 
     /**
      * Kopiert eine App-interne Datei [source] (z.B. das kompilierte PDF) an die
