@@ -50,7 +50,8 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
 - **Localized errors**: the most common TeX messages are rewritten as short,
   readable sentences in the UI language; tapping jumps to the error line.
 - **Multi-file projects**: project-folder sidebar (file tree), tap to switch files,
-  `\input`/`\include` and bibliography (`bibtex`, and `biblatex` with `backend=bibtex`).
+  `\input`/`\include` and bibliography (`bibtex`; `biblatex` with `backend=bibtex`,
+  or `backend=biber` in the thesis edition — see [Editions](#editions)).
 - **Editor comfort**: search & replace (incl. regex), go to line, **document
   outline** (jump to sections like in Kile), toggle comment for a line or a
   selection, a grabbable scroll thumb.

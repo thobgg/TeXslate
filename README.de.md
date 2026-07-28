@@ -52,8 +52,8 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
   verständliche Sätze in der UI-Sprache umformuliert; ein Tipp springt zur
   Fehlerzeile.
 - **Mehrdatei-Projekte**: Projektordner-Sidebar (Dateibaum), Dateiwechsel per Tipp,
-  `\input`/`\include` und Bibliografie (`bibtex`, sowie `biblatex` mit
-  `backend=bibtex`).
+  `\input`/`\include` und Bibliografie (`bibtex`; `biblatex` mit `backend=bibtex`,
+  oder `backend=biber` in der thesis-Edition — siehe [Editionen](#editionen)).
 - **Editor-Komfort**: Suchen & Ersetzen (inkl. Regex), Gehe zu Zeile,
   **Dokument-Gliederung** (zu Abschnitten springen wie in Kile), Kommentar ein/aus
   für eine Zeile oder Auswahl, ein greifbarer Scroll-Griff.

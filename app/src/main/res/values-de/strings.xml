@@ -184,11 +184,13 @@
     <!-- Über-Dialog -->
     <string name="about_version">Version %1$s</string>
     <string name="about_description">Nativer LaTeX-/XeTeX-Editor für Android-Tablets — Editor, Tectonic-Compiler und PDF-Vorschau, komplett offline.</string>
+    <string name="about_biber">thesis-Edition: bündelt biber 2.17, damit biblatex mit backend=biber läuft (Literaturverzeichnisse ohne bibtex), über eine cross-kompilierte Perl-Runtime.</string>
     <string name="about_developer">Entwickler: Thomas Bugge (thobgg)</string>
     <string name="about_contact">Kontakt: %1$s</string>
     <string name="about_license">Lizenz: GPL-3.0-or-later</string>
     <string name="about_components_header">Enthaltene Open-Source-Komponenten</string>
     <string name="about_components">• Tectonic / XeTeX — MIT\n• Latin Modern &amp; TeX Gyre (Schriften) — GUST Font License (LPPL)\n• sora-editor — LGPL-2.1\n• vscode-latex-basics (Syntax) — MIT</string>
+    <string name="about_components_biber">• biber 2.17 + Perl 5.36.3 &amp; XS (Text::BibTeX/btparse, XML::LibXML/XSLT) — Artistic/GPL (thesis-Edition)</string>
 
     <!-- Compile-Log &amp; Fehler -->
     <string name="compile_log">Compile-Log</string>

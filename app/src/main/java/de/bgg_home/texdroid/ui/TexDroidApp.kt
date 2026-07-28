@@ -39,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.res.painterResource
+import de.bgg_home.texdroid.BuildConfig
 import de.bgg_home.texdroid.R
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -1180,6 +1181,13 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     stringResource(R.string.about_description),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                // Nur die thesis-Edition bündelt biber (BuildConfig.HAS_BIBER).
+                if (BuildConfig.HAS_BIBER) {
+                    Text(
+                        stringResource(R.string.about_biber),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
                 Text(
                     stringResource(R.string.about_developer),
                     style = MaterialTheme.typography.bodyMedium,
@@ -1211,6 +1219,13 @@ private fun AboutDialog(onDismiss: () -> Unit) {
                     stringResource(R.string.about_components),
                     style = MaterialTheme.typography.bodyMedium,
                 )
+                // GPL-Pflicht-Attribution: biber/Perl nur in der thesis-Edition.
+                if (BuildConfig.HAS_BIBER) {
+                    Text(
+                        stringResource(R.string.about_components_biber),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
