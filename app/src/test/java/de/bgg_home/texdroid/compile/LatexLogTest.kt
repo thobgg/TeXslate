@@ -97,4 +97,100 @@ class LatexLogTest {
         assertTrue(LatexLog.parseErrors("").isEmpty())
         assertTrue(LatexLog.parseErrors("   \n  ").isEmpty())
     }
+
+    // ── Bug A: fontspec-Font nicht gefunden, l.<n> versetzt (echter Log) ──────
+
+    /** Quelltext wie caseA.tex: \setsansfont auf Zeile 16, \setmonofont auf 17. */
+    private val sourceA: String = buildString {
+        append("\\documentclass{article}\n")            // 1
+        append("\\usepackage{fontspec}\n")               // 2
+        for (n in 3..15) append("% Zeile $n\n")          // 3..15
+        append("\\setsansfont{NonExistentSansXYZ}\n")    // 16
+        append("\\setmonofont{NonExistentMonoXYZ}\n")    // 17
+        append("\\begin{document}\n")                    // 18
+        append("Hallo.\n")                               // 19
+        append("\\end{document}\n")                      // 20
+    }
+
+    /** Echter xelatex-Ausschnitt: Sans-Fehler (Font auf Zeile 16!) meldet l.17. */
+    private val logA = """
+        (./caseA.tex
+        ! Package fontspec Error:
+        (fontspec)                The font "NonExistentSansXYZ" cannot be found;
+        (fontspec)                this may be but usually is not a fontspec bug.
+        (fontspec)                (XeTeX/luaotfload).
+
+        For immediate help type H <return>.
+         ...
+
+        l.17 \setmonofont
+                         {NonExistentMonoXYZ}
+    """.trimIndent()
+
+    @Test
+    fun bugA_fontError_mappedToCommandLine_notLdotN() {
+        val e = LatexLog.parseErrors(logA, sourceA).first()
+        // Der Font "…Sans…" steht auf Zeile 16, NICHT auf der l.17 aus dem Log.
+        assertEquals(16, e.line)
+        assertTrue(e.message.contains("NonExistentSansXYZ"))
+    }
+
+    @Test
+    fun bugA_withoutSource_fallsBackToLdotN() {
+        // Ohne Quelltext kein Mapping möglich → l.17 (dokumentiertes Verhalten).
+        assertEquals(17, LatexLog.parseErrors(logA, source = null).first().line)
+    }
+
+    // ── Bug B: Fehler in geladener .cls, Datei-Stack (echter Log) ────────────
+
+    /** Echter xelatex-Ausschnitt: Fehler in mycls.cls (l.6), verschachtelte (). */
+    private val logB = """
+        (./example.tex
+        LaTeX2e <2025-11-01>
+        (./mycls.cls
+        Document Class: mycls 2026 Test
+        (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
+        Document Class: article 2025/01/22 v1.4n Standard LaTeX document class
+        (/usr/share/texlive/texmf-dist/tex/latex/base/size10.clo
+        File: size10.clo 2025/01/22 v1.4n Standard LaTeX file (size option)
+        )
+        \c@part=\count271
+        \bibindent=\dimen148
+        )
+        ! Undefined control sequence.
+        <recently read> \thisCommandDoesNotExist
+
+        l.6 \thisCommandDoesNotExist
+    """.trimIndent()
+
+    @Test
+    fun bugB_errorInCls_attributedToCls_notMainDocument() {
+        val e = LatexLog.parseErrors(logB).first()
+        assertEquals(6, e.line)
+        assertTrue(
+            "Fehler gehört zur geladenen mycls.cls, nicht zu example.tex – war: ${e.file}",
+            e.file?.endsWith("mycls.cls") == true,
+        )
+    }
+
+    @Test
+    fun error_inMainDocument_keepsMainFile() {
+        val log = """
+            (./document.tex
+            ! Undefined control sequence.
+            l.42 \foo
+        """.trimIndent()
+        val e = LatexLog.parseErrors(log).first()
+        assertEquals(42, e.line)
+        assertTrue(e.file?.endsWith("document.tex") == true)
+    }
+
+    @Test
+    fun fileLineForm_reportsFileToo() {
+        val e = LatexLog.parseErrors(
+            "./document.tex:12: LaTeX Error: There's no line here to end.",
+        ).first()
+        assertEquals(12, e.line)
+        assertTrue(e.file?.endsWith("document.tex") == true)
+    }
 }
