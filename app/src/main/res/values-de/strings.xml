@@ -168,6 +168,7 @@
     <!-- Snackbars / Meldungen -->
     <string name="snackbar_opened">Geöffnet: %1$s</string>
     <string name="snackbar_saved">Gespeichert: %1$s</string>
+    <string name="snackbar_save_failed">%1$s konnte nicht gespeichert werden – die Datei wurde evtl. verschoben oder gelöscht. Nutze „Speichern unter…".</string>
     <string name="snackbar_pdf_saved">PDF gespeichert: %1$s</string>
     <string name="snackbar_compile_first">Erst kompilieren – es gibt noch kein PDF.</string>
     <string name="snackbar_nothing_to_share">Nichts zum Teilen ausgewählt.</string>

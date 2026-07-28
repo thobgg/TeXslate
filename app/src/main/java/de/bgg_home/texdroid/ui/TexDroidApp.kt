@@ -549,10 +549,15 @@ fun TexDroidApp(
             val tree = projectTree
             currentInProject = tree != null && ProjectStore.isWithinTree(uri, tree)
             scope.launch {
-                DocumentStore.write(context, uri, text)
+                val ok = DocumentStore.write(context, uri, text)
                 currentUri = uri
                 currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
-                snackbarHostState.showSnackbar(context.getString(R.string.snackbar_saved, currentName))
+                snackbarHostState.showSnackbar(
+                    context.getString(
+                        if (ok) R.string.snackbar_saved else R.string.snackbar_save_failed,
+                        currentName,
+                    ),
+                )
             }
         }
     }
@@ -635,13 +640,18 @@ fun TexDroidApp(
         val uri = currentUri
         if (uri != null && canWrite) {
             scope.launch {
-                DocumentStore.write(context, uri, text)
-                snackbarHostState.showSnackbar(
-                    context.getString(
-                        R.string.snackbar_saved,
-                        currentName ?: context.getString(R.string.fallback_document),
-                    ),
-                )
+                val name = currentName ?: context.getString(R.string.fallback_document)
+                if (DocumentStore.write(context, uri, text)) {
+                    snackbarHostState.showSnackbar(context.getString(R.string.snackbar_saved, name))
+                } else {
+                    // Schreiben scheiterte (SAF-Recht weg, Datei extern verschoben/
+                    // gelöscht): ehrlich melden statt fälschlich „gespeichert", und
+                    // künftig „Speichern unter…" anbieten, damit nichts verloren geht.
+                    canWrite = false
+                    snackbarHostState.showSnackbar(
+                        context.getString(R.string.snackbar_save_failed, name),
+                    )
+                }
             }
         } else {
             // Noch keine (beschreibbare) Datei → „Speichern unter…".
