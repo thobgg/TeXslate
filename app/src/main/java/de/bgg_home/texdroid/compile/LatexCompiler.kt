@@ -35,10 +35,18 @@ object LatexCompiler {
         continueOnErrors: Boolean = false,
     ): CompileResult =
         withContext(Dispatchers.IO) {
-            // Issue #1 (Tester-Feedback): biblatex mit biber-Backend scheitert in
-            // Tectonic mit der irreführenden Meldung „can't open path …bib". Vorab
-            // erkennen und den echten Grund + die Lösung nennen.
-            detectBiberUsage(context, source)?.let { return@withContext it }
+            // biblatex mit biber-Backend (Issue #1). In der **thesis**-Edition die
+            // cross-gebaute biber-Runtime aufsetzen und normal weiterkompilieren –
+            // Tectonic ruft `biber` dann selbst (tex→biber→tex). In **core** (oder
+            // fremder ABI / Setup-Fehler) den erklärenden Preflight-Fehler liefern,
+            // statt Tectonic mit „can't open path …bib" abbrechen zu lassen.
+            val biberLine = findBiberLine(source)
+            if (biberLine != null && !BiberRuntime.ensureReady(context)) {
+                return@withContext CompileResult.preflightError(
+                    line = biberLine,
+                    message = context.getString(de.bgg_home.texdroid.R.string.error_biber_unsupported),
+                )
+            }
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
             try {
                 cleanAuxArtifacts(jobDir)
@@ -59,19 +67,6 @@ object LatexCompiler {
             } catch (t: Throwable) {
                 CompileResult.nativeUnavailable(t)
             }
-        }
-
-    /**
-     * Erkennt `\usepackage{biblatex}` ohne `backend=bibtex` (biblatex' Default
-     * ist biber — und biber ist Perl, das Tectonic nicht ausführen kann).
-     * Liefert dann ein erklärendes Fehl-Ergebnis mit Sprung zur Zeile, sonst null.
-     */
-    private fun detectBiberUsage(context: Context, source: String): CompileResult? =
-        findBiberLine(source)?.let { line ->
-            CompileResult.preflightError(
-                line = line,
-                message = context.getString(de.bgg_home.texdroid.R.string.error_biber_unsupported),
-            )
         }
 
     /**

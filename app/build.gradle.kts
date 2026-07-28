@@ -32,6 +32,23 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // Editionen (biber-Milestone-Entscheidung): Basis strikt schlank, biber-Runtime
+    // (Perl+XS, ~14 MB) NUR in der thesis-Edition. Gated über BuildConfig.HAS_BIBER.
+    flavorDimensions += "edition"
+    productFlavors {
+        create("core") {
+            dimension = "edition"
+            // Kein biber: biblatex braucht backend=bibtex (Preflight erklärt das).
+            buildConfigField("boolean", "HAS_BIBER", "false")
+        }
+        create("thesis") {
+            dimension = "edition"
+            // Volles biber: Runtime aus src/thesis (assets-zip + jniLibs), Wiring in
+            // BiberRuntime. Für Thesis-/Abschlussarbeiten (biblatex mit biber-Backend).
+            buildConfigField("boolean", "HAS_BIBER", "true")
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (keystorePropsFile.exists()) {
@@ -79,8 +96,19 @@ android {
         }
     }
 
+    // thesis-Edition (biber): jniLibs ins nativeLibraryDir extrahieren, damit die .so
+    // als echte Dateien auf Platte liegen. Nur von dort sind exec (perl/launcher)
+    // erlaubt (App-Datendirs sind noexec / W^X). AGP-Default mappt sie sonst nur aus
+    // dem APK → kein exec'bares File. Siehe BiberRuntime / app/src/thesis/README.md.
+    packaging {
+        jniLibs {
+            useLegacyPackaging = true
+        }
+    }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
