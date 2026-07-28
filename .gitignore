@@ -43,6 +43,16 @@ target/
 # Kompilierte native Libs werden beim Build erzeugt, nicht committen:
 app/src/main/jniLibs/**/*.so
 
+# biber-Runtime der thesis-Edition: cross-gebaute Binaries + Baum-Zip werden
+# extern bereitgestellt (siehe app/src/thesis/README.md), nicht in Git (Blob-Bloat
+# + F-Droid-Policy). Der Code (BiberRuntime, Flavor) ist committed; die Artefakte
+# müssen vor einem thesis-Build vorhanden sein.
+app/src/thesis/jniLibs/**/*.so
+app/src/thesis/assets/biber-tree.zip
+# Sonden-Binaries (androidTest), ebenfalls extern:
+app/src/androidTest/jniLibs/**/*.so
+app/src/androidTest/assets/biber-tree.zip
+
 # ─────────────────────────────────────────────────────────────
 # Sonstiges
 # ─────────────────────────────────────────────────────────────
