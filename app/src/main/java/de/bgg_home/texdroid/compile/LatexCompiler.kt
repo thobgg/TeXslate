@@ -52,7 +52,7 @@ object LatexCompiler {
                     source, jobDir.absolutePath, localWallClockEpoch(), fontConfig,
                     continueOnErrors,
                 )
-                CompileResult.fromJson(json)
+                CompileResult.fromJson(json, source)
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)

@@ -7,10 +7,15 @@ import org.json.JSONObject
  *
  * @param line   Quelltext-Zeile (1-basiert), sofern das Log eine nennt – sonst null.
  * @param message kurze, für Menschen lesbare Fehlermeldung.
+ * @param file   Datei, in der der Fehler auftrat (aus dem `( … )`-Datei-Stack des
+ *   Logs), sofern ermittelbar – sonst null. Wichtig bei Mehrdatei-Projekten: der
+ *   Fehler kann in einer geladenen `.cls`/`.sty`/`\input`-Datei liegen, nicht im
+ *   offenen Hauptdokument.
  */
 data class CompileError(
     val line: Int?,
     val message: String,
+    val file: String? = null,
 )
 
 /**
@@ -52,13 +57,20 @@ data class CompileResult(
     }
 
     companion object {
-        /** Baut ein [CompileResult] aus dem JSON der nativen Brücke. */
-        fun fromJson(json: String): CompileResult {
+        /**
+         * Baut ein [CompileResult] aus dem JSON der nativen Brücke.
+         *
+         * [source] (der kompilierte TeX-Quelltext) ist optional: ist er gesetzt,
+         * kann der Log-Parser fontspec-„font cannot be found"-Fehler über den
+         * Font-Namen auf die tatsächliche `\set*font{…}`-Zeile zurückführen (das
+         * Log nennt hier eine versetzte Zeile, siehe [LatexLog]).
+         */
+        fun fromJson(json: String, source: String? = null): CompileResult {
             val obj = JSONObject(json)
             val log = obj.optString("log", "")
             val engineError = obj.optString("error", "")
             // Fehler primär aus dem Log ziehen; wenn das leer ist, die Engine-Meldung nutzen.
-            val parsed = LatexLog.parseErrors(log)
+            val parsed = LatexLog.parseErrors(log, source)
             val errors = when {
                 parsed.isNotEmpty() -> parsed
                 engineError.isNotEmpty() -> listOf(CompileError(null, engineError.trim()))
