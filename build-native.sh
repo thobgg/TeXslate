@@ -95,6 +95,11 @@ for ABI in "${ABIS[@]}"; do
   export VCPKGRS_TRIPLET="$TRIPLET"
   ( cd "$PROJECT_DIR/rust" && cargo ndk -t "$ABI" -o "$JNILIBS" build --release )
 
+  # cargo-ndk kopiert alle .so aus dem Build-Graph nach jniLibs (z.B. ein
+  # verwaistes libslug-*.so aus den deps/) — ins APK gehört aber nur unsere
+  # eigene Lib. Alle Fremd-.so entfernen, bevor libc++_shared.so ergänzt wird.
+  find "$JNILIBS/$ABI" -maxdepth 1 -name '*.so' ! -name 'libtexdroid_native.so' -delete
+
   # libc++_shared.so mitliefern (HarfBuzz/ICU sind C++, brauchen sie zur Laufzeit)
   cp "$NDK_SYSROOT_LIB/$(abi_to_ndklib "$ABI")/libc++_shared.so" "$JNILIBS/$ABI/"
   echo "   ✓ libtexdroid_native.so + libc++_shared.so in jniLibs/$ABI/"
