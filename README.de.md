@@ -237,9 +237,9 @@ Der Quellcode bleibt frei; eine Play-Store-Verteilung bleibt erlaubt.
   Perl-5.36.3-+-XS-Kette (Text::BibTeX/btparse, XML::LibXML/XSLT, …) und **biber
   2.17**. biber und Perl sind freie Software (**Artistic/GPL**); deshalb wird die
   Runtime nur in der GPLv3-`thesis`-Edition mitgeliefert, nicht in `core`.
-- **Gebündelte Schriften** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono**
+- **Gebündelte Schriften** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono/Math**
   und **TeX Gyre Termes/Pagella/Heros** werden mitgeliefert, damit `\setmainfont{…}`,
-  `\setsansfont{…}` und `\setmonofont{…}` sie über den Namen auflösen. Sie stehen unter
+  `\setsansfont{…}`, `\setmonofont{…}` und `\setmathfont{Latin Modern Math}` sie über den Namen auflösen. Sie stehen unter
   der **GUST Font License (LPPL-basiert)**; der Lizenztext liegt bei unter
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
 - **LaTeX/TeX-TextMate-Grammatik** (`app/src/main/assets/textmate/latex/`):

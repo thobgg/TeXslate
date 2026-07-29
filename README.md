@@ -226,9 +226,9 @@ The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
 
 ### Third-party / bundled assets
 
-- **Bundled fonts** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono**
+- **Bundled fonts** (`app/src/main/assets/fonts/`): **Latin Modern Roman/Sans/Mono/Math**
   and **TeX Gyre Termes/Pagella/Heros** are shipped so `\setmainfont{…}`,
-  `\setsansfont{…}` and `\setmonofont{…}` resolve them by name. They are licensed
+  `\setsansfont{…}`, `\setmonofont{…}` and `\setmathfont{Latin Modern Math}` resolve them by name. They are licensed
   under the **GUST Font License (LPPL-based)**; the license text is included at
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
 - **biber runtime** (`thesis` edition only, `app/src/thesis/`): a cross-compiled

@@ -42,6 +42,38 @@ echo "NDK:        $ANDROID_NDK_HOME"
 echo "VCPKG_ROOT: $VCPKG_ROOT"
 echo "ABIs:       ${ABIS[*]}"
 
+# ── Engine-Fix (XeTeX print_glyph_name) ──────────────────────────────────────
+# tectonic_engine_xetex' print_glyph_name() gibt einen INNEREN Zeiger frei: die
+# Druckschleife schiebt `s` weiter (print_char(*s++)), danach freeGlyphName(s).
+# glibc (Desktop) toleriert dieses fehlerhafte free(); Androids Scudo-Allocator
+# bricht mit SIGABRT ab ("misaligned pointer when deallocating") -> JEDER Compile,
+# der \XeTeXglyphname erreicht (u.a. unicode-math), reisst die App mit. Wir patchen
+# die vendored Crate-Quelle idempotent vor dem cargo-Build (Fix: ueber eine Kopie
+# drucken, den Original-Zeiger freigeben).
+patch_xetex_print_glyph_name() {
+  local f
+  f="$(ls -d "$HOME"/.cargo/registry/src/*/tectonic_engine_xetex-*/xetex/xetex-ext.c 2>/dev/null | head -1)"
+  if [ -z "$f" ]; then
+    echo "  print_glyph_name-Fix: Quelle noch nicht im cargo-Cache (kommt beim ersten Build; einfach erneut aufrufen)."
+    return 0
+  fi
+  if grep -q 'SCUDO print_glyph_name fix' "$f"; then
+    echo "  print_glyph_name-Fix: bereits angewandt."
+    return 0
+  fi
+  perl -0777 -pi -e 's#\n([ \t]*)while \(len-- > 0\)\n[ \t]*print_char\(\*s\+\+\);#\n${1}{ /* SCUDO print_glyph_name fix: print via copy, free the original pointer (Android/Scudo aborts on the interior free) */ const char* p = s; while (len-- > 0) print_char(*p++); }#' "$f"
+  if grep -q 'SCUDO print_glyph_name fix' "$f"; then
+    echo "  print_glyph_name-Fix: angewandt -> $f"
+    # cargo erkennt Aenderungen im Registry-Cache NICHT per mtime -> Neubau der
+    # Crate erzwingen, damit die gepatchte C-Datei neu kompiliert wird.
+    rm -rf "$PROJECT_DIR"/rust/target/*/release/build/tectonic_engine_xetex-* \
+           "$PROJECT_DIR"/rust/target/*/release/deps/*tectonic_engine_xetex* 2>/dev/null || true
+  else
+    echo "  WARN: print_glyph_name-Fix nicht angewandt (Quelltext der Crate abweichend?)."
+  fi
+}
+patch_xetex_print_glyph_name
+
 # ── ABI → vcpkg-Triplet + NDK-Lib-Verzeichnis (für libc++_shared.so) ─────────
 abi_to_triplet() { case "$1" in
   x86_64)     echo "x64-android" ;;
