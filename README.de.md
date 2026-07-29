@@ -144,6 +144,10 @@ der `thesis`-Flavor ergänzt nur biber.
 
 Die aktive Edition ist im Code als `BuildConfig.HAS_BIBER` verfügbar.
 
+![TeXslate thesis-Edition: biblatex mit backend=biber auf dem Tablet kompiliert, mit sortiertem nummeriertem Literaturverzeichnis](./docs/screenshots-de/05-biblatex-biber.png)
+
+_biber auf dem Tablet (thesis-Edition): die mitgelieferte Vorlage `Bibliografie (biber)` — `biblatex` mit `backend=biber`, `\textcite`/`\parencite` und ein sortiertes, nummeriertes Literaturverzeichnis, auf dem Gerät aufgelöst vom cross-kompilierten biber (Perl + biber 2.17)._
+
 ## 🧪 Alpha-Tester:innen gesucht!
 
 TeXslate läuft auf den Geräten des Entwicklers — jetzt braucht es **deine**. Wenn du

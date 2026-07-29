@@ -139,6 +139,10 @@ and features live in the shared `main` source set, so both editions have them; t
 
 The current edition is available in code as `BuildConfig.HAS_BIBER`.
 
+![TeXslate thesis edition: biblatex with backend=biber compiled on the tablet, showing a sorted numeric bibliography](./docs/screenshots/05-biblatex-biber.png)
+
+_biber on the tablet (thesis edition): the bundled `Bibliography (biber)` template — `biblatex` with `backend=biber`, `\textcite`/`\parencite` and a sorted numeric bibliography, resolved on-device by the cross-compiled biber (Perl + biber 2.17)._
+
 ## 🧪 Alpha testers wanted!
 
 TeXslate works on the developer's devices — now it needs **yours**. If you write
