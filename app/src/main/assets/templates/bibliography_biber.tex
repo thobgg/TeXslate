@@ -1,0 +1,47 @@
+% Bibliografie mit biblatex + biber (thesis-Edition).
+% Die .bib-Datenquelle ist per filecontents eingebettet, damit dieses Beispiel
+% eine EINZELNE, selbst-enthaltene Datei bleibt – zum Testen ohne Projektordner.
+\documentclass[12pt,a4paper]{article}
+\usepackage[ngerman]{babel}
+\usepackage[backend=biber,style=numeric,sorting=nyt]{biblatex}
+
+\begin{filecontents}[overwrite]{references.bib}
+@book{knuth1984,
+  author    = {Knuth, Donald E.},
+  title     = {The {\TeX}book},
+  year      = {1984},
+  publisher = {Addison-Wesley},
+}
+@article{turing1936,
+  author  = {Turing, Alan M.},
+  title   = {On Computable Numbers, with an Application to the
+             Entscheidungsproblem},
+  journal = {Proceedings of the London Mathematical Society},
+  year    = {1936},
+  volume  = {42},
+  pages   = {230--265},
+}
+@online{ctan2024,
+  author = {{CTAN Team}},
+  title  = {The Comprehensive {\TeX} Archive Network},
+  year   = {2024},
+  url    = {https://ctan.org},
+}
+\end{filecontents}
+
+\addbibresource{references.bib}
+
+\title{Bibliografie-Test (biber)}
+\author{TeXslate}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+Der Satzalgorithmus stammt von \textcite{knuth1984}. Grundlegende Fragen der
+Berechenbarkeit behandelt \textcite{turing1936}. Viele Pakete finden sich im
+Netzwerk~\parencite{ctan2024}.
+
+\printbibliography
+
+\end{document}

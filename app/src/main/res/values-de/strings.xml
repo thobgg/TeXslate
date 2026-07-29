@@ -21,6 +21,8 @@
     <string name="tmpl_beamer_desc">Folien mit Titelframe, Gliederung und Beispiel-Frames</string>
     <string name="tmpl_thesis_name">Akademische Arbeit</string>
     <string name="tmpl_thesis_desc">Titelseite, Inhaltsverzeichnis, Kapitel, Literatur (report)</string>
+    <string name="tmpl_biber_name">Bibliografie (biber)</string>
+    <string name="tmpl_biber_desc">biblatex mit backend=biber; Beispiel-.bib eingebettet (thesis-Edition)</string>
     <string name="tmpl_letter_name">Brief (KOMA scrlttr2)</string>
     <string name="tmpl_letter_desc">Geschäftsbrief mit Absender, Empfänger und Betreff</string>
     <string name="tmpl_exam_name">Klausur / Übungsblatt</string>

@@ -23,6 +23,8 @@
     <string name="tmpl_beamer_desc">Slides with title frame, outline and example frames</string>
     <string name="tmpl_thesis_name">Academic thesis</string>
     <string name="tmpl_thesis_desc">Title page, table of contents, chapters, bibliography (report)</string>
+    <string name="tmpl_biber_name">Bibliography (biber)</string>
+    <string name="tmpl_biber_desc">biblatex with backend=biber; sample .bib embedded (thesis edition)</string>
     <string name="tmpl_letter_name">Letter (KOMA scrlttr2)</string>
     <string name="tmpl_letter_desc">Business letter with sender, recipient and subject</string>
     <string name="tmpl_exam_name">Exam / worksheet</string>

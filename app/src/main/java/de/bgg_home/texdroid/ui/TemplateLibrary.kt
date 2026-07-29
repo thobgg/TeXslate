@@ -30,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import de.bgg_home.texdroid.BuildConfig
 import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.storage.UserTemplate
 
@@ -44,28 +45,47 @@ import de.bgg_home.texdroid.storage.UserTemplate
  */
 data class DocTemplate(val nameRes: Int, val descRes: Int, val asset: String)
 
-val DOC_TEMPLATES = listOf(
-    DocTemplate(
-        R.string.tmpl_beamer_name,
-        R.string.tmpl_beamer_desc,
-        "templates/beamer_presentation.tex",
-    ),
-    DocTemplate(
-        R.string.tmpl_thesis_name,
-        R.string.tmpl_thesis_desc,
-        "templates/academic_thesis.tex",
-    ),
-    DocTemplate(
-        R.string.tmpl_letter_name,
-        R.string.tmpl_letter_desc,
-        "templates/letter_scrlttr2.tex",
-    ),
-    DocTemplate(
-        R.string.tmpl_exam_name,
-        R.string.tmpl_exam_desc,
-        "templates/exam_worksheet.tex",
-    ),
-)
+val DOC_TEMPLATES: List<DocTemplate> = buildList {
+    add(
+        DocTemplate(
+            R.string.tmpl_beamer_name,
+            R.string.tmpl_beamer_desc,
+            "templates/beamer_presentation.tex",
+        ),
+    )
+    add(
+        DocTemplate(
+            R.string.tmpl_thesis_name,
+            R.string.tmpl_thesis_desc,
+            "templates/academic_thesis.tex",
+        ),
+    )
+    // Bibliografie mit biber nur in der thesis-Edition anbieten – in core würde
+    // backend=biber am Preflight scheitern (kein biber gebündelt).
+    if (BuildConfig.HAS_BIBER) {
+        add(
+            DocTemplate(
+                R.string.tmpl_biber_name,
+                R.string.tmpl_biber_desc,
+                "templates/bibliography_biber.tex",
+            ),
+        )
+    }
+    add(
+        DocTemplate(
+            R.string.tmpl_letter_name,
+            R.string.tmpl_letter_desc,
+            "templates/letter_scrlttr2.tex",
+        ),
+    )
+    add(
+        DocTemplate(
+            R.string.tmpl_exam_name,
+            R.string.tmpl_exam_desc,
+            "templates/exam_worksheet.tex",
+        ),
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
