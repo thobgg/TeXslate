@@ -84,6 +84,52 @@ object ProjectStore {
         copyLevel(context, treeUri, DocumentsContract.getTreeDocumentId(treeUri), destDir, maxBytes)
     }
 
+    /**
+     * Wie [syncToDir], kopiert aber den Teilbaum ab dem **Ordner der Hauptdatei**
+     * [mainFileUri] in die Wurzel von [destDir] – nicht ab der Tree-Wurzel.
+     *
+     * Nötig, weil Tectonic seinen Quelltext immer als `document.tex` in die
+     * Job-Wurzel schreibt: liegt das Projekt in einem Unterordner des gewählten
+     * Baums (z.B. Tree `Documents/`, Hauptdatei `Documents/texproj/x.tex`), muss
+     * die daneben liegende `.cls`/`\input`-Datei ebenfalls in der Wurzel landen –
+     * sonst findet der Compiler sie nicht. Liegt die Hauptdatei direkt in der
+     * Tree-Wurzel (Elternordner == Tree), ist das Ergebnis identisch mit
+     * [syncToDir]. Bei opaken Dokument-Ids (manche Cloud-Provider) fällt es
+     * konservativ auf die Tree-Wurzel zurück.
+     */
+    suspend fun syncProjectOf(
+        context: Context,
+        treeUri: Uri,
+        mainFileUri: Uri,
+        destDir: File,
+        maxBytes: Long = 20L * 1024 * 1024,
+    ): Unit = withContext(Dispatchers.IO) {
+        val treeId = DocumentsContract.getTreeDocumentId(treeUri)
+        val baseId =
+            if (isWithinTree(mainFileUri, treeUri)) {
+                val fileId = runCatching { DocumentsContract.getDocumentId(mainFileUri) }.getOrNull()
+                if (fileId != null) baseDocIdWithin(treeId, fileId) else treeId
+            } else {
+                treeId
+            }
+        copyLevel(context, treeUri, baseId, destDir, maxBytes)
+    }
+
+    /**
+     * Reine Pfad-Logik (JVM-testbar): Dokument-Id des Ordners, der die Datei mit
+     * [fileId] enthält – aber nie oberhalb der Tree-Wurzel [treeId]. Grundlage ist
+     * die Pfad-Kodierung der Dokument-Id (`primary:a/b/c` → Elternordner
+     * `primary:a/b`) der gängigen Provider (v.a. ExternalStorageProvider). Enthält
+     * die Id kein `/` (Datei unerwartet oberste Ebene) oder läge der Elternordner
+     * außerhalb des Baums, wird die Tree-Wurzel geliefert.
+     */
+    internal fun baseDocIdWithin(treeId: String, fileId: String): String {
+        val slash = fileId.lastIndexOf('/')
+        if (slash < 0) return treeId
+        val parentId = fileId.substring(0, slash)
+        return if (parentId == treeId || parentId.startsWith("$treeId/")) parentId else treeId
+    }
+
     private fun copyLevel(
         context: Context,
         treeUri: Uri,

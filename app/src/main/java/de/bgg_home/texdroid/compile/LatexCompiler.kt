@@ -32,6 +32,7 @@ object LatexCompiler {
         context: Context,
         source: String,
         projectTree: Uri? = null,
+        mainFileUri: Uri? = null,
         continueOnErrors: Boolean = false,
     ): CompileResult =
         withContext(Dispatchers.IO) {
@@ -51,7 +52,15 @@ object LatexCompiler {
             try {
                 cleanAuxArtifacts(jobDir)
                 if (projectTree != null) {
-                    ProjectStore.syncToDir(context, projectTree, jobDir)
+                    // Ab dem Ordner der Hauptdatei spiegeln, damit Geschwister-
+                    // dateien (Klasse, \input) neben `document.tex` in der Job-
+                    // Wurzel landen – auch wenn das Projekt in einem Unterordner
+                    // des gewählten Baums liegt. Ohne bekannte Hauptdatei: ab Wurzel.
+                    if (mainFileUri != null) {
+                        ProjectStore.syncProjectOf(context, projectTree, mainFileUri, jobDir)
+                    } else {
+                        ProjectStore.syncToDir(context, projectTree, jobDir)
+                    }
                 }
                 // Fonts auspacken + fonts.conf sicherstellen, damit \setmainfont{<Name>}
                 // (Latin Modern / TeX Gyre / Systemfonts) per Name aufgelöst wird.

@@ -373,29 +373,41 @@ fun TexDroidApp(
     var projectStack by remember { mutableStateOf(listOf<ProjectEntry>()) }
     var projectEntries by remember { mutableStateOf(listOf<ProjectEntry>()) }
 
-    // Zuletzt geöffnetes Projekt wiederherstellen (Uri-Recht überlebt Neustart).
+    // Zuletzt geöffnetes Projekt UND Entwurf wiederherstellen (Uri-Rechte
+    // überleben den Neustart). Bewusst EIN Effekt und in dieser Reihenfolge: erst
+    // der Projektbaum, dann der Entwurf – so ist projectTree bereits gesetzt, wenn
+    // die Projekt-Zugehörigkeit (currentInProject) der Datei bestimmt wird.
     LaunchedEffect(Unit) {
-        val saved = projectPrefs.getString("tree", null)?.let(Uri::parse) ?: return@LaunchedEffect
         val perms = context.contentResolver.persistedUriPermissions
-        if (perms.none { it.uri == saved && it.isReadPermission }) return@LaunchedEffect
-        projectTree = saved
-        projectWritable = perms.any { it.uri == saved && it.isWritePermission }
-        projectFolderName = ProjectStore.folderName(context, saved) ?: context.getString(R.string.fallback_project)
-        projectEntries = ProjectStore.list(context, saved)
-    }
 
-    // Entwurf wiederherstellen: Datei-Uri/Name/Schreibrecht des zuletzt offenen
-    // Dokuments, sofern das SAF-Recht noch gilt (sonst reiner Entwurf → „Speichern
-    // unter…"). Der Editor-Text selbst kommt bereits über startupText hinein.
-    LaunchedEffect(Unit) {
+        // 1) Projektbaum: das persistierte Recht liegt auf dem bloßen Tree-Uri.
+        val savedTree = projectPrefs.getString("tree", null)?.let(Uri::parse)
+        if (savedTree != null && perms.any { it.uri == savedTree && it.isReadPermission }) {
+            projectTree = savedTree
+            projectWritable = perms.any { it.uri == savedTree && it.isWritePermission }
+            projectFolderName = ProjectStore.folderName(context, savedTree)
+                ?: context.getString(R.string.fallback_project)
+            projectEntries = ProjectStore.list(context, savedTree)
+        }
+
+        // 2) Entwurf: Datei-Uri/Name/Schreibrecht des zuletzt offenen Dokuments.
+        // Ein aus dem Projektbaum stammendes Dokument-Uri ist tree-basiert
+        // (.../tree/<T>/document/<T/…>) und taucht NICHT als eigenes
+        // persistedUriPermission auf – das Recht trägt der Baum. Es gilt daher als
+        // lesbar/schreibbar, wenn es im (wiederhergestellten) Baum liegt. Sonst
+        // (einzeln via ACTION_OPEN_DOCUMENT geöffnet) muss das direkte Recht gelten.
+        // Der Editor-Text selbst kommt bereits über startupText hinein.
         val d = startupDraft ?: return@LaunchedEffect
         currentName = d.name
         val uri = d.uri ?: return@LaunchedEffect
-        val perms = context.contentResolver.persistedUriPermissions
-        if (perms.none { it.uri == uri && it.isReadPermission }) return@LaunchedEffect
+        val tree = projectTree
+        val within = tree != null && ProjectStore.isWithinTree(uri, tree)
+        val directRead = perms.any { it.uri == uri && it.isReadPermission }
+        if (!directRead && !within) return@LaunchedEffect
         currentUri = uri
-        canWrite = d.canWrite && perms.any { it.uri == uri && it.isWritePermission }
-        projectTree?.let { currentInProject = ProjectStore.isWithinTree(uri, it) }
+        val directWrite = perms.any { it.uri == uri && it.isWritePermission }
+        canWrite = d.canWrite && (directWrite || (within && projectWritable))
+        currentInProject = within
     }
 
     // Aktuellen Editor-Inhalt als Entwurf sichern lassen (Aufruf aus onStop). Der
@@ -678,6 +690,7 @@ fun TexDroidApp(
                 // gehört – sonst kopierte syncToDir das falsche Projekt (Fußangel).
                 val result = LatexCompiler.compile(
                     context, source, projectTree.takeIf { currentInProject },
+                    mainFileUri = currentUri.takeIf { currentInProject },
                     continueOnErrors = continueOnErrors,
                 )
                 lastLog = result.log.ifBlank { result.engineError }
