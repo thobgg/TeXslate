@@ -167,7 +167,18 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFi
         .map(|s| s.into())
         .unwrap_or_default();
 
-    let result = compile_to_dir(&source, &dir, build_epoch, &font_config, continue_on_errors != 0);
+    // Panics abfangen, statt den App-Prozess zu verlieren: Tectonic `unwrap()`t an
+    // einigen Stellen selbst — z.B. in `PersistentConfig::default_bundle`, wenn das
+    // TeX-Bundle beim ersten Compile nicht geladen werden kann (kein Netz). Ein
+    // Panic, der aus dieser `extern`-Funktion entweichen will, lässt Rust
+    // abbrechen (SIGABRT) — die App war weg, ohne Meldung. Auf dem Gerät
+    // reproduziert (30.07.2026). Mit catch_unwind wird daraus ein normaler Fehler.
+    let result = match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        compile_to_dir(&source, &dir, build_epoch, &font_config, continue_on_errors != 0)
+    })) {
+        Ok(r) => r,
+        Err(payload) => Err(err_no_log(panic_message(payload))),
+    };
     let json = match result {
         Ok(out) => format!(
             r#"{{"ok":true,"pdfPath":"{}","synctexPath":"{}","log":"{}","error":""}}"#,
@@ -314,6 +325,20 @@ fn compile_to_dir(
             log,
         }),
     }
+}
+
+/// Panic-Nutzlast in eine lesbare Meldung übersetzen. Der häufigste Fall ist ein
+/// fehlgeschlagener Bundle-Download beim ersten Compile; das erkennt die
+/// Kotlin-Seite am Präfix und erklärt es dem Nutzer (siehe LatexCompiler).
+fn panic_message(payload: Box<dyn std::any::Any + Send>) -> String {
+    let detail = if let Some(s) = payload.downcast_ref::<&str>() {
+        (*s).to_string()
+    } else if let Some(s) = payload.downcast_ref::<String>() {
+        s.clone()
+    } else {
+        "unbekannter Fehler".to_string()
+    };
+    format!("PANIC: {}", detail)
 }
 
 fn err_no_log(message: String) -> CompileErr {

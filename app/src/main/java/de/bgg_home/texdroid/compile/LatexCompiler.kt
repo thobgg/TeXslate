@@ -111,7 +111,7 @@ object LatexCompiler {
             result = runEngine(current, jobDir, fontConfig, continueOnErrors)
         }
         // Fehler gegen den ZULETZT kompilierten Quelltext auswerten, Hinweise anhängen.
-        return withFriendlyFontErrors(context, result).copy(notes = notes)
+        return withFriendlyEngineError(context, withFriendlyFontErrors(context, result)).copy(notes = notes)
     }
 
     /** Ein einzelner nativer Lauf; Fehler werden gegen [source] ausgewertet. */
@@ -143,6 +143,31 @@ object LatexCompiler {
         }
         return if (changed) result.copy(errors = errors) else result
     }
+
+    /**
+     * Übersetzt einen abgefangenen Engine-Panic (Präfix `PANIC:`, siehe die
+     * catch_unwind-Klammer in `rust/src/lib.rs`) in eine Meldung, mit der man etwas
+     * anfangen kann. Häufigster Fall: der erste Compile kann das TeX-Bundle nicht
+     * laden, weil kein Netz da ist – vorher riss dieser Panic den ganzen Prozess mit.
+     * Der technische Wortlaut bleibt im Log, damit er zur Fehlersuche nicht verloren ist.
+     */
+    private fun withFriendlyEngineError(context: Context, result: CompileResult): CompileResult {
+        val raw = result.engineError
+        if (result.ok || !raw.startsWith("PANIC:")) return result
+        val bundleTrouble = BUNDLE_HINTS.any { raw.contains(it, ignoreCase = true) }
+        val message = context.getString(
+            if (bundleTrouble) R.string.error_bundle_unreachable else R.string.error_engine_internal,
+        )
+        return result.copy(
+            errors = listOf(CompileError(null, message)),
+            log = if (result.log.isBlank()) raw else result.log + "\n" + raw,
+        )
+    }
+
+    /** Wortfetzen, die einen fehlgeschlagenen Bundle-/Netzzugriff verraten. */
+    private val BUNDLE_HINTS = listOf(
+        "bundle", "Paket-Bundle", "http", "url", "dns", "network", "connect", "tls", "resolve",
+    )
 
     private fun fontNotFoundMessage(context: Context, font: String): String = buildString {
         append(context.getString(R.string.error_font_not_found, font))
