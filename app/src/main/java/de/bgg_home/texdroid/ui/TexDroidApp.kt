@@ -694,7 +694,13 @@ fun TexDroidApp(
                     mainFileUri = currentUri.takeIf { currentInProject },
                     continueOnErrors = continueOnErrors,
                 )
-                lastLog = result.log.ifBlank { result.engineError }
+                // Hinweise vor das Log – Snackbars verschwinden, das Log bleibt.
+                val logBody = result.log.ifBlank { result.engineError }
+                lastLog = if (result.notes.isEmpty()) {
+                    logBody
+                } else {
+                    result.notes.joinToString("\n") + "\n\n" + logBody
+                }
                 errors = result.errors
                 errorIndex = 0
                 if (result.ok && result.pdfPath.isNotEmpty()) {
@@ -707,6 +713,12 @@ fun TexDroidApp(
                 } else if (!isWide && result.errors.isNotEmpty()) {
                     // Fehlerpanel sitzt unter dem Editor → dorthin wechseln.
                     selectedTab = Tab.Editor
+                }
+                // Ersetzte Schriften (FontFallback) melden – das PDF ist entstanden,
+                // sieht aber anders aus als vom Dokument gewünscht. Eigene Jobs, damit
+                // der Compile-Zustand nicht an der Snackbar-Anzeigedauer hängt.
+                result.notes.forEach { note ->
+                    scope.launch { snackbarHostState.showSnackbar(note) }
                 }
                 // Nachträglich abgelegte Schriften sieht fontconfig erst im nächsten
                 // Prozess (siehe FontStore) – ohne Hinweis bliebe nur ein rätselhaftes

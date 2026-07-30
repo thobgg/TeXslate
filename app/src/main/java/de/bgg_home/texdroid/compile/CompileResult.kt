@@ -28,6 +28,8 @@ data class CompileError(
  * @param log          das vollständige TeX-Log (für Detailansicht).
  * @param engineError  Fehlermeldung der Engine (leer bei Erfolg).
  * @param errors       aus dem Log extrahierte Einzelfehler (Zeile + Meldung).
+ * @param notes        Hinweise der App zum Lauf – etwa ersetzte Schriften
+ *   (siehe [FontFallback]); keine Fehler, sondern Dinge, die der Nutzer wissen soll.
  */
 data class CompileResult(
     val ok: Boolean,
@@ -36,6 +38,7 @@ data class CompileResult(
     val log: String,
     val engineError: String,
     val errors: List<CompileError>,
+    val notes: List<String> = emptyList(),
 ) {
     /** Kurze Zusammenfassung für die Snackbar (UI-Sprache via Locale). */
     fun summary(): String {

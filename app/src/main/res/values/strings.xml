@@ -164,6 +164,7 @@
     <string name="error_font_bundled">Bundled: %1$s (plus the system fonts).</string>
     <string name="error_font_own_folder">Put your own .otf/.ttf into the folder %1$s – what counts is the family name inside the font file, not the file name.</string>
     <string name="error_font_user_files">Currently in that folder: %1$s.</string>
+    <string name="font_fallback_note">Font “%1$s” is missing – typeset with “%2$s” instead.</string>
     <string name="error_font_restart">Fonts added just now are only found after restarting the app.</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About TeXslate</string>

@@ -66,11 +66,7 @@ object LatexCompiler {
                 // Fonts auspacken + fonts.conf sicherstellen, damit \setmainfont{<Name>}
                 // (Latin Modern / TeX Gyre / Systemfonts) per Name aufgelöst wird.
                 val fontConfig = FontStore.ensureReady(context)
-                val json = RustBridge.tectonicCompileToFile(
-                    source, jobDir.absolutePath, localWallClockEpoch(), fontConfig,
-                    continueOnErrors,
-                )
-                withFriendlyFontErrors(context, CompileResult.fromJson(json, source))
+                compileWithFontFallback(context, source, jobDir, fontConfig, continueOnErrors)
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)
@@ -78,6 +74,58 @@ object LatexCompiler {
                 CompileResult.nativeUnavailable(t)
             }
         }
+
+    /** Wie viele Ersatz-Durchläufe höchstens – deckt mehrere fehlende Schriften ab. */
+    private const val MAX_FONT_FALLBACK_ROUNDS = 3
+
+    /**
+     * Kompiliert und ersetzt dabei fehlende Schriften, statt am ersten Fehler
+     * stehen zu bleiben: Meldet die Engine „font X cannot be found", tritt
+     * [FontFallback] an, der Quelltext der **Compile-Kopie** wird umgeschrieben und
+     * erneut kompiliert. Jede Ersetzung landet als Hinweis im Ergebnis, damit der
+     * Nutzer weiß, dass das PDF nicht mit seiner Wunschschrift gesetzt ist.
+     *
+     * Kann die Schrift nicht ersetzt werden (Name steht in keinem `\set*font{…}`,
+     * etwa weil eine Dokumentklasse sie intern anfordert), bleibt es beim Ergebnis
+     * des letzten Laufs – dann greift die erklärende Meldung aus
+     * [withFriendlyFontErrors].
+     */
+    private fun compileWithFontFallback(
+        context: Context,
+        source: String,
+        jobDir: File,
+        fontConfig: String,
+        continueOnErrors: Boolean,
+    ): CompileResult {
+        var current = source
+        val notes = mutableListOf<String>()
+        var result = runEngine(current, jobDir, fontConfig, continueOnErrors)
+        var rounds = 0
+        while (rounds++ < MAX_FONT_FALLBACK_ROUNDS) {
+            val missing = result.errors
+                .firstNotNullOfOrNull { LatexLog.fontNotFoundName(it.message) } ?: break
+            val (rewritten, replacement) =
+                FontFallback.replaceMissingFont(current, missing) ?: break
+            notes += context.getString(R.string.font_fallback_note, missing, replacement)
+            current = rewritten
+            result = runEngine(current, jobDir, fontConfig, continueOnErrors)
+        }
+        // Fehler gegen den ZULETZT kompilierten Quelltext auswerten, Hinweise anhängen.
+        return withFriendlyFontErrors(context, result).copy(notes = notes)
+    }
+
+    /** Ein einzelner nativer Lauf; Fehler werden gegen [source] ausgewertet. */
+    private fun runEngine(
+        source: String,
+        jobDir: File,
+        fontConfig: String,
+        continueOnErrors: Boolean,
+    ): CompileResult {
+        val json = RustBridge.tectonicCompileToFile(
+            source, jobDir.absolutePath, localWallClockEpoch(), fontConfig, continueOnErrors,
+        )
+        return CompileResult.fromJson(json, source)
+    }
 
     /**
      * Ersetzt fontspec-Rohtext („The font "X" cannot be found") durch eine Meldung,

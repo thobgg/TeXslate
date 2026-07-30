@@ -124,6 +124,7 @@ object FontStore {
         "texgyretermes" to "TeX Gyre Termes",
         "texgyrepagella" to "TeX Gyre Pagella",
         "texgyreheros" to "TeX Gyre Heros",
+        "dejavusans" to "DejaVu Sans",
     )
 
     /** Nur für Tests: Prozess-Zustand zurücksetzen (siehe [fontSetChangedSinceStart]). */
