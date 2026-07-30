@@ -12,9 +12,9 @@ RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
 
 Builds:
-  - versionName: 1.0-alpha10
-    versionCode: 10
-    commit: v1.0-alpha10
+  - versionName: 1.0-alpha14
+    versionCode: 14
+    commit: v1.0-alpha14
     sudo:
       - apt-get update
       - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin bison gperf autoconf-archive
@@ -28,9 +28,9 @@ Builds:
       - export VCPKG_ROOT="$(pwd)/vcpkg" && ./vcpkg/vcpkg install --triplet arm64-android "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
       - export VCPKG_ROOT="$(pwd)/vcpkg" && ./build-native.sh arm64-v8a
     gradle:
-      - yes
+      - core
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.0-alpha10
-CurrentVersionCode: 10
+CurrentVersion: 1.0-alpha14
+CurrentVersionCode: 14
