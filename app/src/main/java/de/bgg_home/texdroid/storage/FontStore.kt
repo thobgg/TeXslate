@@ -62,8 +62,54 @@ object FontStore {
         } else if (!configFile(context).exists()) {
             writeConfig(context)
         }
+
+        // Font-Set festhalten, wie es beim ERSTEN Compile dieses Prozesses aussah –
+        // siehe [fontSetChangedSinceStart]. Muss nach dem Auspacken passieren, sonst
+        // meldet die frisch geschriebene mtime eine Änderung, die keine ist.
+        if (fingerprintAtInit == null) fingerprintAtInit = fontsFingerprint(context)
         configFile(context).absolutePath
     }.getOrDefault("")
+
+    /**
+     * Font-Set beim ersten Compile im laufenden Prozess. Bewusst nur im Speicher:
+     * er beschreibt den Zustand von fontconfig in DIESEM Prozess.
+     */
+    @Volatile
+    private var fingerprintAtInit: String? = null
+
+    /**
+     * True, sobald seit dem ersten Compile dieses Prozesses eine Schrift dazukam,
+     * ersetzt oder entfernt wurde.
+     *
+     * Hintergrund (auf dem Gerät gemessen): fontconfig baut sein Fontset **einmal
+     * pro Prozess** auf. Was danach in den Font-Ordner kommt, bleibt bis zum
+     * App-Neustart unsichtbar — `\setmainfont{<Name>}` scheitert dann mit „font
+     * cannot be found". Der On-Disk-Cache ist unschuldig: ein frischer Prozess
+     * findet die Schrift auch mit altem Cache und aktualisiert ihn selbst.
+     * Deshalb hier nur erkennen und den Nutzer zum Neustart bitten.
+     */
+    fun fontSetChangedSinceStart(context: Context): Boolean {
+        val atInit = fingerprintAtInit ?: return false
+        return runCatching { atInit != fontsFingerprint(context) }.getOrDefault(false)
+    }
+
+    /** Nur für Tests: Prozess-Zustand zurücksetzen (siehe [fontSetChangedSinceStart]). */
+    internal fun resetProcessStateForTest() {
+        fingerprintAtInit = null
+    }
+
+    /**
+     * Kompakter Fingerabdruck aller Font-Dateien in gebündeltem + Nutzer-Ordner
+     * (Name/Größe/mtime, sortiert). Ändert er sich, wurde ein Font hinzugefügt,
+     * ersetzt oder entfernt.
+     */
+    private fun fontsFingerprint(context: Context): String =
+        listOfNotNull(bundledDir(context), userDir(context))
+            .flatMap { dir -> dir.listFiles()?.asList() ?: emptyList() }
+            .filter { it.isFile && (it.name.endsWith(".otf", true) || it.name.endsWith(".ttf", true)) }
+            .map { "${it.name}:${it.length()}:${it.lastModified()}" }
+            .sorted()
+            .joinToString("|")
 
     private fun extractFonts(context: Context, destDir: File) {
         val assets = context.assets

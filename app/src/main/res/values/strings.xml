@@ -177,6 +177,7 @@
     <string name="snackbar_compile_first">Compile first – there is no PDF yet.</string>
     <string name="snackbar_nothing_to_share">Nothing selected to share.</string>
     <string name="snackbar_compile_cancelled">Compile cancelled</string>
+    <string name="snackbar_fonts_changed_restart">New font detected – restart the app so it can be used by name.</string>
     <string name="snackbar_multifile_hint">“%1$s” includes other files (\\input …). To compile multi-part projects, choose the containing folder via the “Open project folder” menu.</string>
     <string name="fallback_document">Document</string>
     <string name="fallback_project">Project</string>

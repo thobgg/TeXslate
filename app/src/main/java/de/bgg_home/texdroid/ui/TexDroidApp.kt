@@ -139,6 +139,7 @@ import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import de.bgg_home.texdroid.pdf.PdfPreview
 import de.bgg_home.texdroid.storage.DocumentStore
 import de.bgg_home.texdroid.storage.DraftStore
+import de.bgg_home.texdroid.storage.FontStore
 import de.bgg_home.texdroid.storage.ProjectEntry
 import de.bgg_home.texdroid.storage.ProjectStore
 import de.bgg_home.texdroid.storage.UserTemplate
@@ -706,6 +707,17 @@ fun TexDroidApp(
                 } else if (!isWide && result.errors.isNotEmpty()) {
                     // Fehlerpanel sitzt unter dem Editor → dorthin wechseln.
                     selectedTab = Tab.Editor
+                }
+                // Nachträglich abgelegte Schriften sieht fontconfig erst im nächsten
+                // Prozess (siehe FontStore) – ohne Hinweis bliebe nur ein rätselhaftes
+                // „font cannot be found". Eigener Job, damit der Compile-Zustand nicht
+                // an der Snackbar-Anzeigedauer hängt.
+                if (FontStore.fontSetChangedSinceStart(context)) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            context.getString(R.string.snackbar_fonts_changed_restart)
+                        )
+                    }
                 }
                 snackbarHostState.showSnackbar(result.summary())
             } finally {
