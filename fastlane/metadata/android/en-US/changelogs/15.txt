@@ -1,0 +1,6 @@
+* Documents written on a desktop now compile: if a font is missing (Arial, Times New Roman, Calibri, Consolas …), TeXslate substitutes a matching bundled one and tells you. `\usepackage[latin1]{inputenc}` and hard-wired driver options (`pdftex`, `dvips`) are adapted for the run — your file stays untouched.
+* Latin-1 files are read correctly. Previously umlauts were silently replaced by placeholder characters and lost for good on save.
+* File name case is matched: a document including `Figure.PDF` now finds `figure.pdf`. Windows and macOS ignore case, Android does not.
+* EPS figures no longer abort the compile: a labelled placeholder takes the figure's place and everything else is typeset normally. (Embedding EPS would need Ghostscript; one `epstopdf` run on your desktop is enough.) Such documents could previously even crash the app.
+* **biber now survives app updates.** In the thesis edition biber silently disappeared after every update until you cleared the app data — caused by a dangling reference to the program files.
+* Verified against 18 real documents from CTAN, GitHub and arXiv: articles, papers, a Beamer talk, a book, a CV, a letter, plots, the journal classes of IEEE, Elsevier and the American Physical Society, AMS mathematics, biblatex with biber, and critical editions. All of them compile.
