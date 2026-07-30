@@ -69,7 +69,16 @@ object BiberRuntime {
             // `biber` auf PATH = Symlink → Launcher (nativeLibDir, exec-erlaubt).
             val launchDir = File(root, "launch").apply { mkdirs() }
             val biberOnPath = File(launchDir, "biber")
-            if (!biberOnPath.exists()) {
+            // ACHTUNG: File.exists() folgt dem Symlink. Nach einem App-Update liegt
+            // der Launcher unter einem NEUEN nativeLibraryDir-Pfad; der alte Link
+            // zeigt dann ins Leere, exists() meldet false – und das erneute
+            // symlink() scheiterte mit EEXIST, weil der Link ja sehr wohl da ist.
+            // Ergebnis war: biber nach jedem Update still weg (auf dem Gerät
+            // reproduziert, 30.07.2026). Deshalb das ZIEL vergleichen, nicht die
+            // Existenz, und den Link bei Abweichung neu setzen.
+            val linkTarget = runCatching { Os.readlink(biberOnPath.absolutePath) }.getOrNull()
+            if (linkTarget != launcher.absolutePath) {
+                biberOnPath.delete()
                 Os.symlink(launcher.absolutePath, biberOnPath.absolutePath)
             }
 

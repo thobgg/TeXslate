@@ -65,6 +65,11 @@ object LatexCompiler {
                 }
                 // Fonts auspacken + fonts.conf sicherstellen, damit \setmainfont{<Name>}
                 // (Latin Modern / TeX Gyre / Systemfonts) per Name aufgelöst wird.
+                // Dateinamen angleichen, die sich nur in der Schreibweise unterscheiden
+                // (PC-Dokumente, siehe [FileCaseFix]) – vor allen weiteren Prüfungen,
+                // damit die EPS-Erkennung die Dateien schon unter dem richtigen Namen sieht.
+                val caseFixed = FileCaseFix.fixCaseMismatches(source, jobDir)
+
                 // EPS abfangen, BEVOR die Engine läuft: der fehlgeschlagene Einbau
                 // vergiftet dvipdfmx' globalen Zustand, der nächste Compile im selben
                 // Prozess bricht dann per C-Assertion ab (siehe [GraphicsCheck]).
@@ -79,7 +84,18 @@ object LatexCompiler {
                     )
                 }
                 val fontConfig = FontStore.ensureReady(context)
-                compileWithFontFallback(context, source, jobDir, fontConfig, continueOnErrors)
+                val result =
+                    compileWithFontFallback(context, source, jobDir, fontConfig, continueOnErrors)
+                if (caseFixed.isEmpty()) {
+                    result
+                } else {
+                    result.copy(
+                        notes = result.notes + context.getString(
+                            R.string.note_file_case_fixed,
+                            caseFixed.joinToString(", "),
+                        ),
+                    )
+                }
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)
