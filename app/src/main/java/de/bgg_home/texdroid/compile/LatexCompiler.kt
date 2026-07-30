@@ -73,29 +73,39 @@ object LatexCompiler {
                 // EPS abfangen, BEVOR die Engine läuft: der fehlgeschlagene Einbau
                 // vergiftet dvipdfmx' globalen Zustand, der nächste Compile im selben
                 // Prozess bricht dann per C-Assertion ab (siehe [GraphicsCheck]).
-                val eps = GraphicsCheck.epsFigures(source, jobDir.list()?.asList().orEmpty())
-                if (eps.isNotEmpty()) {
+                val epsResult = EpsPlaceholder.withPlaceholders(
+                    source,
+                    jobDir.list()?.asList().orEmpty(),
+                    context.getString(R.string.eps_placeholder_label),
+                )
+                if (epsResult.figures.isNotEmpty() && epsResult.rewritten == null) {
+                    // Ohne \begin{document} lässt sich das Makro nicht unterbringen.
                     return@withContext CompileResult.preflightError(
                         line = null,
                         message = context.getString(
                             R.string.error_eps_unsupported,
-                            eps.joinToString(", "),
+                            epsResult.figures.joinToString(", "),
                         ),
                     )
                 }
+                val toCompile = epsResult.rewritten ?: source
                 val fontConfig = FontStore.ensureReady(context)
                 val result =
-                    compileWithFontFallback(context, source, jobDir, fontConfig, continueOnErrors)
-                if (caseFixed.isEmpty()) {
-                    result
-                } else {
-                    result.copy(
-                        notes = result.notes + context.getString(
-                            R.string.note_file_case_fixed,
-                            caseFixed.joinToString(", "),
-                        ),
-                    )
+                    compileWithFontFallback(context, toCompile, jobDir, fontConfig, continueOnErrors)
+                val extraNotes = buildList {
+                    if (caseFixed.isNotEmpty()) {
+                        add(context.getString(R.string.note_file_case_fixed, caseFixed.joinToString(", ")))
+                    }
+                    if (epsResult.figures.isNotEmpty()) {
+                        add(
+                            context.getString(
+                                R.string.note_eps_placeholder,
+                                epsResult.figures.joinToString(", "),
+                            ),
+                        )
+                    }
                 }
+                if (extraNotes.isEmpty()) result else result.copy(notes = result.notes + extraNotes)
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)

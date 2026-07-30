@@ -162,6 +162,8 @@
     <string name="error_biber_unsupported">biber is not supported: TeXslate runs bibtex only. Please use \\usepackage[backend=bibtex]{biblatex}.</string>
     <string name="error_bundle_unreachable">Could not download the TeX packages. The first compile fetches them once from the network – please check your connection. After that TeXslate works offline.</string>
     <string name="error_engine_internal">Internal error in the TeX engine – the compile was aborted, the app keeps running. See the log for details.</string>
+    <string name="eps_placeholder_label">EPS figure (cannot be rendered on Android)</string>
+    <string name="note_eps_placeholder">The TeX engine cannot embed EPS here – %1$s was replaced with a placeholder, everything else is typeset normally. Embed as PDF (on your desktop: epstopdf) and the figure appears.</string>
     <string name="error_eps_unsupported">The TeX engine on Android cannot embed EPS figures (that would require Ghostscript): %1$s. Please embed them as PDF or PNG – then the document compiles.</string>
     <string name="error_font_not_found">Font “%1$s” not found.</string>
     <string name="error_font_bundled">Bundled: %1$s (plus the system fonts).</string>
