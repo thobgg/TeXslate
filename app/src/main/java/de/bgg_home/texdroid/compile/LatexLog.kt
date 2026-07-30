@@ -113,6 +113,14 @@ object LatexLog {
         return out
     }
 
+    /**
+     * Name der Schrift aus einer fontspec-Meldung („The font "X" cannot be found"),
+     * sonst null. Rein und JVM-testbar; die verständliche Ersatzmeldung baut
+     * [LatexCompiler], weil dafür Gerätepfade und das Font-Verzeichnis nötig sind.
+     */
+    fun fontNotFoundName(message: String): String? =
+        fontNotFoundRegex.find(message)?.groupValues?.get(1)
+
     /** Klammern der Zeile in den Datei-Stack einarbeiten (push je '(', pop je ')'). */
     private fun updateFileStack(line: String, stack: ArrayDeque<String?>) {
         var idx = 0

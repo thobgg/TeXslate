@@ -158,6 +158,11 @@
     <string name="menu_autocompile">Auto-Compile</string>
     <string name="menu_continue_on_errors">Trotz Fehlern kompilieren</string>
     <string name="error_biber_unsupported">biber wird nicht unterstützt: TeXslate führt nur bibtex aus. Bitte \\usepackage[backend=bibtex]{biblatex} verwenden.</string>
+    <string name="error_font_not_found">Schrift „%1$s“ nicht gefunden.</string>
+    <string name="error_font_bundled">Mitgeliefert: %1$s (dazu die Systemschriften).</string>
+    <string name="error_font_own_folder">Eigene .otf/.ttf gehören in den Ordner %1$s – maßgeblich ist der Familienname in der Schriftdatei, nicht der Dateiname.</string>
+    <string name="error_font_user_files">Dort liegt derzeit: %1$s.</string>
+    <string name="error_font_restart">Gerade abgelegte Schriften werden erst nach einem Neustart der App gefunden.</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_about">Über TeXslate</string>
 
@@ -201,7 +206,7 @@
     <string name="errors_count">Fehler (%1$d)</string>
     <string name="prev_error">Vorheriger Fehler</string>
     <string name="next_error">Nächster Fehler</string>
-    <string name="error_line_prefix">Zeile %1$d: </string>
+    <string name="error_line_prefix">"Zeile %1$d: "</string>
     <string name="explain">Erklären</string>
     <string name="loading_bundle">Lade TeX-Pakete …\nDas passiert nur beim ersten Mal und kann eine Minute dauern.</string>
     <string name="preview_not_compiled">Noch nicht kompiliert.\nTippe auf „Kompilieren“.</string>

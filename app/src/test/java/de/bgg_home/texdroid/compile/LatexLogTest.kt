@@ -193,4 +193,19 @@ class LatexLogTest {
         assertEquals(12, e.line)
         assertTrue(e.file?.endsWith("document.tex") == true)
     }
+
+    @Test
+    fun fontNotFound_liefertSchriftnamen() {
+        assertEquals(
+            "TeX Gyre Termes",
+            LatexLog.fontNotFoundName(
+                """! Package fontspec Error: The font "TeX Gyre Termes" cannot be found.""",
+            ),
+        )
+    }
+
+    @Test
+    fun andereFehler_liefernKeinenSchriftnamen() {
+        assertEquals(null, LatexLog.fontNotFoundName("! Undefined control sequence."))
+    }
 }

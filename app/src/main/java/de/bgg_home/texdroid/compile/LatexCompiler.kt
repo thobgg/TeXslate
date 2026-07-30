@@ -2,6 +2,7 @@ package de.bgg_home.texdroid.compile
 
 import android.content.Context
 import android.net.Uri
+import de.bgg_home.texdroid.R
 import de.bgg_home.texdroid.RustBridge
 import de.bgg_home.texdroid.storage.FontStore
 import de.bgg_home.texdroid.storage.ProjectStore
@@ -45,7 +46,7 @@ object LatexCompiler {
             if (biberLine != null && !BiberRuntime.ensureReady(context)) {
                 return@withContext CompileResult.preflightError(
                     line = biberLine,
-                    message = context.getString(de.bgg_home.texdroid.R.string.error_biber_unsupported),
+                    message = context.getString(R.string.error_biber_unsupported),
                 )
             }
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
@@ -69,7 +70,7 @@ object LatexCompiler {
                     source, jobDir.absolutePath, localWallClockEpoch(), fontConfig,
                     continueOnErrors,
                 )
-                CompileResult.fromJson(json, source)
+                withFriendlyFontErrors(context, CompileResult.fromJson(json, source))
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)
@@ -77,6 +78,43 @@ object LatexCompiler {
                 CompileResult.nativeUnavailable(t)
             }
         }
+
+    /**
+     * Ersetzt fontspec-Rohtext („The font "X" cannot be found") durch eine Meldung,
+     * mit der man etwas anfangen kann: welche Familien mitgeliefert sind, wohin
+     * eigene Schriften gehören und – falls zutreffend – dass eben abgelegte
+     * Schriften erst nach einem App-Neustart gefunden werden (siehe FontStore).
+     */
+    private fun withFriendlyFontErrors(context: Context, result: CompileResult): CompileResult {
+        if (result.errors.isEmpty()) return result
+        var changed = false
+        val errors = result.errors.map { err ->
+            val font = LatexLog.fontNotFoundName(err.message) ?: return@map err
+            changed = true
+            err.copy(message = fontNotFoundMessage(context, font))
+        }
+        return if (changed) result.copy(errors = errors) else result
+    }
+
+    private fun fontNotFoundMessage(context: Context, font: String): String = buildString {
+        append(context.getString(R.string.error_font_not_found, font))
+        FontStore.bundledFamilies(context).takeIf { it.isNotEmpty() }?.let { families ->
+            append(' ')
+            append(context.getString(R.string.error_font_bundled, families.joinToString(", ")))
+        }
+        FontStore.userDir(context)?.let { dir ->
+            append(' ')
+            append(context.getString(R.string.error_font_own_folder, dir.absolutePath))
+        }
+        FontStore.userFontFiles(context).takeIf { it.isNotEmpty() }?.let { files ->
+            append(' ')
+            append(context.getString(R.string.error_font_user_files, files.joinToString(", ")))
+        }
+        if (FontStore.fontSetChangedSinceStart(context)) {
+            append(' ')
+            append(context.getString(R.string.error_font_restart))
+        }
+    }
 
     /**
      * Reine Erkennung (JVM-testbar): 1-basierte Zeile des biblatex-Ladens ohne

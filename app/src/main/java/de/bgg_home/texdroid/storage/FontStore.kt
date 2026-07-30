@@ -93,6 +93,39 @@ object FontStore {
         return runCatching { atInit != fontsFingerprint(context) }.getOrDefault(false)
     }
 
+    /**
+     * Familiennamen der mitgelieferten Schriften, so wie `\setmainfont{<Name>}` sie
+     * erwartet — abgeleitet aus den tatsächlich ausgepackten Dateien. Dateiname und
+     * Familienname unterscheiden sich (`lmroman10-regular.otf` → „Latin Modern
+     * Roman"); genau daran scheitern Nutzer, deshalb nennt die Fehlermeldung die
+     * Familien und nicht die Dateien.
+     */
+    fun bundledFamilies(context: Context): List<String> {
+        val files = runCatching { bundledDir(context).list()?.map { it.lowercase() } }
+            .getOrNull() ?: return emptyList()
+        return FAMILY_BY_PREFIX
+            .filter { (prefix, _) -> files.any { it.startsWith(prefix) } }
+            .map { it.second }
+    }
+
+    /** Dateinamen der selbst abgelegten Schriften (Nutzer-Ordner), alphabetisch. */
+    fun userFontFiles(context: Context): List<String> =
+        userDir(context)?.list()
+            ?.filter { it.endsWith(".otf", true) || it.endsWith(".ttf", true) }
+            ?.sorted()
+            .orEmpty()
+
+    /** Dateipräfix → Familienname der gebündelten Schriften (Reihenfolge = Anzeige). */
+    private val FAMILY_BY_PREFIX = listOf(
+        "lmroman" to "Latin Modern Roman",
+        "lmsans" to "Latin Modern Sans",
+        "lmmono" to "Latin Modern Mono",
+        "latinmodern-math" to "Latin Modern Math",
+        "texgyretermes" to "TeX Gyre Termes",
+        "texgyrepagella" to "TeX Gyre Pagella",
+        "texgyreheros" to "TeX Gyre Heros",
+    )
+
     /** Nur für Tests: Prozess-Zustand zurücksetzen (siehe [fontSetChangedSinceStart]). */
     internal fun resetProcessStateForTest() {
         fingerprintAtInit = null
