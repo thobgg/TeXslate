@@ -64,6 +64,42 @@ echo "ABIs:       ${ABIS[*]}"
 # der \XeTeXglyphname erreicht (u.a. unicode-math), reisst die App mit. Wir patchen
 # die vendored Crate-Quelle idempotent vor dem cargo-Build (Fix: ueber eine Kopie
 # drucken, den Original-Zeiger freigeben).
+# ── Bridge-Fix (doppeltes Schliessen einer Ausgabe) ──────────────────────────
+# tectonic_bridge_core::CoreBridgeState::output_close macht
+#   let mut oh = self.output_handles[id.idx()].take().unwrap();
+# Schliesst die C-Seite dieselbe Ausgabe ZWEIMAL, ist take() None -> unwrap()
+# panickt. Der Aufruf kommt aus dem extern "C"-Callback ttbc_output_close, also
+# darf der Panic nicht entwinden: Rust bricht sofort ab (panic_cannot_unwind ->
+# SIGABRT), die App ist weg und KEIN catch_unwind der Welt faengt das.
+# Reproduziert mit dem REVTeX/APS-Beispiel (Physik) samt .eps-Abbildungen:
+# dvipdfmx schliesst auf dem Fehlerpfad in pdf_obj_reset_global_state doppelt.
+# Wir machen das zweite Schliessen zum No-Op.
+patch_bridge_double_close() {
+  local f
+  f="$(ls -d "$HOME"/.cargo/registry/src/*/tectonic_bridge_core-*/src/lib.rs 2>/dev/null | head -1)"
+  if [ -z "$f" ]; then
+    echo "  double-close-Fix: Quelle noch nicht im cargo-Cache (kommt beim ersten Build)."
+    return 0
+  fi
+  if grep -q 'double-close fix' "$f"; then
+    echo "  double-close-Fix: bereits angewandt."
+    return 0
+  fi
+  # (a) Doppeltes take() abfangen …
+  perl -0777 -pi -e 's#let mut oh = self\.output_handles\[id\.idx\(\)\]\.take\(\)\.unwrap\(\);#/* double-close fix */\n        let mut oh = match self.output_handles.get_mut(id.idx()).and_then(|s| s.take()) { Some(h) => h, None => return false };#' "$f"
+  # (b) … und die FFI-Grenze selbst absichern: ein Panic, der aus einer
+  #     extern "C"-Funktion entkommen will, beendet den Prozess sofort
+  #     (panic_cannot_unwind). Egal was drinnen schiefgeht – hier ist Schluss.
+  perl -0777 -pi -e 's#\{\n    match handle \{\n        Some\(handle\) => libc::c_int::from\(es\.output_close\(handle\)\),\n        None => 0, // This is/was the behavior of close_file\(\) in C\.\n    \}\n\}#{\n    // double-close fix: no panic may cross this extern "C" boundary\n    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| match handle {\n        Some(handle) => libc::c_int::from(es.output_close(handle)),\n        None => 0,\n    }))\n    .unwrap_or(1)\n}#' "$f"
+  if grep -q 'double-close fix' "$f"; then
+    echo "  double-close-Fix: angewandt -> $f"
+    rm -rf "$PROJECT_DIR"/rust/target/*/release/build/tectonic_bridge_core-* \
+           "$PROJECT_DIR"/rust/target/*/release/deps/*tectonic_bridge_core* 2>/dev/null || true
+  else
+    echo "  double-close-Fix: Muster nicht gefunden (Crate-Version geaendert?) -> BITTE PRUEFEN"
+  fi
+}
+
 patch_xetex_print_glyph_name() {
   local f
   f="$(ls -d "$HOME"/.cargo/registry/src/*/tectonic_engine_xetex-*/xetex/xetex-ext.c 2>/dev/null | head -1)"
@@ -87,6 +123,7 @@ patch_xetex_print_glyph_name() {
   fi
 }
 patch_xetex_print_glyph_name
+patch_bridge_double_close
 
 # ── ABI → vcpkg-Triplet + NDK-Lib-Verzeichnis (für libc++_shared.so) ─────────
 abi_to_triplet() { case "$1" in

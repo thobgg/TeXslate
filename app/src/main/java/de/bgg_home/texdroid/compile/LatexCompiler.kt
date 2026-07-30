@@ -65,6 +65,19 @@ object LatexCompiler {
                 }
                 // Fonts auspacken + fonts.conf sicherstellen, damit \setmainfont{<Name>}
                 // (Latin Modern / TeX Gyre / Systemfonts) per Name aufgelöst wird.
+                // EPS abfangen, BEVOR die Engine läuft: der fehlgeschlagene Einbau
+                // vergiftet dvipdfmx' globalen Zustand, der nächste Compile im selben
+                // Prozess bricht dann per C-Assertion ab (siehe [GraphicsCheck]).
+                val eps = GraphicsCheck.epsFigures(source, jobDir.list()?.asList().orEmpty())
+                if (eps.isNotEmpty()) {
+                    return@withContext CompileResult.preflightError(
+                        line = null,
+                        message = context.getString(
+                            R.string.error_eps_unsupported,
+                            eps.joinToString(", "),
+                        ),
+                    )
+                }
                 val fontConfig = FontStore.ensureReady(context)
                 compileWithFontFallback(context, source, jobDir, fontConfig, continueOnErrors)
             } catch (t: UnsatisfiedLinkError) {

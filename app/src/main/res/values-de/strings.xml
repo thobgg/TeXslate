@@ -160,6 +160,7 @@
     <string name="error_biber_unsupported">biber wird nicht unterstützt: TeXslate führt nur bibtex aus. Bitte \\usepackage[backend=bibtex]{biblatex} verwenden.</string>
     <string name="error_bundle_unreachable">TeX-Pakete konnten nicht geladen werden. Der erste Compile holt sie einmalig aus dem Netz – bitte Verbindung prüfen. Danach arbeitet TeXslate offline.</string>
     <string name="error_engine_internal">Interner Fehler der TeX-Engine – der Compile wurde abgebrochen, die App läuft weiter. Details stehen im Log.</string>
+    <string name="error_eps_unsupported">EPS-Abbildungen kann die TeX-Engine auf Android nicht einbinden (dafür wäre Ghostscript nötig): %1$s. Bitte als PDF oder PNG einbetten – dann läuft das Dokument durch.</string>
     <string name="error_font_not_found">Schrift „%1$s“ nicht gefunden.</string>
     <string name="error_font_bundled">Mitgeliefert: %1$s (dazu die Systemschriften).</string>
     <string name="error_font_own_folder">Eigene .otf/.ttf gehören in den Ordner %1$s – maßgeblich ist der Familienname in der Schriftdatei, nicht der Dateiname.</string>
