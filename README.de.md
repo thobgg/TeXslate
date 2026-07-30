@@ -199,8 +199,9 @@ sudo apt install -y cmake ninja-build pkg-config autoconf automake \
   libtool libtool-bin bison gperf autoconf-archive
 
 # vcpkg + C-Stack für das gewünschte Android-Triplet (Beispiel: Emulator = x64-android)
-git clone https://github.com/microsoft/vcpkg ~/vcpkg && ~/vcpkg/bootstrap-vcpkg.sh
-ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> ~/vcpkg/vcpkg install --triplet x64-android \
+export VCPKG_ROOT=~/.local/share/texslate/vcpkg
+git clone https://github.com/microsoft/vcpkg "$VCPKG_ROOT" && "$VCPKG_ROOT"/bootstrap-vcpkg.sh
+ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> "$VCPKG_ROOT"/vcpkg install --triplet x64-android \
   "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
 # für echte Tablets zusätzlich: --triplet arm64-android
 ```

@@ -23,15 +23,15 @@ Fehlen sie, baut die Edition trotzdem, aber `BiberRuntime.ensureReady` liefert `
 ## Woher
 
 Fertige Artefakte + reproduzierbares Rezept liegen außerhalb des Repos unter
-`~/biber-android/`:
+`~/.local/share/texslate/biber-android/`:
 
-- `~/biber-android/pkg/` — fertiges Paket (einfach hierher kopieren):
+- `~/.local/share/texslate/biber-android/pkg/` — fertiges Paket (einfach hierher kopieren):
   ```
-  cp ~/biber-android/pkg/biber-tree.zip                 app/src/thesis/assets/
-  cp ~/biber-android/pkg/jniLibs/arm64-v8a/libperl_exe.so       app/src/thesis/jniLibs/arm64-v8a/
-  cp ~/biber-android/pkg/jniLibs/arm64-v8a/libbiber_launcher.so app/src/thesis/jniLibs/arm64-v8a/
+  cp ~/.local/share/texslate/biber-android/pkg/biber-tree.zip                 app/src/thesis/assets/
+  cp ~/.local/share/texslate/biber-android/pkg/jniLibs/arm64-v8a/libperl_exe.so       app/src/thesis/jniLibs/arm64-v8a/
+  cp ~/.local/share/texslate/biber-android/pkg/jniLibs/arm64-v8a/libbiber_launcher.so app/src/thesis/jniLibs/arm64-v8a/
   ```
-- `~/biber-android/scripts/` — vollständiges Bau-Rezept (`build-perl-bionic.sh`,
+- `~/.local/share/texslate/biber-android/scripts/` — vollständiges Bau-Rezept (`build-perl-bionic.sh`,
   `xsbuild.sh`, `biber-xs-recipe.md`, `packaging-plan.md`, `biber_launcher.c`),
   falls die Runtime neu gebaut werden muss.
 

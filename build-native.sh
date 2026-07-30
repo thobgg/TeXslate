@@ -7,7 +7,8 @@
 #   - Rust + Android-Targets:  rustup target add x86_64-linux-android aarch64-linux-android
 #   - cargo-ndk:               cargo install cargo-ndk
 #   - Android NDK (via Android Studio SDK Manager)
-#   - vcpkg unter $VCPKG_ROOT (Default: ~/vcpkg), mit dem C-Stack für das jeweilige
+#   - vcpkg unter $VCPKG_ROOT (Default: ~/.local/share/texslate/vcpkg, sonst ~/vcpkg),
+#     mit dem C-Stack für das jeweilige
 #     Android-Triplet gebaut, z.B. für x64-android:
 #       vcpkg install --triplet x64-android \
 #         "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng fontconfig
@@ -33,7 +34,20 @@ if [ -z "${ANDROID_NDK_HOME:-}" ]; then
   ANDROID_NDK_HOME="$(ls -d "$ANDROID_HOME/ndk/"*/ 2>/dev/null | sort -V | tail -1)"
   export ANDROID_NDK_HOME="${ANDROID_NDK_HOME%/}"
 fi
-export VCPKG_ROOT="${VCPKG_ROOT:-$HOME/vcpkg}"
+# Default: XDG-Datenverzeichnis (~/.local/share/texslate/vcpkg). Der alte Ort
+# ~/vcpkg wird weiter akzeptiert, damit bestehende Arbeitsplätze nichts merken.
+if [ -z "${VCPKG_ROOT:-}" ]; then
+  if [ -d "$HOME/.local/share/texslate/vcpkg" ]; then
+    VCPKG_ROOT="$HOME/.local/share/texslate/vcpkg"
+  else
+    VCPKG_ROOT="$HOME/vcpkg"
+  fi
+fi
+export VCPKG_ROOT
+# ⚠️ Zieht VCPKG_ROOT um, halten die Build-Skripte von Cargo ihre alten
+# -L-Pfade fest (cargo:rustc-link-search im gecachten `output`) und das Linken
+# scheitert mit „unable to find library -lbz2" o.ä. Dann einmal:
+#   rm -rf rust/target/*/release/build/tectonic_bridge_* rust/target/*/release/build/tectonic_engine_*
 export TECTONIC_DEP_BACKEND="vcpkg"
 
 NDK_SYSROOT_LIB="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib"
