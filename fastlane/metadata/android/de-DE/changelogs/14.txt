@@ -1,0 +1,7 @@
+* Schriften aus PC-Dokumenten brechen den Compile nicht mehr ab: Fehlt Arial, Times New Roman, Calibri, Consolas & Co., setzt TeXslate eine passende mitgelieferte Familie ein, erzeugt das PDF und sagt, was ersetzt wurde. Rund 60 geläufige Namen sind zugeordnet, unbekannte über eine Heuristik.
+* DejaVu Sans liegt jetzt bei — beliebt für Symbole und große Zeichenabdeckung.
+* Fehlt eine Schrift doch, erklärt die Meldung endlich, was zu tun ist: welche Familien mitgeliefert sind, in welchen Ordner eigene .otf/.ttf gehören und dass der Familienname in der Datei zählt, nicht der Dateiname.
+* Eine nachträglich abgelegte Schrift wird erkannt — mit Hinweis, dass sie erst nach einem Neustart der App gefunden wird.
+* Mehrteilige Projekte in Unterordnern kompilieren zuverlässig: eigene Dokumentklassen und \input-Dateien werden gefunden, und ein Projekt wird nach dem Neustart wiederhergestellt.
+* Schnellerer Compile: Hilfsdateien bleiben zwischen den Läufen erhalten (spart bei Inhaltsverzeichnis und Querverweisen einen kompletten Durchlauf), und Projektdateien werden nur noch kopiert, wenn sie sich geändert haben.
+* Kein Absturz mehr, wenn die TeX-Pakete beim ersten Compile nicht geladen werden können — stattdessen eine Meldung mit dem Hinweis, dass dafür einmalig Internet nötig ist.

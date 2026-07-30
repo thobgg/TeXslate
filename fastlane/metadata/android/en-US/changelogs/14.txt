@@ -1,0 +1,7 @@
+* Fonts from desktop documents no longer abort the compile: if Arial, Times New Roman, Calibri, Consolas & co. are missing, TeXslate substitutes a matching bundled family, produces the PDF and tells you what was replaced. Around 60 common names are mapped, unknown ones go through a heuristic.
+* DejaVu Sans is now bundled — popular for symbols and its wide character coverage.
+* If a font is still missing, the message finally explains what to do: which families are bundled, which folder your own .otf/.ttf belong in, and that the family name inside the file counts, not the file name.
+* A font added later is detected — with a note that it is only found after restarting the app.
+* Multi-file projects in subfolders compile reliably: custom document classes and \input files are found, and a project is restored after a restart.
+* Faster compiles: auxiliary files are kept between runs (saving a full pass for documents with a table of contents or cross-references), and project files are only copied when they have changed.
+* No more crash when the TeX packages cannot be downloaded on the first compile — you get a message explaining that this needs an internet connection once.
