@@ -41,13 +41,17 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
   Palette für gängige Bausteine, Umgebungen und Mathe-Symbole; der Cursor landet
   automatisch an der richtigen Stelle.
 - **Compiler auf dem Gerät** (Tectonic/XeTeX) — kein Terminal, keine Cloud.
-  Optionales **Auto-Compile** beim Tippen.
+  Optionales **Auto-Compile** beim Tippen. Hilfsdateien bleiben zwischen den Läufen
+  erhalten (spart bei Inhaltsverzeichnis und Querverweisen einen kompletten
+  Durchlauf), Projektdateien werden nur kopiert, wenn sie sich geändert haben.
 - **PDF-Vorschau** daneben (Tablet-Split-View mit verschiebbarem Trenner) oder als
   Tab auf schmalen Displays.
 - **Schriften über den Namen**: `\setmainfont{…}` funktioniert offline — ein
-  kuratierter Satz (Latin Modern Roman, TeX Gyre Termes/Pagella/Heros) ist
-  gebündelt und über den Namen auflösbar, ebenso deine Android-Systemschriften und
-  jede `.otf`/`.ttf`, die du in den Schriften-Ordner der App legst.
+  kuratierter Satz (Latin Modern Roman, TeX Gyre Termes/Pagella/Heros, **DejaVu
+  Sans**) ist gebündelt und über den Namen auflösbar, ebenso deine
+  Android-Systemschriften und jede `.otf`/`.ttf`, die du in den Schriften-Ordner der
+  App legst. Fehlt eine Schrift, wird sie ersetzt statt den Compile abzubrechen —
+  siehe [Dokumente vom PC](#dokumente-vom-pc).
 - **Eingedeutschte Fehler**: die häufigsten TeX-Meldungen werden als kurze,
   verständliche Sätze in der UI-Sprache umformuliert; ein Tipp springt zur
   Fehlerzeile.
@@ -73,6 +77,30 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
   Assistent antwortet in der UI-Sprache.
 - **Über-Bildschirm** (Überlauf-Menü): Version, Entwickler, Lizenz und die
   gebündelten Open-Source-Komponenten.
+
+## Dokumente vom PC
+
+Die meisten `.tex`-Dateien sind für **pdfLaTeX auf einem Rechner** geschrieben —
+TeXslate rechnet mit XeTeX. Statt dich dein Dokument anpassen zu lassen, passt sich
+die App an. Geändert wird dabei **nie deine Datei**, sondern nur die Arbeitskopie
+für den einen Compile-Lauf; jeder Eingriff wird gemeldet, und die Zeilennummern im
+Fehlerpanel bleiben gültig.
+
+| Was am PC anders ist | Was TeXslate tut |
+|---|---|
+| `Arial`, `Times New Roman`, `Calibri`, `Consolas` … sind nicht da | setzt eine passende mitgelieferte Familie ein (~60 Namen zugeordnet, unbekannte über eine Heuristik) |
+| `\usepackage[latin1]{inputenc}` | blendet es aus — XeTeX liest ohnehin UTF-8 |
+| Datei ist Latin-1-kodiert | wird richtig gelesen (vorher gingen Umlaute beim Speichern verloren) |
+| `\usepackage[pdftex]{hyperref}` | stellt die Treiberoption auf `xetex` um |
+| `Bild.PDF` im Dokument, `bild.pdf` auf der Platte | gleicht die Schreibweise an (Windows/macOS sind da unempfindlich, Android nicht) |
+| `.eps`-Abbildungen | setzt einen beschrifteten Platzhalter — das Dokument kompiliert, nur die Bildstelle bleibt leer (EPS bräuchte Ghostscript). Liegt eine `.pdf` daneben, wird die genommen |
+
+Geprüft an **18 echten Dokumenten** von CTAN, GitHub und arXiv — Artikel, Paper mit
+Nebendateien, Beamer-Vortrag, Buch, Lebenslauf, Brief, Diagramme, die Journal-Klassen
+von IEEE, Elsevier und der American Physical Society (REVTeX), AMS-Mathematik,
+`biblatex` mit biber und Editionsphilologie (reledmac). Alle 18 kompilieren, keine
+Abstürze. Die Sammlung läuft als Regressionstest mit, siehe
+[`docs/CORPUS.md`](./docs/CORPUS.md).
 
 ## Warum
 
@@ -243,6 +271,11 @@ Der Quellcode bleibt frei; eine Play-Store-Verteilung bleibt erlaubt.
   `\setsansfont{…}`, `\setmonofont{…}` und `\setmathfont{Latin Modern Math}` sie über den Namen auflösen. Sie stehen unter
   der **GUST Font License (LPPL-basiert)**; der Lizenztext liegt bei unter
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
+- **DejaVu Sans** (`app/src/main/assets/fonts/DejaVuSans*.ttf`): mitgeliefert wegen
+  der großen Zeichenabdeckung (Symbole, Griechisch, Kyrillisch) und weil es zu den
+  am häufigsten verlangten Familien gehört. Freie Lizenz (Bitstream Vera /
+  gemeinfreie Ergänzungen); der Text liegt bei unter
+  [`app/src/main/assets/fonts/DEJAVU-LICENSE.txt`](./app/src/main/assets/fonts/DEJAVU-LICENSE.txt).
 - **LaTeX/TeX-TextMate-Grammatik** (`app/src/main/assets/textmate/latex/`):
   `LaTeX.tmLanguage.json`, `TeX.tmLanguage.json` und `language-configuration.json`
   stammen von **[jlelong/vscode-latex-basics](https://github.com/jlelong/vscode-latex-basics)**

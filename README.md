@@ -40,13 +40,16 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
   for common building blocks, environments and math symbols; the cursor lands in
   the right place automatically.
 - **On-device compiler** (Tectonic/XeTeX) — no terminal, no cloud. Optional
-  **auto-compile** as you type.
+  **auto-compile** as you type. Auxiliary files are kept between runs (saving a
+  full pass for documents with a table of contents or cross-references), and
+  project files are only copied when they have changed.
 - **PDF preview** alongside (tablet split view with a draggable divider) or as a
   tab on narrow displays.
 - **Fonts by name**: `\setmainfont{…}` works offline — a curated set (Latin
-  Modern Roman, TeX Gyre Termes/Pagella/Heros) is bundled and resolvable by name,
-  as are your Android system fonts and any `.otf`/`.ttf` you drop into the app's
-  font folder.
+  Modern Roman, TeX Gyre Termes/Pagella/Heros, **DejaVu Sans**) is bundled and
+  resolvable by name, as are your Android system fonts and any `.otf`/`.ttf` you
+  drop into the app's font folder. Missing fonts are substituted instead of
+  aborting the compile — see [Documents from your desktop](#documents-from-your-desktop).
 - **Localized errors**: the most common TeX messages are rewritten as short,
   readable sentences in the UI language; tapping jumps to the error line.
 - **Multi-file projects**: project-folder sidebar (file tree), tap to switch files,
@@ -69,6 +72,29 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
   **fully offline**, and the assistant replies in the UI language.
 - **About screen** (overflow menu): version, developer, license and the bundled
   open-source components.
+
+## Documents from your desktop
+
+Most `.tex` files out there are written for **pdfLaTeX on a computer** — TeXslate
+runs XeTeX. Rather than making you adapt your document, the app adapts itself. It
+never touches **your file**: only the working copy for that one compile run is
+rewritten, every change is reported, and line numbers in the error panel stay valid.
+
+| What differs on the desktop | What TeXslate does |
+|---|---|
+| `Arial`, `Times New Roman`, `Calibri`, `Consolas` … are not there | substitutes a matching bundled family (~60 names mapped, unknown ones via a heuristic) |
+| `\usepackage[latin1]{inputenc}` | skips it — XeTeX reads UTF-8 anyway |
+| file is Latin-1 encoded | is read correctly (umlauts used to be lost on save) |
+| `\usepackage[pdftex]{hyperref}` | switches the driver option to `xetex` |
+| `Figure.PDF` in the document, `figure.pdf` on disk | matches the file name case (Windows/macOS ignore case, Android does not) |
+| `.eps` figures | inserts a labelled placeholder — the document compiles, only the figure area stays empty (EPS would need Ghostscript). If a `.pdf` sits next to it, that one is used |
+
+Verified against **18 real documents** from CTAN, GitHub and arXiv — articles,
+papers with side files, a Beamer talk, a book, a CV, a letter, plots, the journal
+classes of IEEE, Elsevier and the American Physical Society (REVTeX), AMS
+mathematics, `biblatex` with biber, and critical editions (reledmac). All 18
+compile, no crashes. The collection runs as a regression test, see
+[`docs/CORPUS.md`](./docs/CORPUS.md).
 
 ## Why
 
@@ -232,6 +258,11 @@ The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
   `\setsansfont{…}`, `\setmonofont{…}` and `\setmathfont{Latin Modern Math}` resolve them by name. They are licensed
   under the **GUST Font License (LPPL-based)**; the license text is included at
   [`app/src/main/assets/fonts/GUST-FONT-LICENSE.txt`](./app/src/main/assets/fonts/GUST-FONT-LICENSE.txt).
+- **DejaVu Sans** (`app/src/main/assets/fonts/DejaVuSans*.ttf`): bundled for its wide
+  character coverage (symbols, Greek, Cyrillic) and because it is one of the most
+  frequently requested families. Free license (Bitstream Vera / public domain
+  additions); the text is included at
+  [`app/src/main/assets/fonts/DEJAVU-LICENSE.txt`](./app/src/main/assets/fonts/DEJAVU-LICENSE.txt).
 - **biber runtime** (`thesis` edition only, `app/src/thesis/`): a cross-compiled
   Perl 5.36.3 + XS chain (Text::BibTeX/btparse, XML::LibXML/XSLT, …) and **biber
   2.17**. biber and Perl are free software (**Artistic/GPL**); this is why the
