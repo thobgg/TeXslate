@@ -51,7 +51,7 @@ object LatexCompiler {
             }
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
             try {
-                cleanAuxArtifacts(jobDir, mainFileUri)
+                cleanAuxArtifacts(jobDir, mainFileUri?.toString(), source)
                 if (projectTree != null) {
                     // Ab dem Ordner der Hauptdatei spiegeln, damit Geschwister-
                     // dateien (Klasse, \input) neben `document.tex` in der Job-
@@ -99,6 +99,20 @@ object LatexCompiler {
     ): CompileResult {
         var current = source
         val notes = mutableListOf<String>()
+        // Dokumente für pdfLaTeX vorab XeTeX-tauglich machen (inputenc, Treiberoptionen).
+        // Das ist deterministisch, kostet also keinen Extra-Durchlauf – anders als die
+        // Schrift-Ersetzung, die erst auf einen Fehler der Engine reagieren kann.
+        EngineCompat.adapt(current)?.let { (adapted, what) ->
+            current = adapted
+            what.forEach { a ->
+                notes += context.getString(
+                    when (a) {
+                        EngineCompat.Adaptation.INPUTENC_ENTFERNT -> R.string.compat_inputenc_removed
+                        EngineCompat.Adaptation.TREIBER_UMGESTELLT -> R.string.compat_driver_rewritten
+                    },
+                )
+            }
+        }
         var result = runEngine(current, jobDir, fontConfig, continueOnErrors)
         var rounds = 0
         while (rounds++ < MAX_FONT_FALLBACK_ROUNDS) {
@@ -244,20 +258,34 @@ object LatexCompiler {
      *
      * Der Hauptinput heißt nativ immer `document.tex`, daher alle Namen `document.*`.
      */
-    private fun cleanAuxArtifacts(jobDir: File, mainFileUri: Uri?) {
+    private fun cleanAuxArtifacts(jobDir: File, docUri: String?, source: String) {
         BIB_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
         File(jobDir, "document-blx.bib").delete() // biblatex-Kontrolldatei
 
-        // Beim Wechsel des Dokuments gilt das Behalten nicht: die Hilfsdateien
-        // heißen immer `document.*` und beschrieben dann fremde Labels/Kapitel.
-        // Tectonic würde sich über einen Extra-Durchlauf einfangen – den sparen wir
-        // und vermeiden zugleich irritierende „Reference undefined" im ersten Lauf.
+        // Beim Wechsel des Dokuments gilt das Behalten nicht (siehe [documentSignature]).
         val marker = File(jobDir, ".lastdoc")
-        val docId = mainFileUri?.toString() ?: "(entwurf)"
-        if (marker.takeIf { it.exists() }?.readText() != docId) {
+        val signature = documentSignature(docUri, source)
+        if (marker.takeIf { it.exists() }?.readText() != signature) {
             REF_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
-            runCatching { marker.writeText(docId) }
+            runCatching { marker.writeText(signature) }
         }
+    }
+
+    /**
+     * Kennung des Dokuments für die Frage „dürfen die Hilfsdateien des letzten Laufs
+     * bleiben?": die Datei-Uri **plus** ein Fingerabdruck der Präambel (alles vor
+     * `\begin{document}`).
+     *
+     * Die Präambel muss mit hinein, weil die Hilfsdateien immer `document.*` heißen:
+     * Zwei verschiedene Dokumente ohne Uri (Entwürfe) – oder ein Wechsel von Klasse
+     * bzw. Sprache – erbten sonst die `.aux` des anderen. babel bricht dann hart ab
+     * („You haven't defined the language '*' yet"), auf dem Gerät reproduziert.
+     * Beim normalen Tippen im Textteil bleibt die Präambel gleich, der Tempo-Gewinn
+     * also erhalten.
+     */
+    internal fun documentSignature(docUri: String?, source: String): String {
+        val preamble = source.substringBefore("\\begin{document}")
+        return "${docUri ?: "(entwurf)"}|${preamble.hashCode()}"
     }
 
     /** Bibliografie-Artefakte: immer weg (veraltete `.bbl` bricht biblatex). */

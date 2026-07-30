@@ -18,11 +18,34 @@ import java.io.OutputStream
  */
 object DocumentStore {
 
-    /** Liest den gesamten Textinhalt der [uri] (UTF-8). Läuft auf [Dispatchers.IO]. */
+    /** Liest den gesamten Textinhalt der [uri]. Läuft auf [Dispatchers.IO]. */
     suspend fun read(context: Context, uri: Uri): String = withContext(Dispatchers.IO) {
         context.contentResolver.openInputStream(uri)?.use { input ->
-            input.readBytes().toString(Charsets.UTF_8)
+            decodeText(input.readBytes())
         } ?: ""
+    }
+
+    /**
+     * Dekodiert [bytes] als UTF-8 und fällt bei ungültigen Bytes auf ISO-8859-1
+     * (Latin-1) zurück — ältere Dokumente sind häufig so kodiert, deutsche
+     * Umlaute stehen dort als Einzelbyte.
+     *
+     * Vorher lief das über `toString(Charsets.UTF_8)`: der Decoder ersetzt
+     * ungültige Bytes STILL durch „\uFFFD". Wer eine Latin-1-Datei öffnete und
+     * speicherte, schrieb diese Ersatzzeichen zurück und hatte seine Umlaute
+     * endgültig verloren. Beim Speichern wird weiterhin UTF-8 geschrieben, die
+     * Datei wechselt also einmalig die Kodierung — das ist gewollt und besser,
+     * als den Text zu beschädigen.
+     */
+    internal fun decodeText(bytes: ByteArray): String {
+        val decoder = Charsets.UTF_8.newDecoder()
+            .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
+            .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
+        return try {
+            decoder.decode(java.nio.ByteBuffer.wrap(bytes)).toString()
+        } catch (_: java.nio.charset.CharacterCodingException) {
+            String(bytes, Charsets.ISO_8859_1)
+        }
     }
 
     /**

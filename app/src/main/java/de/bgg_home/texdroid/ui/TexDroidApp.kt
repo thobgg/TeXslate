@@ -284,6 +284,8 @@ fun TexDroidApp(
     val scope = rememberCoroutineScope()
     val darkTheme = isSystemInDarkTheme()
     val snackbarHostState = remember { SnackbarHostState() }
+    // Schon gezeigte Compile-Hinweise (ersetzte Schriften, XeTeX-Anpassungen).
+    val shownNotes = remember { mutableSetOf<String>() }
 
     // Zuletzt gesicherter Entwurf (überlebt Prozess-Tod). Einmalig beim Start gelesen;
     // vorhanden → Startinhalt & Dateibezug wiederherstellen, sonst Beispiel-Dokument.
@@ -718,7 +720,11 @@ fun TexDroidApp(
                 // sieht aber anders aus als vom Dokument gewünscht. Eigene Jobs, damit
                 // der Compile-Zustand nicht an der Snackbar-Anzeigedauer hängt.
                 result.notes.forEach { note ->
-                    scope.launch { snackbarHostState.showSnackbar(note) }
+                    // Nur beim ersten Mal je Meldung: beim Auto-Compile käme sonst nach
+                    // jedem Tippstopp dieselbe Snackbar.
+                    if (shownNotes.add(note)) {
+                        scope.launch { snackbarHostState.showSnackbar(note) }
+                    }
                 }
                 // Nachträglich abgelegte Schriften sieht fontconfig erst im nächsten
                 // Prozess (siehe FontStore) – ohne Hinweis bliebe nur ein rätselhaftes

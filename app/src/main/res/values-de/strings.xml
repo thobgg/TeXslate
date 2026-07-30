@@ -164,6 +164,8 @@
     <string name="error_font_bundled">Mitgeliefert: %1$s (dazu die Systemschriften).</string>
     <string name="error_font_own_folder">Eigene .otf/.ttf gehören in den Ordner %1$s – maßgeblich ist der Familienname in der Schriftdatei, nicht der Dateiname.</string>
     <string name="error_font_user_files">Dort liegt derzeit: %1$s.</string>
+    <string name="compat_inputenc_removed">Für XeTeX angepasst: „inputenc“ wird nicht gebraucht und wurde für den Lauf ausgeblendet.</string>
+    <string name="compat_driver_rewritten">Für XeTeX angepasst: Treiberoption (pdftex/dvips) wurde für den Lauf auf „xetex“ umgestellt.</string>
     <string name="font_fallback_note">Schrift „%1$s“ fehlt – ersatzweise mit „%2$s“ gesetzt.</string>
     <string name="error_font_restart">Gerade abgelegte Schriften werden erst nach einem Neustart der App gefunden.</string>
     <string name="menu_settings">Einstellungen</string>
