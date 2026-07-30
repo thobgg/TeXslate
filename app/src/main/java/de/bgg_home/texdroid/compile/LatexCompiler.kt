@@ -51,7 +51,7 @@ object LatexCompiler {
             }
             val jobDir = File(context.filesDir, "job").apply { mkdirs() }
             try {
-                cleanAuxArtifacts(jobDir)
+                cleanAuxArtifacts(jobDir, mainFileUri)
                 if (projectTree != null) {
                     // Ab dem Ordner der Hauptdatei spiegeln, damit Geschwister-
                     // dateien (Klasse, \input) neben `document.tex` in der Job-
@@ -205,22 +205,41 @@ object LatexCompiler {
     }
 
     /**
-     * Zwischen-/Hilfsdateien des letzten Compile-Laufs löschen, bevor neu gebaut
-     * wird. Nötig, damit eine veraltete `.bbl` (z.B. aus einem anderen Bib-System)
-     * den nächsten Lauf nicht bricht: biblatex bricht sonst mit „File 'document.bbl'
-     * not created by biblatex" ab. PDF, SyncTeX, das Tectonic-Bundle/den Cache und
-     * die Projektquellen lassen wir bewusst stehen (Neuaufbau wäre teuer).
+     * Bibliografie-Zwischendateien des letzten Laufs löschen, bevor neu gebaut wird.
+     * Nötig, damit eine veraltete `.bbl` (z.B. aus einem anderen Bib-System) den
+     * nächsten Lauf nicht bricht: biblatex bricht sonst mit „File 'document.bbl'
+     * not created by biblatex" ab.
+     *
+     * **Nicht** gelöscht werden `.aux`, `.toc` & Co: Tectonic läuft, bis das Ergebnis
+     * stabil ist – findet es die Hilfsdateien des letzten Laufs vor, stimmen
+     * Querverweise und Inhaltsverzeichnis schon im ersten Durchlauf und der zweite
+     * entfällt. Genau wie latexmk auf dem PC. Sie zu löschen kostete bei jedem
+     * Compile einen kompletten Extra-Durchlauf (auf dem Gerät gemessen).
+     * PDF, SyncTeX, Bundle-Cache und Projektquellen bleiben ebenfalls stehen.
      *
      * Der Hauptinput heißt nativ immer `document.tex`, daher alle Namen `document.*`.
      */
-    private fun cleanAuxArtifacts(jobDir: File) {
-        AUX_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
+    private fun cleanAuxArtifacts(jobDir: File, mainFileUri: Uri?) {
+        BIB_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
         File(jobDir, "document-blx.bib").delete() // biblatex-Kontrolldatei
+
+        // Beim Wechsel des Dokuments gilt das Behalten nicht: die Hilfsdateien
+        // heißen immer `document.*` und beschrieben dann fremde Labels/Kapitel.
+        // Tectonic würde sich über einen Extra-Durchlauf einfangen – den sparen wir
+        // und vermeiden zugleich irritierende „Reference undefined" im ersten Lauf.
+        val marker = File(jobDir, ".lastdoc")
+        val docId = mainFileUri?.toString() ?: "(entwurf)"
+        if (marker.takeIf { it.exists() }?.readText() != docId) {
+            REF_EXTENSIONS.forEach { ext -> File(jobDir, "document.$ext").delete() }
+            runCatching { marker.writeText(docId) }
+        }
     }
 
-    private val AUX_EXTENSIONS = listOf(
-        "aux", "bbl", "blg", "bcf", "run.xml",
-        "toc", "out", "nav", "snm", "lof", "lot",
-        "idx", "ilg", "ind",
+    /** Bibliografie-Artefakte: immer weg (veraltete `.bbl` bricht biblatex). */
+    private val BIB_EXTENSIONS = listOf("bbl", "blg", "bcf", "run.xml")
+
+    /** Verweis-/Gliederungs-Artefakte: nur beim Dokumentwechsel weg. */
+    private val REF_EXTENSIONS = listOf(
+        "aux", "toc", "out", "nav", "snm", "lof", "lot", "idx", "ilg", "ind",
     )
 }

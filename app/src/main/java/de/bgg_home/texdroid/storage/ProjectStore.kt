@@ -145,6 +145,7 @@ object ProjectStore {
                 DocumentsContract.Document.COLUMN_DISPLAY_NAME,
                 DocumentsContract.Document.COLUMN_MIME_TYPE,
                 DocumentsContract.Document.COLUMN_SIZE,
+                DocumentsContract.Document.COLUMN_LAST_MODIFIED,
             ),
             null, null, null,
         )?.use { c ->
@@ -157,16 +158,34 @@ object ProjectStore {
                     copyLevel(context, treeUri, docId, sub, maxBytes)
                     continue
                 }
-                if (!c.isNull(3) && c.getLong(3) > maxBytes) continue
+                val size = if (c.isNull(3)) -1L else c.getLong(3)
+                if (size > maxBytes) continue
+                val modified = if (c.isNull(4)) -1L else c.getLong(4)
+                val dest = File(destDir, name)
+                if (isUpToDate(dest, size, modified)) continue
                 val src = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
                 runCatching {
                     context.contentResolver.openInputStream(src)?.use { input ->
-                        File(destDir, name).outputStream().use { input.copyTo(it) }
+                        dest.outputStream().use { input.copyTo(it) }
                     }
                 }
             }
         }
     }
+
+    /**
+     * Ist die lokale Kopie [dest] noch aktuell? Verglichen wird Größe und
+     * Änderungszeit der Quelle; die Kopie ist beim Kopieren entstanden, ihre mtime
+     * liegt also nicht vor der Quell-mtime, wenn sich seither nichts geändert hat.
+     *
+     * Grund: Der Sync lief bei JEDEM Compile über alle Projektdateien – bei einem
+     * bildlastigen Projekt sind das schnell mehrere Megabyte durch SAF, pro
+     * Tastendruck beim Auto-Compile. Unbekannte Größe/Zeit (manche Provider liefern
+     * keine) → konservativ kopieren.
+     */
+    internal fun isUpToDate(dest: File, size: Long, modified: Long): Boolean =
+        dest.isFile && size >= 0 && modified > 0 &&
+            dest.length() == size && dest.lastModified() >= modified
 
     private suspend fun listChildren(
         context: Context,
