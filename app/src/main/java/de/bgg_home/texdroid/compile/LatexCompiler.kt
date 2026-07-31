@@ -124,7 +124,7 @@ object LatexCompiler {
         }
 
     /** Wie viele Ersatz-Durchläufe höchstens – deckt mehrere fehlende Schriften ab. */
-    private const val MAX_FONT_FALLBACK_ROUNDS = 3
+    private const val MAX_FONT_FALLBACK_ROUNDS = 5
 
     /**
      * Kompiliert und ersetzt dabei fehlende Schriften, statt am ersten Fehler
@@ -147,6 +147,22 @@ object LatexCompiler {
     ): CompileResult {
         var current = source
         val notes = mutableListOf<String>()
+
+        // Bekannte PC-Schriften ALLE auf einmal ersetzen, bevor die Engine startet.
+        // Reaktiv erführe man immer nur die eine Schrift, an der es gerade scheitert –
+        // eine Vorlage mit vier verdrahteten Windows-Schriften bräuchte vier komplette
+        // Durchläufe (chinesische Wettbewerbsvorlage: Times New Roman, SimSun, simkai,
+        // Arial). Klassen- und Paketdateien im Arbeitsverzeichnis gehören dazu.
+        val (batchSource, batchSubs) = FontFallback.replaceAllKnown(current)
+        current = batchSource
+        val allSubs = batchSubs + FontFallback.replaceAllKnownInFiles(jobDir)
+        if (allSubs.isNotEmpty()) {
+            notes += context.getString(
+                R.string.font_fallback_batch,
+                allSubs.joinToString(", ") { "${it.requested} → ${it.replacement}" },
+            )
+        }
+
         // Dokumente für pdfLaTeX vorab XeTeX-tauglich machen (inputenc, Treiberoptionen).
         // Das ist deterministisch, kostet also keinen Extra-Durchlauf – anders als die
         // Schrift-Ersetzung, die erst auf einen Fehler der Engine reagieren kann.
@@ -166,10 +182,16 @@ object LatexCompiler {
         while (rounds++ < MAX_FONT_FALLBACK_ROUNDS) {
             val missing = result.errors
                 .firstNotNullOfOrNull { LatexLog.fontNotFoundName(it.message) } ?: break
-            val (rewritten, replacement) =
-                FontFallback.replaceMissingFont(current, missing) ?: break
+            val inSource = FontFallback.replaceMissingFont(current, missing)
+            val replacement = if (inSource != null) {
+                current = inSource.first
+                inSource.second
+            } else {
+                // Steht die Schrift nicht im Hauptdokument, verdrahtet sie meist die
+                // Dokumentklasse (siehe [FontFallback.replaceMissingFontInFiles]).
+                FontFallback.replaceMissingFontInFiles(jobDir, missing) ?: break
+            }
             notes += context.getString(R.string.font_fallback_note, missing, replacement)
-            current = rewritten
             result = runEngine(current, jobDir, fontConfig, continueOnErrors)
         }
         // Fehler gegen den ZULETZT kompilierten Quelltext auswerten, Hinweise anhängen.

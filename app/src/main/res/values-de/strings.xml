@@ -171,6 +171,7 @@
     <string name="compat_driver_rewritten">Für XeTeX angepasst: Treiberoption (pdftex/dvips) wurde für den Lauf auf „xetex“ umgestellt.</string>
     <string name="note_file_case_fixed">Dateinamen angeglichen (Groß-/Kleinschreibung): %1$s. Auf dem PC ist das egal, auf Android nicht.</string>
     <string name="note_index_not_built">Das Stichwortverzeichnis bleibt leer: makeindex läuft auf dem Gerät nicht. Der Rest des Dokuments ist vollständig gesetzt.</string>
+    <string name="font_fallback_batch">Nicht verfügbare Schriften ersetzt: %1$s. Deine Datei bleibt unverändert.</string>
     <string name="font_fallback_note">Schrift „%1$s“ fehlt – ersatzweise mit „%2$s“ gesetzt.</string>
     <string name="error_font_restart">Gerade abgelegte Schriften werden erst nach einem Neustart der App gefunden.</string>
     <string name="menu_settings">Einstellungen</string>

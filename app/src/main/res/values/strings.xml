@@ -173,6 +173,7 @@
     <string name="compat_driver_rewritten">Adapted for XeTeX: driver option (pdftex/dvips) was switched to “xetex” for this run.</string>
     <string name="note_file_case_fixed">File names matched case-insensitively: %1$s. Desktop systems ignore case, Android does not.</string>
     <string name="note_index_not_built">The index stays empty: makeindex does not run on the device. The rest of the document is typeset completely.</string>
+    <string name="font_fallback_batch">Substituted unavailable fonts: %1$s. Your file stays unchanged.</string>
     <string name="font_fallback_note">Font “%1$s” is missing – typeset with “%2$s” instead.</string>
     <string name="error_font_restart">Fonts added just now are only found after restarting the app.</string>
     <string name="menu_settings">Settings</string>
