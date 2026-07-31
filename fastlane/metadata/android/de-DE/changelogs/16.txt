@@ -1,0 +1,2 @@
+* Stichwortverzeichnis: Dokumente mit \makeindex/\printindex sagen jetzt, dass das Verzeichnis leer bleibt — die Engine führt makeindex auf dem Gerät nicht aus. Vorher entstand stillschweigend ein PDF ohne Index, obwohl der Compile Erfolg meldete. Der Rest des Dokuments wird vollständig gesetzt.
+* Der Kompilieren-Knopf zeigte nach fertigem PDF noch bis zu vier Sekunden „Stopp“, weil die Meldung unten das Zurücksetzen aufhielt. Behoben.

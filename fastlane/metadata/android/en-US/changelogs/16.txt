@@ -1,0 +1,2 @@
+* Index: documents using \makeindex/\printindex now tell you that the index stays empty — the engine does not run makeindex on the device. Previously you silently got a PDF without an index while the compile reported success. The rest of the document is typeset completely.
+* The compile button kept showing “Stop” for up to four seconds after the PDF was done, because the status message held up the reset. Fixed.
