@@ -93,6 +93,15 @@ object LatexCompiler {
                 val result =
                     compileWithFontFallback(context, toCompile, jobDir, fontConfig, continueOnErrors)
                 val extraNotes = buildList {
+                    // Tectonic fährt tex → bibtex/biber → tex, aber KEIN makeindex.
+                    // `document.idx` entsteht also, `document.ind` nie – das
+                    // Stichwortverzeichnis bliebe still leer, obwohl der Compile
+                    // „fertig" meldet. Auf dem Tab S5e nachgewiesen (31.07.2026).
+                    if (File(jobDir, "document.idx").exists() &&
+                        !File(jobDir, "document.ind").exists()
+                    ) {
+                        add(context.getString(R.string.note_index_not_built))
+                    }
                     if (caseFixed.isNotEmpty()) {
                         add(context.getString(R.string.note_file_case_fixed, caseFixed.joinToString(", ")))
                     }

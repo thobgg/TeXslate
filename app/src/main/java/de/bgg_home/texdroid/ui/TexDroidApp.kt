@@ -737,7 +737,10 @@ fun TexDroidApp(
                         )
                     }
                 }
-                snackbarHostState.showSnackbar(result.summary())
+                // In eigenem Job: showSnackbar wartet, bis die Meldung wieder weg ist
+                // (bis zu vier Sekunden). Stand das hier direkt, lief das `finally`
+                // erst danach – der Knopf zeigte nach fertigem PDF weiter „Stopp".
+                scope.launch { snackbarHostState.showSnackbar(result.summary()) }
             } finally {
                 // Läuft auch bei Abbruch (finally) – erst wenn der native Aufruf
                 // wirklich zurückkehrt, damit keine zwei Compiles gleichzeitig laufen.
