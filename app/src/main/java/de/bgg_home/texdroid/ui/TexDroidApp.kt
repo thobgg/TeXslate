@@ -651,6 +651,21 @@ fun TexDroidApp(
         }
     }
 
+    /**
+     * Zeigt eine Meldung SOFORT und verdrängt dabei eine noch sichtbare.
+     *
+     * Compose stellt Snackbars in eine Warteschlange: Stand noch eine Meldung vom
+     * letzten Compile am Bildschirm, erschien die Bestätigung des Speicherns erst
+     * bis zu vier Sekunden später — also gefühlt gar nicht. Wer keine Rückmeldung
+     * sieht, tippt ein zweites Mal (auf dem Gerät beobachtet, 01.08.2026). Für
+     * bewusst ausgelöste Aktionen wie Speichern ist Verdrängen richtig; die
+     * beiläufigen Compile-Hinweise dürfen dagegen weiter warten.
+     */
+    fun showNow(message: String) {
+        snackbarHostState.currentSnackbarData?.dismiss()
+        scope.launch { snackbarHostState.showSnackbar(message) }
+    }
+
     fun saveDocument() {
         val text = editor?.text?.toString() ?: return
         val uri = currentUri
@@ -658,15 +673,13 @@ fun TexDroidApp(
             scope.launch {
                 val name = currentName ?: context.getString(R.string.fallback_document)
                 if (DocumentStore.write(context, uri, text)) {
-                    snackbarHostState.showSnackbar(context.getString(R.string.snackbar_saved, name))
+                    showNow(context.getString(R.string.snackbar_saved, name))
                 } else {
                     // Schreiben scheiterte (SAF-Recht weg, Datei extern verschoben/
                     // gelöscht): ehrlich melden statt fälschlich „gespeichert", und
                     // künftig „Speichern unter…" anbieten, damit nichts verloren geht.
                     canWrite = false
-                    snackbarHostState.showSnackbar(
-                        context.getString(R.string.snackbar_save_failed, name),
-                    )
+                    showNow(context.getString(R.string.snackbar_save_failed, name))
                 }
             }
         } else {
