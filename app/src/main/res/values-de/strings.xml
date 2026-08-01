@@ -163,6 +163,7 @@
     <string name="eps_placeholder_label">EPS-Abbildung (auf Android nicht darstellbar)</string>
     <string name="note_eps_placeholder">EPS kann die TeX-Engine hier nicht einbetten – %1$s wurde durch einen Platzhalter ersetzt, der Rest ist normal gesetzt. Als PDF einbetten (am PC: epstopdf), dann erscheint die Abbildung.</string>
     <string name="error_eps_unsupported">EPS-Abbildungen kann die TeX-Engine auf Android nicht einbinden (dafür wäre Ghostscript nötig): %1$s. Bitte als PDF oder PNG einbetten – dann läuft das Dokument durch.</string>
+    <string name="error_empty_document">Das Dokument enthält noch keinen Text: Zwischen \\begin{document} und \\end{document} steht nichts, deshalb entsteht keine Seite. Schreib etwas dazwischen und kompiliere erneut.</string>
     <string name="error_font_not_found">Schrift „%1$s“ nicht gefunden.</string>
     <string name="error_font_bundled">Mitgeliefert: %1$s (dazu die Systemschriften).</string>
     <string name="error_font_own_folder">Eigene .otf/.ttf gehören in den Ordner %1$s – maßgeblich ist der Familienname in der Schriftdatei, nicht der Dateiname.</string>

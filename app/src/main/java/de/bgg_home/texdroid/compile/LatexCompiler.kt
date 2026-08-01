@@ -42,6 +42,16 @@ object LatexCompiler {
             // Tectonic ruft `biber` dann selbst (tex→biber→tex). In **core** (oder
             // fremder ABI / Setup-Fehler) den erklärenden Preflight-Fehler liefern,
             // statt Tectonic mit „can't open path …bib" abbrechen zu lassen.
+            // Leeres Dokument: LaTeX erzeugt keine Seite, also auch keine .xdv –
+            // der PDF-Schritt bricht dann mit „cannot open document.xdv" ab. Das ist
+            // ausgerechnet der erste Fehler, den ein neuer Nutzer sieht: „Neu"
+            // antippen, „Kompilieren" antippen. Lieber vorher klar sagen, was fehlt.
+            if (hasEmptyBody(source)) {
+                return@withContext CompileResult.preflightError(
+                    line = null,
+                    message = context.getString(R.string.error_empty_document),
+                )
+            }
             val biberLine = findBiberLine(source)
             if (biberLine != null && !BiberRuntime.ensureReady(context)) {
                 return@withContext CompileResult.preflightError(
@@ -314,6 +324,26 @@ object LatexCompiler {
             append(context.getString(R.string.error_font_restart))
         }
     }
+
+    /**
+     * Steht zwischen `\begin{document}` und `\end{document}` nur Leerraum oder
+     * Kommentar? Dann entsteht keine Seite (JVM-testbar).
+     *
+     * Bewusst konservativ: Gibt es keinen `\begin{document}`, wird nichts
+     * behauptet – das kann eine Klassendatei oder ein eingebundener Teil sein.
+     */
+    fun hasEmptyBody(source: String): Boolean {
+        val begin = BEGIN_DOCUMENT.find(source) ?: return false
+        val rest = source.substring(begin.range.last + 1)
+        val end = END_DOCUMENT.find(rest)
+        val body = if (end != null) rest.substring(0, end.range.first) else rest
+        return body.lineSequence()
+            .map { it.substringBefore('%').trim() }
+            .none { it.isNotEmpty() }
+    }
+
+    private val BEGIN_DOCUMENT = Regex("""\\begin\s*\{\s*document\s*\}""")
+    private val END_DOCUMENT = Regex("""\\end\s*\{\s*document\s*\}""")
 
     /**
      * Reine Erkennung (JVM-testbar): 1-basierte Zeile des biblatex-Ladens ohne
