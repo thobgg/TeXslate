@@ -26,8 +26,8 @@ android {
         applicationId = "de.bgg_home.texslate"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16
-        versionName = "1.0-alpha16"
+        versionCode = 17
+        versionName = "1.0-alpha17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

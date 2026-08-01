@@ -1,0 +1,4 @@
+* Chinese documents compile: templates that hard-wire Windows fonts (SimSun, 黑体, KaiTi, Microsoft YaHei …) are now typeset with the free Fandol fonts. Tested with CUMCMThesis, the template of the national mathematical modeling contest — it compiles completely.
+* Fonts are now also substituted inside document classes and packages, not just in the main text. Many university and journal classes hard-wire Times New Roman or Arial.
+* All missing fonts are substituted at once instead of one per run — for a template with four hard-wired fonts that saves three full compile passes.
+* Index: `\printindex` works now. It used to stay silently empty because the engine runs no makeindex; TeXslate builds the index itself (sub-entries, sort keys, page ranges). If it cannot be built cleanly for a document, the previous result is kept along with a note — an index must never break the document.
