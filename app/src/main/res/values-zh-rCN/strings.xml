@@ -5,228 +5,412 @@
       LaTeX terminology follows common Chinese usage (编译 / 导言区 / 宏包 /
       参考文献 / 文档类). Corrections very welcome — see the localization issue.
     -->
+    <!-- launcher name — do not translate | EN: TeXslate -->
     <string name="app_name">TeXslate</string>
 
     <!-- 通用 -->
+    <!-- dialog button | EN: Cancel -->
     <string name="cancel">取消</string>
+    <!-- toolbar button | EN: Save -->
     <string name="save">保存</string>
+    <!-- dialog button | EN: Delete -->
     <string name="delete">删除</string>
+    <!-- dialog button | EN: Insert -->
     <string name="insert">插入</string>
 
     <!-- 模板 -->
+    <!-- UI label | EN: Templates -->
     <string name="templates_title">模板</string>
+    <!-- templates dialog | EN: Save current document as template -->
     <string name="template_save_current">将当前文档保存为模板</string>
+    <!-- UI label | EN: Your templates -->
     <string name="templates_user_section">我的模板</string>
+    <!-- templates dialog | EN: Delete template -->
     <string name="template_delete">删除模板</string>
+    <!-- UI label | EN: Bundled templates -->
     <string name="templates_builtin_section">内置模板</string>
+    <!-- templates dialog | EN: Save as template -->
     <string name="template_save_dialog_title">保存为模板</string>
+    <!-- templates dialog | EN: Template name -->
     <string name="template_name_label">模板名称</string>
+    <!-- templates dialog | EN: Delete template? -->
     <string name="template_delete_dialog_title">删除模板？</string>
+    <!-- templates dialog | EN: “%1$s” will be permanently removed. -->
     <string name="template_delete_confirm">将永久删除“%1$s”。</string>
+    <!-- templates dialog | EN: Template “%1$s” saved -->
     <string name="template_saved">已保存模板“%1$s”</string>
+    <!-- templates dialog | EN: Save failed -->
     <string name="template_save_failed">保存失败</string>
+    <!-- bundled template: name/description | EN: Beamer presentation -->
     <string name="tmpl_beamer_name">Beamer 演示文稿</string>
+    <!-- bundled template: name/description | EN: Slides with title frame, outline and example frames -->
     <string name="tmpl_beamer_desc">含标题页、目录和示例帧的幻灯片</string>
+    <!-- bundled template: name/description | EN: Academic thesis -->
     <string name="tmpl_thesis_name">学位论文</string>
+    <!-- bundled template: name/description | EN: Title page, table of contents, chapters, bibliography (report) -->
     <string name="tmpl_thesis_desc">标题页、目录、章节、参考文献（report 类）</string>
+    <!-- bundled template: name/description | EN: Bibliography (biber) -->
     <string name="tmpl_biber_name">参考文献（biber）</string>
+    <!-- bundled template: name/description | EN: biblatex with backend=biber; sample .bib embedded (thesis edition) -->
     <string name="tmpl_biber_desc">biblatex 使用 backend=biber，内嵌示例 .bib（thesis 版）</string>
+    <!-- bundled template: name/description | EN: Letter (KOMA scrlttr2) -->
     <string name="tmpl_letter_name">书信（KOMA scrlttr2）</string>
+    <!-- bundled template: name/description | EN: Business letter with sender, recipient and subject -->
     <string name="tmpl_letter_desc">含寄件人、收件人和事由的商务信函</string>
+    <!-- bundled template: name/description | EN: Exam / worksheet -->
     <string name="tmpl_exam_name">试卷 / 习题</string>
+    <!-- bundled template: name/description | EN: Exercises with points and solutions (exam class) -->
     <string name="tmpl_exam_desc">带分值和参考答案的习题（exam 类）</string>
 
     <!-- 跳转到行 -->
+    <!-- go-to-line dialog | EN: Go to line -->
     <string name="goto_line_title">跳转到行</string>
+    <!-- go-to-line dialog | EN: Line (1–%1$d) -->
     <string name="goto_line_label">行（1–%1$d）</string>
+    <!-- go-to-line dialog | EN: Go -->
     <string name="goto_line_jump">跳转</string>
 
     <!-- 查找与替换 -->
+    <!-- search & replace bar | EN: Search -->
     <string name="search_hint">查找</string>
+    <!-- search & replace bar | EN: Previous match -->
     <string name="search_prev_match">上一个匹配</string>
+    <!-- search & replace bar | EN: Next match -->
     <string name="search_next_match">下一个匹配</string>
+    <!-- search & replace bar | EN: Close search -->
     <string name="search_close">关闭查找</string>
+    <!-- search & replace bar | EN: Replace with -->
     <string name="search_replace_hint">替换为</string>
+    <!-- search & replace bar | EN: Replace -->
     <string name="search_replace">替换</string>
+    <!-- search & replace bar | EN: All -->
     <string name="search_replace_all">全部替换</string>
+    <!-- search & replace bar | EN: Pattern? -->
     <string name="search_invalid_pattern">表达式有误？</string>
 
     <!-- 项目侧边栏 -->
+    <!-- project sidebar | EN: No project -->
     <string name="project_none">未打开项目</string>
+    <!-- UI label | EN: Open folder -->
     <string name="open_folder">打开文件夹</string>
+    <!-- project sidebar | EN: Tap the folder icon to open a project folder. All .tex files inside will appear here. -->
     <string name="project_drawer_hint">点击文件夹图标以打开项目文件夹，其中所有 .tex 文件都会显示在这里。</string>
 
     <!-- PDF 预览 -->
+    <!-- PDF preview pane | EN: No PDF loaded -->
     <string name="pdf_none_loaded">未加载 PDF</string>
+    <!-- PDF preview pane | EN: PDF page %1$d -->
     <string name="pdf_page">PDF 第 %1$d 页</string>
 
     <!-- LaTeX 插入面板 -->
+    <!-- LaTeX insert palette | EN: More LaTeX snippets -->
     <string name="palette_more">更多 LaTeX 片段</string>
+    <!-- LaTeX insert palette | EN: Insert LaTeX -->
     <string name="palette_title">插入 LaTeX</string>
+    <!-- LaTeX insert palette | EN: Wizards -->
     <string name="palette_wizards">向导</string>
+    <!-- LaTeX insert palette | EN: Template … -->
     <string name="palette_template">模板 …</string>
+    <!-- LaTeX insert palette | EN: Document wizard … -->
     <string name="palette_document_wizard">文档向导 …</string>
+    <!-- LaTeX insert palette | EN: Table wizard … -->
     <string name="palette_table_wizard">表格向导 …</string>
+    <!-- LaTeX insert palette | EN: Structure -->
     <string name="palette_cat_structure">结构</string>
+    <!-- LaTeX insert palette | EN: Environments -->
     <string name="palette_cat_environments">环境</string>
+    <!-- LaTeX insert palette | EN: Math -->
     <string name="palette_cat_math">数学</string>
+    <!-- LaTeX insert palette | EN: Greek -->
     <string name="palette_cat_greek">希腊字母</string>
 
     <!-- 表格向导 -->
+    <!-- table wizard | EN: Table wizard -->
     <string name="table_wizard_title">表格向导</string>
+    <!-- table wizard | EN: Columns -->
     <string name="table_columns">列数</string>
+    <!-- table wizard | EN: Rows -->
     <string name="table_rows">行数</string>
+    <!-- table wizard | EN: Alignment -->
     <string name="table_alignment">对齐方式</string>
+    <!-- table wizard: alignment choice | EN: left -->
     <string name="align_left">左对齐</string>
+    <!-- table wizard: alignment choice | EN: centered -->
     <string name="align_center">居中</string>
+    <!-- table wizard: alignment choice | EN: right -->
     <string name="align_right">右对齐</string>
+    <!-- table wizard | EN: Borders (lines) -->
     <string name="table_borders">表格线</string>
+    <!-- stepper button label | EN: less -->
     <string name="stepper_decrease">减少</string>
+    <!-- stepper button label | EN: more -->
     <string name="stepper_increase">增加</string>
 
     <!-- 文档向导 -->
+    <!-- document wizard | EN: Document wizard -->
     <string name="doc_wizard_title">文档向导</string>
+    <!-- document wizard | EN: Document class -->
     <string name="doc_class">文档类</string>
+    <!-- document wizard | EN: Font size -->
     <string name="doc_font_size">字号</string>
+    <!-- document wizard | EN: Language -->
     <string name="doc_language">语言</string>
+    <!-- document wizard | EN: Packages -->
     <string name="doc_packages">宏包</string>
+    <!-- document wizard | EN: Title block (\\maketitle) -->
     <string name="doc_title_block">标题块（\\maketitle）</string>
+    <!-- document wizard | EN: Title -->
     <string name="doc_title">标题</string>
+    <!-- document wizard | EN: Author -->
     <string name="doc_author">作者</string>
+    <!-- document wizard | EN: Create -->
     <string name="doc_create">创建</string>
 
     <!-- AI 设置 -->
+    <!-- AI assistant sheet / settings | EN: AI assistant (beta) -->
     <string name="ai_settings_title">AI 助手（测试版）</string>
+    <!-- AI assistant sheet / settings | EN: Enable (opt-in) -->
     <string name="ai_enable_optin">启用（需手动开启）</string>
+    <!-- AI assistant sheet / settings | EN: Provider -->
     <string name="ai_provider">服务商</string>
+    <!-- AI assistant sheet / settings | EN: API key (%1$s) -->
     <string name="ai_api_key_label">API 密钥（%1$s）</string>
+    <!-- AI assistant sheet / settings | EN: Hide key -->
     <string name="ai_key_hide">隐藏密钥</string>
+    <!-- AI assistant sheet / settings | EN: Show key -->
     <string name="ai_key_show">显示密钥</string>
+    <!-- AI assistant sheet / settings | EN: Model -->
     <string name="ai_model">模型</string>
+    <!-- AI assistant sheet / settings | EN: Model ID (freely editable) -->
     <string name="ai_model_id_label">模型 ID（可自由填写）</string>
+    <!-- AI assistant sheet / settings | EN: This looks like an API key. It belongs in the “API key” field above, where it is stored encrypted. -->
     <string name="ai_model_looks_like_key">这看起来像是 API 密钥。它应填在上方的“API 密钥”栏中，那里会加密保存。</string>
+    <!-- AI assistant sheet / settings | EN: Move to API key field -->
     <string name="ai_move_to_key_field">移到 API 密钥栏</string>
+    <!-- AI assistant sheet / settings | EN: Note: Your text is only sent to the selected provider after explicit confirmation (preview dialog). Keys stay encrypted on the device. API costs may apply. The core app works fully offline. -->
     <string name="ai_privacy_note">说明：只有在你于预览对话框中明确确认后，文本才会发送给所选服务商。密钥始终加密保存在本机。可能产生 API 费用。应用核心功能完全离线可用。</string>
 
     <!-- AI 助手面板 -->
+    <!-- AI assistant sheet / settings | EN: The AI assistant is not enabled yet. -->
     <string name="ai_not_enabled">AI 助手尚未启用。</string>
+    <!-- AI assistant sheet / settings | EN: No API key is set for %1$s yet. -->
     <string name="ai_no_key">尚未为 %1$s 设置 API 密钥。</string>
+    <!-- AI assistant sheet / settings | EN: Open settings -->
     <string name="ai_open_settings">打开设置</string>
+    <!-- AI assistant sheet / settings | EN: Sending question … -->
     <string name="ai_sending">正在发送问题 …</string>
+    <!-- AI assistant sheet / settings | EN: Back -->
     <string name="ai_back">返回</string>
+    <!-- AI assistant sheet / settings | EN: Send again -->
     <string name="ai_resend">重新发送</string>
+    <!-- AI assistant sheet / settings | EN: This will be sent -->
     <string name="ai_preview_title">将发送以下内容</string>
+    <!-- AI assistant sheet / settings | EN: To %1$s (%2$s). Costs may apply. -->
     <string name="ai_preview_note">发送至 %1$s（%2$s）。可能产生费用。</string>
+    <!-- AI assistant sheet / settings | EN: The last rounds are included as context. -->
     <string name="ai_preview_context_suffix"> 最近几轮对话将作为上下文一并发送。</string>
+    <!-- AI assistant sheet / settings | EN: Send -->
     <string name="ai_send">发送</string>
+    <!-- AI assistant sheet / settings | EN: (empty answer) -->
     <string name="ai_empty_answer">（回复为空）</string>
+    <!-- AI assistant sheet / settings | EN: Question for the AI -->
     <string name="ai_question_label">向 AI 提问</string>
+    <!-- AI assistant sheet / settings | EN: e.g. “Create a 3×3 table with a header row” -->
     <string name="ai_question_placeholder">例如：“生成一个带表头的 3×3 表格”</string>
+    <!-- AI assistant sheet / settings | EN: Context -->
     <string name="ai_context">上下文</string>
+    <!-- AI assistant sheet / settings | EN: Preview &amp; send -->
     <string name="ai_preview_and_send">预览并发送</string>
+    <!-- AI assistant sheet / settings | EN: Follow-up … -->
     <string name="ai_followup_label">追问 …</string>
+    <!-- AI assistant sheet / settings | EN: e.g. “And how do I make the header bold?” -->
     <string name="ai_followup_placeholder">例如：“表头怎么加粗？”</string>
+    <!-- AI assistant sheet / settings | EN: Follow up -->
     <string name="ai_followup_button">追问</string>
+    <!-- AI assistant sheet / settings | EN: At document end -->
     <string name="ai_insert_end">插入到文档末尾</string>
+    <!-- AI assistant sheet / settings | EN: Replace -->
     <string name="ai_replace">替换</string>
+    <!-- AI assistant sheet / settings | EN: At cursor -->
     <string name="ai_insert_cursor">插入到光标处</string>
+    <!-- AI assistant sheet / settings | EN: Copy -->
     <string name="ai_copy">复制</string>
+    <!-- AI assistant sheet / settings | EN: New question -->
     <string name="ai_new_question">新问题</string>
+    <!-- AI assistant sheet / settings | EN: No context -->
     <string name="ai_scope_none">不带上下文</string>
+    <!-- AI assistant sheet / settings | EN: Selection -->
     <string name="ai_scope_selection">选中内容</string>
+    <!-- AI assistant sheet / settings | EN: Whole document -->
     <string name="ai_scope_document">整个文档</string>
 
     <!-- 主界面通用 -->
+    <!-- toolbar button | EN: Open -->
     <string name="open">打开</string>
+    <!-- toolbar button | EN: Undo -->
     <string name="undo">撤销</string>
+    <!-- toolbar button | EN: Redo -->
     <string name="redo">重做</string>
+    <!-- button | EN: Close -->
     <string name="close">关闭</string>
+    <!-- overflow menu | EN: More -->
     <string name="more">更多</string>
+    <!-- compile button while running | EN: Stop -->
     <string name="stop">停止</string>
+    <!-- main action button | EN: Compile -->
     <string name="compile">编译</string>
 
     <!-- 顶栏 -->
+    <!-- top app bar | EN: Project -->
     <string name="header_project">项目</string>
+    <!-- top app bar | EN: TeXslate — %1$s -->
     <string name="header_title_with_file">TeXslate — %1$s</string>
+    <!-- search & replace bar | EN: Search &amp; replace -->
     <string name="search_replace_title">查找与替换</string>
+    <!-- AI assistant sheet / settings | EN: AI assistant -->
     <string name="ai_assistant">AI 助手</string>
 
     <!-- 标签页（手机布局） -->
+    <!-- tab label (phone layout) | EN: Editor -->
     <string name="tab_editor">编辑器</string>
+    <!-- tab label (phone layout) | EN: Preview -->
     <string name="tab_preview">预览</string>
 
     <!-- 溢出菜单 -->
+    <!-- overflow menu item | EN: New -->
     <string name="menu_new">新建</string>
+    <!-- overflow menu item | EN: Save PDF -->
     <string name="menu_save_pdf">保存 PDF</string>
+    <!-- overflow menu item | EN: Share … -->
     <string name="menu_share">分享 …</string>
+    <!-- overflow menu item | EN: View log -->
     <string name="menu_view_log">查看日志</string>
+    <!-- overflow menu item | EN: Go to line … -->
     <string name="menu_goto_line">跳转到行 …</string>
+    <!-- overflow menu item | EN: Document outline … -->
     <string name="menu_outline">文档大纲 …</string>
+    <!-- overflow menu item | EN: Toggle comment -->
     <string name="menu_toggle_comment">注释 / 取消注释</string>
+    <!-- overflow menu item | EN: Auto-compile -->
     <string name="menu_autocompile">自动编译</string>
+    <!-- overflow menu item | EN: Compile despite errors -->
     <string name="menu_continue_on_errors">出错时仍继续编译</string>
+    <!-- compile error panel | EN: biber is not supported: TeXslate runs bibtex only. Please use \\usepackage[backend=bibtex]{biblatex}. -->
     <string name="error_biber_unsupported">不支持 biber：TeXslate 仅运行 bibtex。请使用 \\usepackage[backend=bibtex]{biblatex}。</string>
+    <!-- compile error panel | EN: Could not download the TeX packages. The first compile fetches them once from the network – please check your connection. After that TeXslate works offline. -->
     <string name="error_bundle_unreachable">无法下载 TeX 宏包。首次编译需要联网获取一次，请检查网络连接。之后 TeXslate 即可离线工作。</string>
+    <!-- compile error panel | EN: Internal error in the TeX engine – the compile was aborted, the app keeps running. See the log for details. -->
     <string name="error_engine_internal">TeX 引擎内部错误 —— 本次编译已中止，应用仍在运行。详情请查看日志。</string>
+    <!-- label printed INSIDE the produced PDF | EN: EPS figure (cannot be rendered on Android) -->
     <string name="eps_placeholder_label">EPS 图片（Android 上无法渲染）</string>
+    <!-- compile note, shown as snackbar and in the log | EN: The TeX engine cannot embed EPS here – %1$s was replaced with a placeholder, everything else is typeset normally. Embed as PDF (on your desktop: epstopdf) and the figure appears. -->
     <string name="note_eps_placeholder">TeX 引擎无法在此嵌入 EPS —— %1$s 已用占位框代替，其余内容正常排版。请改为嵌入 PDF（在电脑上运行 epstopdf），图片即可显示。</string>
+    <!-- compile error panel | EN: The TeX engine on Android cannot embed EPS figures (that would require Ghostscript): %1$s. Please embed them as PDF or PNG – then the document compiles. -->
     <string name="error_eps_unsupported">Android 上的 TeX 引擎无法嵌入 EPS 图片（那需要 Ghostscript）：%1$s。请改用 PDF 或 PNG —— 这样文档就能编译。</string>
+    <!-- compile error panel | EN: Font “%1$s” not found. -->
     <string name="error_font_not_found">未找到字体“%1$s”。</string>
+    <!-- compile error panel | EN: Bundled: %1$s (plus the system fonts). -->
     <string name="error_font_bundled">已内置：%1$s（另有系统字体）。</string>
+    <!-- compile error panel | EN: Put your own .otf/.ttf into the folder %1$s – what counts is the family name inside the font file, not the file name. -->
     <string name="error_font_own_folder">自备的 .otf/.ttf 请放入文件夹 %1$s —— 起作用的是字体文件内部的字体族名称，而非文件名。</string>
+    <!-- compile error panel | EN: Currently in that folder: %1$s. -->
     <string name="error_font_user_files">该文件夹中现有：%1$s。</string>
+    <!-- compile note about an automatic adaptation | EN: Adapted for XeTeX: “inputenc” is not needed and was skipped for this run. -->
     <string name="compat_inputenc_removed">已为 XeTeX 调整：本次编译跳过了不需要的“inputenc”。</string>
+    <!-- compile note about an automatic adaptation | EN: Adapted for XeTeX: driver option (pdftex/dvips) was switched to “xetex” for this run. -->
     <string name="compat_driver_rewritten">已为 XeTeX 调整：本次编译将驱动选项（pdftex/dvips）改为“xetex”。</string>
+    <!-- compile note, shown as snackbar and in the log | EN: File names matched case-insensitively: %1$s. Desktop systems ignore case, Android does not. -->
     <string name="note_file_case_fixed">已按大小写匹配文件名：%1$s。桌面系统不区分大小写，Android 区分。</string>
+    <!-- compile note, shown as snackbar and in the log | EN: The index could not be built for this document (for example because of a custom index style file) and stays empty. Everything else is typeset completely. -->
     <string name="note_index_not_built">本文档的索引无法生成（例如使用了自定义索引样式文件），索引将为空。其余内容均已完整排版。</string>
+    <!-- compile note about substituted fonts | EN: Substituted unavailable fonts: %1$s. Your file stays unchanged. -->
     <string name="font_fallback_batch">已替换不可用的字体：%1$s。你的文件保持不变。</string>
+    <!-- compile note about substituted fonts | EN: Font “%1$s” is missing – typeset with “%2$s” instead. -->
     <string name="font_fallback_note">缺少字体“%1$s”——已改用“%2$s”排版。</string>
+    <!-- compile error panel | EN: Fonts added just now are only found after restarting the app. -->
     <string name="error_font_restart">刚刚放入的字体需重启应用后才能被找到。</string>
+    <!-- overflow menu item | EN: Settings -->
     <string name="menu_settings">设置</string>
+    <!-- overflow menu item | EN: About TeXslate -->
     <string name="menu_about">关于 TeXslate</string>
 
     <!-- 分享 -->
+    <!-- share dialog | EN: Share -->
     <string name="share_title">分享</string>
+    <!-- share dialog | EN: TeX source (.tex) -->
     <string name="share_tex_source">TeX 源文件（.tex）</string>
+    <!-- share dialog | EN: PDF (.pdf) -->
     <string name="share_pdf">PDF（.pdf）</string>
+    <!-- share dialog | EN: Compile first -->
     <string name="share_compile_first_hint">请先编译</string>
 
     <!-- 提示消息 -->
+    <!-- transient message (snackbar) | EN: Opened: %1$s -->
     <string name="snackbar_opened">已打开：%1$s</string>
+    <!-- transient message (snackbar) | EN: Saved: %1$s -->
     <string name="snackbar_saved">已保存：%1$s</string>
+    <!-- transient message (snackbar) | EN: Could not save %1$s – the file may have been moved or deleted. Use “Save as…”. -->
     <string name="snackbar_save_failed">无法保存 %1$s —— 文件可能已被移动或删除。请使用“另存为…”。</string>
+    <!-- transient message (snackbar) | EN: PDF saved: %1$s -->
     <string name="snackbar_pdf_saved">PDF 已保存：%1$s</string>
+    <!-- transient message (snackbar) | EN: Compile first – there is no PDF yet. -->
     <string name="snackbar_compile_first">请先编译 —— 目前还没有 PDF。</string>
+    <!-- transient message (snackbar) | EN: Nothing selected to share. -->
     <string name="snackbar_nothing_to_share">没有可分享的内容。</string>
+    <!-- transient message (snackbar) | EN: Compile cancelled -->
     <string name="snackbar_compile_cancelled">编译已取消</string>
+    <!-- transient message (snackbar) | EN: New font detected – restart the app so it can be used by name. -->
     <string name="snackbar_fonts_changed_restart">检测到新字体 —— 请重启应用，之后即可按名称使用。</string>
+    <!-- transient message (snackbar) | EN: “%1$s” includes other files (\\input …). To compile multi-part projects, choose the containing folder via the “Open project folder” menu. -->
     <string name="snackbar_multifile_hint">“%1$s”引用了其他文件（\\input …）。要编译多文件项目，请通过“打开项目文件夹”菜单选择所在文件夹。</string>
+    <!-- fallback name when a file or project has no name | EN: Document -->
     <string name="fallback_document">文档</string>
+    <!-- fallback name when a file or project has no name | EN: Project -->
     <string name="fallback_project">项目</string>
 
     <!-- AI 错误解释预填 -->
+    <!-- AI assistant sheet / settings | EN: Briefly explain this LaTeX compile error and how to fix it%1$s:\n%2$s -->
     <string name="ai_explain_error">请简要说明这个 LaTeX 编译错误的原因和解决办法%1$s：\n%2$s</string>
+    <!-- compile error panel | EN: (line %1$d) -->
     <string name="error_line_paren">（第 %1$d 行）</string>
 
     <!-- 关于 -->
+    <!-- about screen | EN: Version %1$s -->
     <string name="about_version">版本 %1$s</string>
+    <!-- about screen | EN: Native LaTeX/XeTeX editor for Android tablets — editor, Tectonic compiler and PDF preview, fully offline. -->
     <string name="about_description">面向 Android 平板的原生 LaTeX/XeTeX 编辑器 —— 编辑器、Tectonic 编译器与 PDF 预览合而为一，完全离线。</string>
+    <!-- about screen | EN: Thesis edition: bundles biber 2.17 so biblatex works with backend=biber (bibtex-free bibliographies), via a cross-compiled Perl runtime. -->
     <string name="about_biber">thesis 版：内置 biber 2.17，通过交叉编译的 Perl 运行时支持 biblatex 的 backend=biber（无需 bibtex 的参考文献）。</string>
+    <!-- about screen | EN: Developer: Thomas Bugge (thobgg) -->
     <string name="about_developer">开发者：Thomas Bugge（thobgg）</string>
+    <!-- about screen | EN: Contact: %1$s -->
     <string name="about_contact">联系方式：%1$s</string>
+    <!-- about screen | EN: License: GPL-3.0-or-later -->
     <string name="about_license">许可证：GPL-3.0-or-later</string>
+    <!-- about screen | EN: Included open-source components -->
     <string name="about_components_header">包含的开源组件</string>
+    <!-- about screen | EN: • Tectonic / XeTeX — MIT\n• Latin Modern &amp; TeX Gyre (fonts) — GUST Font License (LPPL)\n• sora-editor — LGPL-2.1\n• vscode-latex-basics (syntax) — MIT -->
     <string name="about_components">• Tectonic / XeTeX —— MIT\n• Latin Modern &amp; TeX Gyre（字体）—— GUST Font License（LPPL）\n• sora-editor —— LGPL-2.1\n• vscode-latex-basics（语法高亮）—— MIT</string>
+    <!-- about screen | EN: • biber 2.17 + Perl 5.36.3 &amp; XS (Text::BibTeX/btparse, XML::LibXML/XSLT) — Artistic/GPL (thesis edition) -->
     <string name="about_components_biber">• biber 2.17 + Perl 5.36.3 与 XS（Text::BibTeX/btparse、XML::LibXML/XSLT）—— Artistic/GPL（thesis 版）</string>
 
     <!-- 编译日志与错误 -->
+    <!-- log screen | EN: Compile log -->
     <string name="compile_log">编译日志</string>
+    <!-- log screen | EN: (no log available) -->
     <string name="log_empty">（暂无日志）</string>
+    <!-- error panel heading | EN: Errors (%1$d) -->
     <string name="errors_count">错误（%1$d）</string>
+    <!-- error panel navigation | EN: Previous error -->
     <string name="prev_error">上一个错误</string>
+    <!-- error panel navigation | EN: Next error -->
     <string name="next_error">下一个错误</string>
+    <!-- compile error panel | EN: "Line %1$d: " -->
     <string name="error_line_prefix">"第 %1$d 行： "</string>
+    <!-- button next to a compile error | EN: Explain -->
     <string name="explain">解释</string>
+    <!-- preview pane while TeX packages download | EN: Downloading TeX packages …\nThis happens only the first time and may take a minute. -->
     <string name="loading_bundle">正在下载 TeX 宏包 …\n仅首次需要，可能耗时约一分钟。</string>
+    <!-- preview pane before the first compile | EN: Not compiled yet.\nTap “Compile”. -->
     <string name="preview_not_compiled">尚未编译。\n请点击“编译”。</string>
 </resources>
