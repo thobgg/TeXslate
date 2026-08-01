@@ -1,0 +1,2 @@
+* A freshly created document reported “cannot open document.xdv” when compiled — the very first error new users ran into. It now says plainly that there is nothing between \begin{document} and \end{document}, so no page is produced.
+* Saving confirms immediately: the “Saved” message used to wait while a compile note was still on screen, so you tapped a second time because nothing seemed to happen.

@@ -1,0 +1,2 @@
+* Ein frisch angelegtes Dokument meldete beim Kompilieren „cannot open document.xdv“ — der erste Fehler, den neue Nutzer überhaupt zu sehen bekamen. Jetzt steht dort verständlich, dass zwischen \begin{document} und \end{document} noch nichts steht und deshalb keine Seite entsteht.
+* Speichern bestätigt sofort: Die Meldung „Gespeichert“ musste bisher warten, wenn noch ein Compile-Hinweis am Bildschirm stand — man tippte dann ein zweites Mal, weil scheinbar nichts passierte.
