@@ -90,8 +90,9 @@ object LatexCompiler {
                 }
                 val toCompile = epsResult.rewritten ?: source
                 val fontConfig = FontStore.ensureReady(context)
-                val result =
+                val compiled =
                     compileWithFontFallback(context, toCompile, jobDir, fontConfig, continueOnErrors)
+                val result = withIndex(compiled, jobDir, toCompile, fontConfig, continueOnErrors)
                 val extraNotes = buildList {
                     // Tectonic fährt tex → bibtex/biber → tex, aber KEIN makeindex.
                     // `document.idx` entsteht also, `document.ind` nie – das
@@ -196,6 +197,47 @@ object LatexCompiler {
         }
         // Fehler gegen den ZULETZT kompilierten Quelltext auswerten, Hinweise anhängen.
         return withFriendlyEngineError(context, withFriendlyFontErrors(context, result)).copy(notes = notes)
+    }
+
+    /**
+     * Baut das Stichwortverzeichnis und kompiliert einmal nach.
+     *
+     * LaTeX schreibt seine Einträge nach `document.idx`, braucht daraus aber ein
+     * `document.ind` – erzeugt normalerweise vom Programm `makeindex`, das es auf
+     * dem Gerät nicht gibt. [MakeIndex] übernimmt das; der zusätzliche Durchlauf
+     * ist nötig, damit `\printindex` die fertige Datei einliest.
+     *
+     * Kostet nur etwas, wenn das Dokument überhaupt einen Index hat – und nur beim
+     * ersten Mal: Ändert sich nichts, bleibt die vorhandene `.ind` stehen und es
+     * wird nicht neu kompiliert.
+     */
+    private fun withIndex(
+        result: CompileResult,
+        jobDir: File,
+        source: String,
+        fontConfig: String,
+        continueOnErrors: Boolean,
+    ): CompileResult {
+        val idx = File(jobDir, "document.idx")
+        if (!idx.exists()) return result
+        val built = runCatching { MakeIndex.build(idx.readText()) }.getOrNull() ?: return result
+        val ind = File(jobDir, "document.ind")
+        if (ind.exists() && runCatching { ind.readText() }.getOrNull() == built) return result
+        val withIndex = runCatching {
+            ind.writeText(built)
+            runEngine(source, jobDir, fontConfig, continueOnErrors)
+        }.getOrNull() ?: return result
+
+        // Sicherheitsnetz: Ein selbstgebautes Verzeichnis darf ein Dokument, das
+        // vorher lief, niemals kaputt machen. Kommt der Lauf MIT Index schlechter
+        // heraus als der ohne, wird die .ind verworfen und das alte Ergebnis
+        // behalten – dann greift der Hinweis „Verzeichnis bleibt leer".
+        // (Bei lshort mit eigener .ist-Stildatei genau so passiert.)
+        if (result.ok && !withIndex.ok) {
+            runCatching { ind.delete() }
+            return result
+        }
+        return withIndex
     }
 
     /** Ein einzelner nativer Lauf; Fehler werden gegen [source] ausgewertet. */
