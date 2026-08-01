@@ -1,0 +1,232 @@
+<resources>
+    <!--
+      简体中文翻译（草稿 / DRAFT）
+      Machine-assisted translation, NOT yet reviewed by a native speaker.
+      LaTeX terminology follows common Chinese usage (编译 / 导言区 / 宏包 /
+      参考文献 / 文档类). Corrections very welcome — see the localization issue.
+    -->
+    <string name="app_name">TeXslate</string>
+
+    <!-- 通用 -->
+    <string name="cancel">取消</string>
+    <string name="save">保存</string>
+    <string name="delete">删除</string>
+    <string name="insert">插入</string>
+
+    <!-- 模板 -->
+    <string name="templates_title">模板</string>
+    <string name="template_save_current">将当前文档保存为模板</string>
+    <string name="templates_user_section">我的模板</string>
+    <string name="template_delete">删除模板</string>
+    <string name="templates_builtin_section">内置模板</string>
+    <string name="template_save_dialog_title">保存为模板</string>
+    <string name="template_name_label">模板名称</string>
+    <string name="template_delete_dialog_title">删除模板？</string>
+    <string name="template_delete_confirm">将永久删除“%1$s”。</string>
+    <string name="template_saved">已保存模板“%1$s”</string>
+    <string name="template_save_failed">保存失败</string>
+    <string name="tmpl_beamer_name">Beamer 演示文稿</string>
+    <string name="tmpl_beamer_desc">含标题页、目录和示例帧的幻灯片</string>
+    <string name="tmpl_thesis_name">学位论文</string>
+    <string name="tmpl_thesis_desc">标题页、目录、章节、参考文献（report 类）</string>
+    <string name="tmpl_biber_name">参考文献（biber）</string>
+    <string name="tmpl_biber_desc">biblatex 使用 backend=biber，内嵌示例 .bib（thesis 版）</string>
+    <string name="tmpl_letter_name">书信（KOMA scrlttr2）</string>
+    <string name="tmpl_letter_desc">含寄件人、收件人和事由的商务信函</string>
+    <string name="tmpl_exam_name">试卷 / 习题</string>
+    <string name="tmpl_exam_desc">带分值和参考答案的习题（exam 类）</string>
+
+    <!-- 跳转到行 -->
+    <string name="goto_line_title">跳转到行</string>
+    <string name="goto_line_label">行（1–%1$d）</string>
+    <string name="goto_line_jump">跳转</string>
+
+    <!-- 查找与替换 -->
+    <string name="search_hint">查找</string>
+    <string name="search_prev_match">上一个匹配</string>
+    <string name="search_next_match">下一个匹配</string>
+    <string name="search_close">关闭查找</string>
+    <string name="search_replace_hint">替换为</string>
+    <string name="search_replace">替换</string>
+    <string name="search_replace_all">全部替换</string>
+    <string name="search_invalid_pattern">表达式有误？</string>
+
+    <!-- 项目侧边栏 -->
+    <string name="project_none">未打开项目</string>
+    <string name="open_folder">打开文件夹</string>
+    <string name="project_drawer_hint">点击文件夹图标以打开项目文件夹，其中所有 .tex 文件都会显示在这里。</string>
+
+    <!-- PDF 预览 -->
+    <string name="pdf_none_loaded">未加载 PDF</string>
+    <string name="pdf_page">PDF 第 %1$d 页</string>
+
+    <!-- LaTeX 插入面板 -->
+    <string name="palette_more">更多 LaTeX 片段</string>
+    <string name="palette_title">插入 LaTeX</string>
+    <string name="palette_wizards">向导</string>
+    <string name="palette_template">模板 …</string>
+    <string name="palette_document_wizard">文档向导 …</string>
+    <string name="palette_table_wizard">表格向导 …</string>
+    <string name="palette_cat_structure">结构</string>
+    <string name="palette_cat_environments">环境</string>
+    <string name="palette_cat_math">数学</string>
+    <string name="palette_cat_greek">希腊字母</string>
+
+    <!-- 表格向导 -->
+    <string name="table_wizard_title">表格向导</string>
+    <string name="table_columns">列数</string>
+    <string name="table_rows">行数</string>
+    <string name="table_alignment">对齐方式</string>
+    <string name="align_left">左对齐</string>
+    <string name="align_center">居中</string>
+    <string name="align_right">右对齐</string>
+    <string name="table_borders">表格线</string>
+    <string name="stepper_decrease">减少</string>
+    <string name="stepper_increase">增加</string>
+
+    <!-- 文档向导 -->
+    <string name="doc_wizard_title">文档向导</string>
+    <string name="doc_class">文档类</string>
+    <string name="doc_font_size">字号</string>
+    <string name="doc_language">语言</string>
+    <string name="doc_packages">宏包</string>
+    <string name="doc_title_block">标题块（\\maketitle）</string>
+    <string name="doc_title">标题</string>
+    <string name="doc_author">作者</string>
+    <string name="doc_create">创建</string>
+
+    <!-- AI 设置 -->
+    <string name="ai_settings_title">AI 助手（测试版）</string>
+    <string name="ai_enable_optin">启用（需手动开启）</string>
+    <string name="ai_provider">服务商</string>
+    <string name="ai_api_key_label">API 密钥（%1$s）</string>
+    <string name="ai_key_hide">隐藏密钥</string>
+    <string name="ai_key_show">显示密钥</string>
+    <string name="ai_model">模型</string>
+    <string name="ai_model_id_label">模型 ID（可自由填写）</string>
+    <string name="ai_model_looks_like_key">这看起来像是 API 密钥。它应填在上方的“API 密钥”栏中，那里会加密保存。</string>
+    <string name="ai_move_to_key_field">移到 API 密钥栏</string>
+    <string name="ai_privacy_note">说明：只有在你于预览对话框中明确确认后，文本才会发送给所选服务商。密钥始终加密保存在本机。可能产生 API 费用。应用核心功能完全离线可用。</string>
+
+    <!-- AI 助手面板 -->
+    <string name="ai_not_enabled">AI 助手尚未启用。</string>
+    <string name="ai_no_key">尚未为 %1$s 设置 API 密钥。</string>
+    <string name="ai_open_settings">打开设置</string>
+    <string name="ai_sending">正在发送问题 …</string>
+    <string name="ai_back">返回</string>
+    <string name="ai_resend">重新发送</string>
+    <string name="ai_preview_title">将发送以下内容</string>
+    <string name="ai_preview_note">发送至 %1$s（%2$s）。可能产生费用。</string>
+    <string name="ai_preview_context_suffix"> 最近几轮对话将作为上下文一并发送。</string>
+    <string name="ai_send">发送</string>
+    <string name="ai_empty_answer">（回复为空）</string>
+    <string name="ai_question_label">向 AI 提问</string>
+    <string name="ai_question_placeholder">例如：“生成一个带表头的 3×3 表格”</string>
+    <string name="ai_context">上下文</string>
+    <string name="ai_preview_and_send">预览并发送</string>
+    <string name="ai_followup_label">追问 …</string>
+    <string name="ai_followup_placeholder">例如：“表头怎么加粗？”</string>
+    <string name="ai_followup_button">追问</string>
+    <string name="ai_insert_end">插入到文档末尾</string>
+    <string name="ai_replace">替换</string>
+    <string name="ai_insert_cursor">插入到光标处</string>
+    <string name="ai_copy">复制</string>
+    <string name="ai_new_question">新问题</string>
+    <string name="ai_scope_none">不带上下文</string>
+    <string name="ai_scope_selection">选中内容</string>
+    <string name="ai_scope_document">整个文档</string>
+
+    <!-- 主界面通用 -->
+    <string name="open">打开</string>
+    <string name="undo">撤销</string>
+    <string name="redo">重做</string>
+    <string name="close">关闭</string>
+    <string name="more">更多</string>
+    <string name="stop">停止</string>
+    <string name="compile">编译</string>
+
+    <!-- 顶栏 -->
+    <string name="header_project">项目</string>
+    <string name="header_title_with_file">TeXslate — %1$s</string>
+    <string name="search_replace_title">查找与替换</string>
+    <string name="ai_assistant">AI 助手</string>
+
+    <!-- 标签页（手机布局） -->
+    <string name="tab_editor">编辑器</string>
+    <string name="tab_preview">预览</string>
+
+    <!-- 溢出菜单 -->
+    <string name="menu_new">新建</string>
+    <string name="menu_save_pdf">保存 PDF</string>
+    <string name="menu_share">分享 …</string>
+    <string name="menu_view_log">查看日志</string>
+    <string name="menu_goto_line">跳转到行 …</string>
+    <string name="menu_outline">文档大纲 …</string>
+    <string name="menu_toggle_comment">注释 / 取消注释</string>
+    <string name="menu_autocompile">自动编译</string>
+    <string name="menu_continue_on_errors">出错时仍继续编译</string>
+    <string name="error_biber_unsupported">不支持 biber：TeXslate 仅运行 bibtex。请使用 \\usepackage[backend=bibtex]{biblatex}。</string>
+    <string name="error_bundle_unreachable">无法下载 TeX 宏包。首次编译需要联网获取一次，请检查网络连接。之后 TeXslate 即可离线工作。</string>
+    <string name="error_engine_internal">TeX 引擎内部错误 —— 本次编译已中止，应用仍在运行。详情请查看日志。</string>
+    <string name="eps_placeholder_label">EPS 图片（Android 上无法渲染）</string>
+    <string name="note_eps_placeholder">TeX 引擎无法在此嵌入 EPS —— %1$s 已用占位框代替，其余内容正常排版。请改为嵌入 PDF（在电脑上运行 epstopdf），图片即可显示。</string>
+    <string name="error_eps_unsupported">Android 上的 TeX 引擎无法嵌入 EPS 图片（那需要 Ghostscript）：%1$s。请改用 PDF 或 PNG —— 这样文档就能编译。</string>
+    <string name="error_font_not_found">未找到字体“%1$s”。</string>
+    <string name="error_font_bundled">已内置：%1$s（另有系统字体）。</string>
+    <string name="error_font_own_folder">自备的 .otf/.ttf 请放入文件夹 %1$s —— 起作用的是字体文件内部的字体族名称，而非文件名。</string>
+    <string name="error_font_user_files">该文件夹中现有：%1$s。</string>
+    <string name="compat_inputenc_removed">已为 XeTeX 调整：本次编译跳过了不需要的“inputenc”。</string>
+    <string name="compat_driver_rewritten">已为 XeTeX 调整：本次编译将驱动选项（pdftex/dvips）改为“xetex”。</string>
+    <string name="note_file_case_fixed">已按大小写匹配文件名：%1$s。桌面系统不区分大小写，Android 区分。</string>
+    <string name="note_index_not_built">本文档的索引无法生成（例如使用了自定义索引样式文件），索引将为空。其余内容均已完整排版。</string>
+    <string name="font_fallback_batch">已替换不可用的字体：%1$s。你的文件保持不变。</string>
+    <string name="font_fallback_note">缺少字体“%1$s”——已改用“%2$s”排版。</string>
+    <string name="error_font_restart">刚刚放入的字体需重启应用后才能被找到。</string>
+    <string name="menu_settings">设置</string>
+    <string name="menu_about">关于 TeXslate</string>
+
+    <!-- 分享 -->
+    <string name="share_title">分享</string>
+    <string name="share_tex_source">TeX 源文件（.tex）</string>
+    <string name="share_pdf">PDF（.pdf）</string>
+    <string name="share_compile_first_hint">请先编译</string>
+
+    <!-- 提示消息 -->
+    <string name="snackbar_opened">已打开：%1$s</string>
+    <string name="snackbar_saved">已保存：%1$s</string>
+    <string name="snackbar_save_failed">无法保存 %1$s —— 文件可能已被移动或删除。请使用“另存为…”。</string>
+    <string name="snackbar_pdf_saved">PDF 已保存：%1$s</string>
+    <string name="snackbar_compile_first">请先编译 —— 目前还没有 PDF。</string>
+    <string name="snackbar_nothing_to_share">没有可分享的内容。</string>
+    <string name="snackbar_compile_cancelled">编译已取消</string>
+    <string name="snackbar_fonts_changed_restart">检测到新字体 —— 请重启应用，之后即可按名称使用。</string>
+    <string name="snackbar_multifile_hint">“%1$s”引用了其他文件（\\input …）。要编译多文件项目，请通过“打开项目文件夹”菜单选择所在文件夹。</string>
+    <string name="fallback_document">文档</string>
+    <string name="fallback_project">项目</string>
+
+    <!-- AI 错误解释预填 -->
+    <string name="ai_explain_error">请简要说明这个 LaTeX 编译错误的原因和解决办法%1$s：\n%2$s</string>
+    <string name="error_line_paren">（第 %1$d 行）</string>
+
+    <!-- 关于 -->
+    <string name="about_version">版本 %1$s</string>
+    <string name="about_description">面向 Android 平板的原生 LaTeX/XeTeX 编辑器 —— 编辑器、Tectonic 编译器与 PDF 预览合而为一，完全离线。</string>
+    <string name="about_biber">thesis 版：内置 biber 2.17，通过交叉编译的 Perl 运行时支持 biblatex 的 backend=biber（无需 bibtex 的参考文献）。</string>
+    <string name="about_developer">开发者：Thomas Bugge（thobgg）</string>
+    <string name="about_contact">联系方式：%1$s</string>
+    <string name="about_license">许可证：GPL-3.0-or-later</string>
+    <string name="about_components_header">包含的开源组件</string>
+    <string name="about_components">• Tectonic / XeTeX —— MIT\n• Latin Modern &amp; TeX Gyre（字体）—— GUST Font License（LPPL）\n• sora-editor —— LGPL-2.1\n• vscode-latex-basics（语法高亮）—— MIT</string>
+    <string name="about_components_biber">• biber 2.17 + Perl 5.36.3 与 XS（Text::BibTeX/btparse、XML::LibXML/XSLT）—— Artistic/GPL（thesis 版）</string>
+
+    <!-- 编译日志与错误 -->
+    <string name="compile_log">编译日志</string>
+    <string name="log_empty">（暂无日志）</string>
+    <string name="errors_count">错误（%1$d）</string>
+    <string name="prev_error">上一个错误</string>
+    <string name="next_error">下一个错误</string>
+    <string name="error_line_prefix">"第 %1$d 行： "</string>
+    <string name="explain">解释</string>
+    <string name="loading_bundle">正在下载 TeX 宏包 …\n仅首次需要，可能耗时约一分钟。</string>
+    <string name="preview_not_compiled">尚未编译。\n请点击“编译”。</string>
+</resources>
