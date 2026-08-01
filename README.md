@@ -52,6 +52,14 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
   aborting the compile — see [Documents from your desktop](#documents-from-your-desktop).
 - **Localized errors**: the most common TeX messages are rewritten as short,
   readable sentences in the UI language; tapping jumps to the error line.
+- **Chinese and other CJK languages**: `ctex` and `xeCJK` work. Templates that
+  hard-wire Windows fonts (`SimSun`, `黑体`, `KaiTi`, `Microsoft YaHei`) are typeset
+  with the free **Fandol** fonts from the TeX bundle, so no CJK system font has to be
+  present on the device. Verified with
+  [CUMCMThesis](https://github.com/latexstudio/CUMCMThesis), the template of the
+  Chinese national mathematical modeling contest.
+- **Index**: `\printindex` works — TeXslate builds the index itself (sub-entries, sort
+  keys, page ranges), because the engine ships no `makeindex`.
 - **Multi-file projects**: project-folder sidebar (file tree), tap to switch files,
   `\input`/`\include` and bibliography (`bibtex`; `biblatex` with `backend=bibtex`,
   or `backend=biber` in the thesis edition — see [Editions](#editions)).
@@ -87,6 +95,8 @@ rewritten, every change is reported, and line numbers in the error panel stay va
 | file is Latin-1 encoded | is read correctly (umlauts used to be lost on save) |
 | `\usepackage[pdftex]{hyperref}` | switches the driver option to `xetex` |
 | `Figure.PDF` in the document, `figure.pdf` on disk | matches the file name case (Windows/macOS ignore case, Android does not) |
+| `SimSun`, `黑体`, `KaiTi` … in a Chinese template | typeset with the free Fandol fonts from the TeX bundle — no CJK system font needed |
+| the font is hard-wired in the **document class**, not the text | substituted there as well (many university and journal classes hard-wire Times New Roman) |
 | `.eps` figures | inserts a labelled placeholder — the document compiles, only the figure area stays empty (EPS would need Ghostscript). If a `.pdf` sits next to it, that one is used |
 
 Verified against **18 real documents** from CTAN, GitHub and arXiv — articles,
@@ -140,6 +150,11 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 - [x] **M4** — project management (multi-file, bibliography)
 - [x] **ME** — editor comfort (search & replace, go to line, comment) + TeX branding
 - [x] **MR** — alpha releases: signed APKs, verified on three devices; English + German UI
+- [x] **MB — biber** — `biblatex` with `backend=biber` runs on the device (thesis
+      edition, cross-compiled Perl runtime + biber 2.17)
+- [x] **MK — Documents from elsewhere** — font substitution, `inputenc`/driver options,
+      Latin-1, file name case, EPS placeholders, index, CJK/Chinese; verified against 18
+      real documents from CTAN, GitHub and arXiv on three devices
 - [ ] **M5** — F-Droid release
 - [ ] **M6** — Play Store release (optional)
 

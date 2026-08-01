@@ -55,6 +55,15 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
 - **Eingedeutschte Fehler**: die häufigsten TeX-Meldungen werden als kurze,
   verständliche Sätze in der UI-Sprache umformuliert; ein Tipp springt zur
   Fehlerzeile.
+- **Chinesisch und andere CJK-Sprachen**: `ctex` und `xeCJK` funktionieren. Vorlagen,
+  die Windows-Schriften fest verdrahten (`SimSun`, `黑体`, `KaiTi`, `Microsoft YaHei`),
+  werden mit den freien **Fandol**-Schriften aus dem TeX-Bundle gesetzt — es muss also
+  keine CJK-Systemschrift auf dem Gerät liegen. Geprüft mit
+  [CUMCMThesis](https://github.com/latexstudio/CUMCMThesis), der Vorlage des nationalen
+  chinesischen Mathematik-Modellierungswettbewerbs.
+- **Stichwortverzeichnis**: `\printindex` funktioniert — TeXslate erzeugt das
+  Verzeichnis selbst (Unterpunkte, Sortierschlüssel, Seitenbereiche), weil die Engine
+  kein `makeindex` mitbringt.
 - **Mehrdatei-Projekte**: Projektordner-Sidebar (Dateibaum), Dateiwechsel per Tipp,
   `\input`/`\include` und Bibliografie (`bibtex`; `biblatex` mit `backend=bibtex`,
   oder `backend=biber` in der thesis-Edition — siehe [Editionen](#editionen)).
@@ -93,6 +102,8 @@ Fehlerpanel bleiben gültig.
 | Datei ist Latin-1-kodiert | wird richtig gelesen (vorher gingen Umlaute beim Speichern verloren) |
 | `\usepackage[pdftex]{hyperref}` | stellt die Treiberoption auf `xetex` um |
 | `Bild.PDF` im Dokument, `bild.pdf` auf der Platte | gleicht die Schreibweise an (Windows/macOS sind da unempfindlich, Android nicht) |
+| `SimSun`, `黑体`, `KaiTi` … in einer chinesischen Vorlage | setzt mit den freien Fandol-Schriften aus dem TeX-Bundle — ohne CJK-Systemschrift |
+| Schrift steckt in der **Dokumentklasse** statt im Text | wird dort ebenfalls ersetzt (viele Universitäts- und Journal-Klassen verdrahten Times New Roman fest) |
 | `.eps`-Abbildungen | setzt einen beschrifteten Platzhalter — das Dokument kompiliert, nur die Bildstelle bleibt leer (EPS bräuchte Ghostscript). Liegt eine `.pdf` daneben, wird die genommen |
 
 Geprüft an **18 echten Dokumenten** von CTAN, GitHub und arXiv — Artikel, Paper mit
@@ -146,6 +157,11 @@ APK (ABI-Splits). `armeabi-v7a` (ältere 32-bit-Geräte) ist noch offen.
 - [x] **M4** — Projektverwaltung (Mehrdatei, Bibliografie)
 - [x] **ME** — Editor-Komfort (Suchen & Ersetzen, Gehe zu Zeile, Kommentar) + TeX-Branding
 - [x] **MR** — Alpha-Releases: signierte APKs, auf drei Geräten geprüft; englische + deutsche UI
+- [x] **MB — biber** — `biblatex` mit `backend=biber` läuft auf dem Gerät (thesis-Edition,
+      cross-kompilierte Perl-Runtime + biber 2.17)
+- [x] **MK — Fremde Dokumente** — Ersatzschriften, `inputenc`/Treiberoptionen, Latin-1,
+      Dateinamen-Schreibweise, EPS-Platzhalter, Stichwortverzeichnis, CJK/Chinesisch;
+      geprüft an 18 echten Dokumenten von CTAN, GitHub und arXiv auf drei Geräten
 - [ ] **M5** — F-Droid-Release
 - [ ] **M6** — Play-Store-Release (optional)
 
