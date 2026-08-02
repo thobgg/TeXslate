@@ -1,0 +1,2 @@
+* Tipp ins PDF, Cursor im Quelltext (SyncTeX): Auf eine Stelle in der Vorschau tippen, und der Cursor springt in die Zeile, aus der sie gesetzt wurde. Das gilt auch innerhalb eines umbrochenen Absatzes, wo die linke und die rechte Hälfte derselben gesetzten Zeile aus verschiedenen Quellzeilen stammen.
+* Liegt die getippte Stelle in einer eingebundenen Datei, nennt eine Meldung diese Datei, statt den Cursor im offenen Dokument irgendwohin zu setzen.

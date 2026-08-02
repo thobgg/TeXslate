@@ -1,0 +1,2 @@
+* Tap the PDF, land in the source (SyncTeX): tap a spot in the preview and the cursor jumps to the line it was typeset from. That holds inside a wrapped paragraph too, where the left and the right half of one typeset line come from different source lines.
+* If the tapped spot comes from an included file, a message names that file instead of putting the cursor somewhere arbitrary in the open document.

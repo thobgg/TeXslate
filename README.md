@@ -45,6 +45,10 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
   project files are only copied when they have changed.
 - **PDF preview** alongside (tablet split view with a draggable divider) or as a
   tab on narrow displays.
+- **Tap the PDF, land in the source** (SyncTeX): tap a spot in the preview and the
+  cursor jumps to the line it was typeset from — inside a wrapped paragraph too,
+  where the left and the right half of one typeset line come from different source
+  lines.
 - **Fonts by name**: `\setmainfont{…}` works offline — a curated set (Latin
   Modern Roman, TeX Gyre Termes/Pagella/Heros, **DejaVu Sans**) is bundled and
   resolvable by name, as are your Android system fonts and any `.otf`/`.ttf` you

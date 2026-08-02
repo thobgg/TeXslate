@@ -46,6 +46,10 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
   Durchlauf), Projektdateien werden nur kopiert, wenn sie sich geändert haben.
 - **PDF-Vorschau** daneben (Tablet-Split-View mit verschiebbarem Trenner) oder als
   Tab auf schmalen Displays.
+- **Tipp ins PDF, Cursor im Quelltext** (SyncTeX): Auf eine Stelle in der Vorschau
+  tippen, und der Cursor springt in die Zeile, aus der sie gesetzt wurde — auch
+  innerhalb eines umbrochenen Absatzes, wo die linke und die rechte Hälfte
+  derselben gesetzten Zeile aus verschiedenen Quellzeilen stammen.
 - **Schriften über den Namen**: `\setmainfont{…}` funktioniert offline — ein
   kuratierter Satz (Latin Modern Roman, TeX Gyre Termes/Pagella/Heros, **DejaVu
   Sans**) ist gebündelt und über den Namen auflösbar, ebenso deine
