@@ -6,6 +6,7 @@ import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.rememberTransformableState
 import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -58,17 +60,27 @@ class PdfDocument(file: File) : Closeable {
     val pageCount: Int get() = renderer.pageCount
 
     /**
+     * Eine gerenderte Seite samt ihrer Maße in PDF-Punkten.
+     *
+     * Die Punktmaße kommen mit, weil SyncTeX in genau dieser Einheit rechnet:
+     * Ein Tipp auf das Bitmap lässt sich nur dann in eine PDF-Position umrechnen,
+     * wenn man weiß, wie groß die Seite in Punkten ist (siehe [PdfPreview]).
+     */
+    class RenderedPage(val bitmap: Bitmap, val widthPoints: Int, val heightPoints: Int)
+
+    /**
      * Rendert Seite [index] auf [targetWidthPx] Breite (Höhe seitenverhältnistreu).
      * Der weiße Hintergrund wird explizit gesetzt – PDF-Seiten sind sonst transparent.
      */
-    fun renderPage(index: Int, targetWidthPx: Int): Bitmap = synchronized(lock) {
+    fun renderPage(index: Int, targetWidthPx: Int): RenderedPage = synchronized(lock) {
         renderer.openPage(index).use { page ->
             val width = targetWidthPx.coerceAtLeast(1)
             val height = (width.toFloat() * page.height / page.width).toInt().coerceAtLeast(1)
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             bitmap.eraseColor(Color.WHITE)
             page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-            bitmap
+            // getWidth()/getHeight() liefern die Seitenmaße in Punkten (1/72 Zoll).
+            RenderedPage(bitmap, page.width, page.height)
         }
     }
 
@@ -86,12 +98,16 @@ class PdfDocument(file: File) : Closeable {
  * @param file        das anzuzeigende PDF.
  * @param reloadToken bei jedem erfolgreichen Compile erhöhen → Preview lädt neu,
  *                    die Scroll-Position bleibt (gemerkter [rememberLazyListState]).
+ * @param onTapPosition Tipp auf eine Seite, als Position in PDF-Punkten (Ursprung
+ *                    links oben, 1-basierte Seitennummer). Damit findet die App
+ *                    über SyncTeX die zugehörige Quelltext-Zeile.
  */
 @Composable
 fun PdfPreview(
     file: File,
     reloadToken: Int,
     modifier: Modifier = Modifier,
+    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)? = null,
 ) {
     // Bei neuem File ODER neuem reloadToken das Dokument neu öffnen.
     val document = remember(file.absolutePath, reloadToken) {
@@ -134,16 +150,26 @@ fun PdfPreview(
                 .transformable(transformState),
         ) {
             items(document.pageCount) { index ->
-                PdfPageItem(document = document, index = index, targetWidthPx = widthPx)
+                PdfPageItem(
+                    document = document,
+                    index = index,
+                    targetWidthPx = widthPx,
+                    onTapPosition = onTapPosition,
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PdfPageItem(document: PdfDocument, index: Int, targetWidthPx: Int) {
+private fun PdfPageItem(
+    document: PdfDocument,
+    index: Int,
+    targetWidthPx: Int,
+    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)?,
+) {
     // Seite asynchron auf dem IO-Dispatcher rendern; solange Platzhalter zeigen.
-    val bitmap by produceState<Bitmap?>(
+    val rendered by produceState<PdfDocument.RenderedPage?>(
         initialValue = null,
         document,
         index,
@@ -154,8 +180,8 @@ private fun PdfPageItem(document: PdfDocument, index: Int, targetWidthPx: Int) {
         }
     }
 
-    val bmp = bitmap
-    if (bmp == null) {
+    val page = rendered
+    if (page == null) {
         Box(
             Modifier
                 .fillMaxWidth()
@@ -167,12 +193,28 @@ private fun PdfPageItem(document: PdfDocument, index: Int, targetWidthPx: Int) {
         }
     } else {
         Image(
-            bitmap = bmp.asImageBitmap(),
+            bitmap = page.bitmap.asImageBitmap(),
             contentDescription = stringResource(R.string.pdf_page, index + 1),
             contentScale = ContentScale.FillWidth,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 4.dp),
+                .padding(horizontal = 4.dp)
+                // Ganz am Ende der Kette: So bekommt der Tipp Koordinaten
+                // relativ zum Bild selbst – Zoom und Scroll der Liste rechnet
+                // Compose bereits heraus, das Bild füllt die Breite exakt aus.
+                .pointerInput(onTapPosition, page) {
+                    if (onTapPosition == null) return@pointerInput
+                    detectTapGestures { offset ->
+                        val w = size.width.toFloat()
+                        val h = size.height.toFloat()
+                        if (w <= 0f || h <= 0f) return@detectTapGestures
+                        onTapPosition(
+                            index + 1, // SyncTeX zählt Seiten ab 1
+                            offset.x / w * page.widthPoints,
+                            offset.y / h * page.heightPoints,
+                        )
+                    }
+                },
         )
     }
 }

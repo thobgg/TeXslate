@@ -137,6 +137,9 @@ import de.bgg_home.texdroid.editor.stopSearch
 import de.bgg_home.texdroid.editor.toggleLineComment
 import io.github.rosemoe.sora.event.PublishSearchResultEvent
 import de.bgg_home.texdroid.pdf.PdfPreview
+import de.bgg_home.texdroid.synctex.PdfPoint
+import de.bgg_home.texdroid.synctex.SyncTexIndex
+import de.bgg_home.texdroid.synctex.SyncTexParser
 import de.bgg_home.texdroid.storage.DocumentStore
 import de.bgg_home.texdroid.storage.DraftStore
 import de.bgg_home.texdroid.storage.FontStore
@@ -307,6 +310,13 @@ fun TexDroidApp(
     var compiledOnce by remember { mutableStateOf(appPrefs.getBoolean("compiledOnce", false)) }
     var pdfFile by remember { mutableStateOf<File?>(null) }
     var reloadToken by remember { mutableIntStateOf(0) }
+    // SyncTeX: Datei aus dem letzten Compile plus der daraus gelesene Index.
+    // Der Index wird erst beim ersten Tipp gebaut (siehe onPdfTap) – ihn nach
+    // jedem Compile zu parsen, hieße beim Auto-Compile alle paar Sekunden eine
+    // Datei zu lesen, die vielleicht nie gebraucht wird.
+    var synctexFile by remember { mutableStateOf<File?>(null) }
+    var syncTexIndex by remember { mutableStateOf<SyncTexIndex?>(null) }
+    var syncTexToken by remember { mutableIntStateOf(-1) }
     var errors by remember { mutableStateOf<List<CompileError>>(emptyList()) }
     var selectedTab by remember { mutableStateOf(Tab.Editor) }
 
@@ -720,6 +730,7 @@ fun TexDroidApp(
                 errorIndex = 0
                 if (result.ok && result.pdfPath.isNotEmpty()) {
                     pdfFile = File(result.pdfPath)
+                    synctexFile = result.synctexPath.takeIf { it.isNotEmpty() }?.let { File(it) }
                     reloadToken++ // Preview neu laden, Scroll-Position bleibt erhalten.
                     // Tab-Layout: Ein bewusst gedrückter Compile will das Ergebnis
                     // sehen → zur Vorschau wechseln. Beim Auto-Compile nicht –
@@ -803,6 +814,43 @@ fun TexDroidApp(
     val onErrorClick: (CompileError) -> Unit = { err ->
         selectedTab = Tab.Editor
         err.line?.let { editor?.jumpToErrorLine(it) }
+    }
+
+    /**
+     * Tipp in die PDF-Vorschau → Cursor auf die zugehörige Quelltext-Zeile
+     * (Inverse Search). [page] ist 1-basiert, [x]/[y] sind PDF-Punkte ab der
+     * linken oberen Ecke der Seite.
+     *
+     * Der SyncTeX-Index wird hier beim ersten Tipp nach einem Compile gelesen und
+     * bis zum nächsten behalten – das Parsen läuft auf dem IO-Dispatcher, die
+     * Datei kann bei einem Buch etliche Megabyte haben.
+     */
+    val onPdfTap: (Int, Float, Float) -> Unit = { page, x, y ->
+        scope.launch {
+            val index = if (syncTexToken == reloadToken) {
+                syncTexIndex
+            } else {
+                val file = synctexFile
+                withContext(Dispatchers.IO) { SyncTexParser.parse(file) }.also {
+                    syncTexIndex = it
+                    syncTexToken = reloadToken
+                }
+            }
+            val hit = index?.inverseSearch(PdfPoint(page = page, x = x, y = y))
+            when {
+                // Ohne Zuordnung passiert sonst gar nichts und man rätselt, ob
+                // der Tipp überhaupt angekommen ist.
+                hit == null -> showNow(context.getString(R.string.snackbar_synctex_unavailable))
+                // Andere Datei: Die Zeilennummer gilt dort, nicht im offenen
+                // Dokument – blind zu springen setzte den Cursor irgendwohin.
+                !hit.isMainDocument ->
+                    showNow(context.getString(R.string.snackbar_synctex_other_file, hit.fileName))
+                else -> {
+                    selectedTab = Tab.Editor // Tab-Layout: sonst sieht man den Cursor nicht.
+                    editor?.goToLine(hit.line)
+                }
+            }
+        }
     }
 
     // QW A4: „Fehler erklären" – KI-Assistent mit vorbefüllter Frage zum Fehler öffnen.
@@ -940,6 +988,7 @@ fun TexDroidApp(
                         compiling = compiling,
                         firstCompile = compiling && !compiledOnce,
                         modifier = paneModifier,
+                        onTapPosition = onPdfTap,
                     )
                 }
             }
@@ -1795,10 +1844,15 @@ private fun PreviewPane(
     compiling: Boolean,
     firstCompile: Boolean,
     modifier: Modifier = Modifier,
+    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)? = null,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
         when {
-            pdfFile != null -> PdfPreview(file = pdfFile, reloadToken = reloadToken)
+            pdfFile != null -> PdfPreview(
+                file = pdfFile,
+                reloadToken = reloadToken,
+                onTapPosition = onTapPosition,
+            )
             compiling -> Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(horizontal = 24.dp),

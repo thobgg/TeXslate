@@ -192,6 +192,9 @@
     <string name="snackbar_compile_first">Erst kompilieren – es gibt noch kein PDF.</string>
     <string name="snackbar_nothing_to_share">Nichts zum Teilen ausgewählt.</string>
     <string name="snackbar_compile_cancelled">Compile abgebrochen</string>
+    <!-- Tipp in die PDF-Vorschau: Sprung zur zugehörigen Quelltext-Zeile (SyncTeX). -->
+    <string name="snackbar_synctex_unavailable">Für dieses PDF gibt es noch keine Zuordnung — bitte neu kompilieren</string>
+    <string name="snackbar_synctex_other_file">Diese Stelle stammt aus %1$s — zum Springen die Datei öffnen</string>
     <string name="snackbar_fonts_changed_restart">Neue Schrift erkannt – App neu starten, damit sie per Name nutzbar ist.</string>
     <string name="snackbar_multifile_hint">„%1$s“ bindet weitere Dateien ein (\\input …). Zum Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ den enthaltenden Ordner wählen.</string>
     <string name="fallback_document">Dokument</string>
