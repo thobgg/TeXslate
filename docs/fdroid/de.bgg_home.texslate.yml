@@ -24,6 +24,7 @@ Builds:
     gradle:
       - core
     prebuild:
+      - sed -i -e '/foojay/d' settings.gradle.kts
       - sed -i 's/include("arm64-v8a", "x86_64")/include("arm64-v8a")/' app/build.gradle.kts
       - rustup target add aarch64-linux-android
       - cargo install cargo-ndk --version 3.5.4 --locked
@@ -34,6 +35,11 @@ Builds:
         "harfbuzz[core,freetype,graphite2,icu,png]" freetype graphite2 icu libpng
         fontconfig
       - export VCPKG_ROOT="$(pwd)/vcpkg" && ./build-native.sh arm64-v8a
+    scanignore:
+      - app/src/main/jniLibs
+    scandelete:
+      - vcpkg
+      - rust/target
     ndk: 27.2.12479018
 
 AutoUpdateMode: Version v%v
