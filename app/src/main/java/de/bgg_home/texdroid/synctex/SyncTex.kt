@@ -194,8 +194,9 @@ object SyncTexParser {
      * und enthält nichts, worauf man zielen würde – der Fehlgriff wäre es wert
      * gewesen, wenn dafür jede kurze Zeile ins Leere liefe.
      */
-    private const val RECORD_TYPES = "[(vhrxkg\$"
     private const val CONTENT_TYPES = "xkg\$hv"
+    private const val STRUCTURE_TYPES = "[(r"
+    private const val RECORD_TYPES = STRUCTURE_TYPES + CONTENT_TYPES
 
     /** `Input:12:./kapitel/eins.tex` → 12 zu `kapitel/eins.tex`. */
     private fun parseInput(line: String): Pair<Int, String>? {
@@ -245,15 +246,21 @@ object SyncTexParser {
         val h = position.substring(0, posComma).trim().toIntOrNull() ?: return
         val v = position.substring(posComma + 1).trim().toIntOrNull() ?: return
 
-        var width = 0
-        var height = 0
-        var depth = 0
+        // `breite,höhe,tiefe` – von Hand zerlegt wie tag/zeile oben: split()
+        // hieße eine Wegwerf-Liste pro Datensatz, hunderttausendfach pro Parse.
+        val extents = IntArray(3)
         if (secondColon >= 0) {
-            val extent = rest.substring(secondColon + 1).split(',')
-            width = extent.getOrNull(0)?.trim()?.toIntOrNull() ?: 0
-            height = extent.getOrNull(1)?.trim()?.toIntOrNull() ?: 0
-            depth = extent.getOrNull(2)?.trim()?.toIntOrNull() ?: 0
+            var start = secondColon + 1
+            for (slot in extents.indices) {
+                if (start > rest.length) break
+                val end = rest.indexOf(',', start).let { if (it < 0) rest.length else it }
+                extents[slot] = rest.substring(start, end).trim().toIntOrNull() ?: 0
+                start = end + 1
+            }
         }
+        val width = extents[0]
+        val height = extents[1]
+        val depth = extents[2]
 
         // `v` ist die Grundlinie; die Kiste reicht um ihre Höhe nach oben und um
         // ihre Tiefe nach unten. Negative Breiten kommen vor (rückwärts gesetzte

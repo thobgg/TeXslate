@@ -148,8 +148,10 @@ import de.bgg_home.texdroid.storage.ProjectStore
 import de.bgg_home.texdroid.storage.UserTemplate
 import de.bgg_home.texdroid.storage.UserTemplateStore
 import io.github.rosemoe.sora.widget.CodeEditor
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -313,10 +315,11 @@ fun TexDroidApp(
     // SyncTeX: Datei aus dem letzten Compile plus der daraus gelesene Index.
     // Der Index wird erst beim ersten Tipp gebaut (siehe onPdfTap) – ihn nach
     // jedem Compile zu parsen, hieße beim Auto-Compile alle paar Sekunden eine
-    // Datei zu lesen, die vielleicht nie gebraucht wird.
+    // Datei zu lesen, die vielleicht nie gebraucht wird. Als Deferred, damit
+    // schnelle Tipps hintereinander denselben Parse-Lauf teilen; ein Compile
+    // setzt es zurück (siehe runCompile).
     var synctexFile by remember { mutableStateOf<File?>(null) }
-    var syncTexIndex by remember { mutableStateOf<SyncTexIndex?>(null) }
-    var syncTexToken by remember { mutableIntStateOf(-1) }
+    var syncTexIndex by remember { mutableStateOf<Deferred<SyncTexIndex?>?>(null) }
     var errors by remember { mutableStateOf<List<CompileError>>(emptyList()) }
     var selectedTab by remember { mutableStateOf(Tab.Editor) }
 
@@ -731,6 +734,7 @@ fun TexDroidApp(
                 if (result.ok && result.pdfPath.isNotEmpty()) {
                     pdfFile = File(result.pdfPath)
                     synctexFile = result.synctexPath.takeIf { it.isNotEmpty() }?.let { File(it) }
+                    syncTexIndex = null // der alte Index passt nicht mehr zum neuen PDF
                     reloadToken++ // Preview neu laden, Scroll-Position bleibt erhalten.
                     // Tab-Layout: Ein bewusst gedrückter Compile will das Ergebnis
                     // sehen → zur Vorschau wechseln. Beim Auto-Compile nicht –
@@ -818,25 +822,22 @@ fun TexDroidApp(
 
     /**
      * Tipp in die PDF-Vorschau → Cursor auf die zugehörige Quelltext-Zeile
-     * (Inverse Search). [page] ist 1-basiert, [x]/[y] sind PDF-Punkte ab der
-     * linken oberen Ecke der Seite.
+     * (Inverse Search).
      *
      * Der SyncTeX-Index wird hier beim ersten Tipp nach einem Compile gelesen und
      * bis zum nächsten behalten – das Parsen läuft auf dem IO-Dispatcher, die
-     * Datei kann bei einem Buch etliche Megabyte haben.
+     * Datei kann bei einem Buch etliche Megabyte haben. Auch ein Fehlschlag wird
+     * behalten (das Deferred liefert dann null): dieselbe Datei noch einmal zu
+     * parsen, brächte nichts.
      */
-    val onPdfTap: (Int, Float, Float) -> Unit = { page, x, y ->
+    val onPdfTap: (PdfPoint) -> Unit = { point ->
         scope.launch {
-            val index = if (syncTexToken == reloadToken) {
-                syncTexIndex
-            } else {
+            val parsing = syncTexIndex ?: run {
                 val file = synctexFile
-                withContext(Dispatchers.IO) { SyncTexParser.parse(file) }.also {
-                    syncTexIndex = it
-                    syncTexToken = reloadToken
-                }
+                scope.async(Dispatchers.IO) { SyncTexParser.parse(file) }
+                    .also { syncTexIndex = it }
             }
-            val hit = index?.inverseSearch(PdfPoint(page = page, x = x, y = y))
+            val hit = parsing.await()?.inverseSearch(point)
             when {
                 // Ohne Zuordnung passiert sonst gar nichts und man rätselt, ob
                 // der Tipp überhaupt angekommen ist.
@@ -1843,8 +1844,8 @@ private fun PreviewPane(
     reloadToken: Int,
     compiling: Boolean,
     firstCompile: Boolean,
+    onTapPosition: (PdfPoint) -> Unit,
     modifier: Modifier = Modifier,
-    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)? = null,
 ) {
     Box(modifier, contentAlignment = Alignment.Center) {
         when {

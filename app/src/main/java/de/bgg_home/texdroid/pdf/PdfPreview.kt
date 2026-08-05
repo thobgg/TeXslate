@@ -40,6 +40,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import de.bgg_home.texdroid.R
+import de.bgg_home.texdroid.synctex.PdfPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.Closeable
@@ -98,16 +99,15 @@ class PdfDocument(file: File) : Closeable {
  * @param file        das anzuzeigende PDF.
  * @param reloadToken bei jedem erfolgreichen Compile erhöhen → Preview lädt neu,
  *                    die Scroll-Position bleibt (gemerkter [rememberLazyListState]).
- * @param onTapPosition Tipp auf eine Seite, als Position in PDF-Punkten (Ursprung
- *                    links oben, 1-basierte Seitennummer). Damit findet die App
- *                    über SyncTeX die zugehörige Quelltext-Zeile.
+ * @param onTapPosition Tipp auf eine Seite, als [PdfPoint] in PDF-Punkten. Damit
+ *                    findet die App über SyncTeX die zugehörige Quelltext-Zeile.
  */
 @Composable
 fun PdfPreview(
     file: File,
     reloadToken: Int,
+    onTapPosition: (PdfPoint) -> Unit,
     modifier: Modifier = Modifier,
-    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)? = null,
 ) {
     // Bei neuem File ODER neuem reloadToken das Dokument neu öffnen.
     val document = remember(file.absolutePath, reloadToken) {
@@ -166,7 +166,7 @@ private fun PdfPageItem(
     document: PdfDocument,
     index: Int,
     targetWidthPx: Int,
-    onTapPosition: ((page: Int, x: Float, y: Float) -> Unit)?,
+    onTapPosition: (PdfPoint) -> Unit,
 ) {
     // Seite asynchron auf dem IO-Dispatcher rendern; solange Platzhalter zeigen.
     val rendered by produceState<PdfDocument.RenderedPage?>(
@@ -203,15 +203,16 @@ private fun PdfPageItem(
                 // relativ zum Bild selbst – Zoom und Scroll der Liste rechnet
                 // Compose bereits heraus, das Bild füllt die Breite exakt aus.
                 .pointerInput(onTapPosition, page) {
-                    if (onTapPosition == null) return@pointerInput
                     detectTapGestures { offset ->
                         val w = size.width.toFloat()
                         val h = size.height.toFloat()
                         if (w <= 0f || h <= 0f) return@detectTapGestures
                         onTapPosition(
-                            index + 1, // SyncTeX zählt Seiten ab 1
-                            offset.x / w * page.widthPoints,
-                            offset.y / h * page.heightPoints,
+                            PdfPoint(
+                                page = index + 1, // SyncTeX zählt Seiten ab 1
+                                x = offset.x / w * page.widthPoints,
+                                y = offset.y / h * page.heightPoints,
+                            ),
                         )
                     }
                 },
