@@ -1,3 +1,6 @@
+AntiFeatures:
+  NonFreeNet:
+    en-US: The optional AI assistant sends text to Anthropic, OpenAI or Google using an API key supplied by the user. It is disabled by default; the editor and the LaTeX compiler work fully offline.
 Categories:
   - Writing
 License: GPL-3.0-or-later
@@ -5,16 +8,13 @@ AuthorName: thobgg
 SourceCode: https://github.com/thobgg/TeXslate
 IssueTracker: https://github.com/thobgg/TeXslate/issues
 
-AntiFeatures:
-  - NonFreeNetwork
-
 RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
 
 Builds:
-  - versionName: 1.0-alpha14
-    versionCode: 14
-    commit: v1.0-alpha14
+  - versionName: 1.0-alpha19
+    versionCode: 19
+    commit: v1.0-alpha19
     sudo:
       - apt-get update
       - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin bison gperf autoconf-archive
@@ -32,5 +32,5 @@ Builds:
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.0-alpha14
-CurrentVersionCode: 14
+CurrentVersion: 1.0-alpha19
+CurrentVersionCode: 19
