@@ -215,6 +215,37 @@ object SyncTexParser {
         substringAfter(':').trim().toFloatOrNull()
 
     /**
+     * Ganzzahl zwischen [from] (einschließlich) und [to] (ausschließlich) – das
+     * Gegenstück zu `substring(from, to).trim().toIntOrNull()`, nur ohne die
+     * Teilstrings: [addRecord] liest so bis zu [MAX_RECORDS]-mal pro Parse jedes
+     * Feld direkt aus der Zeile, statt Millionen Wegwerf-Strings zu erzeugen.
+     */
+    private fun String.intIn(from: Int, to: Int): Int? {
+        var start = from
+        var end = to
+        while (start < end && this[start].isWhitespace()) start++
+        while (end > start && this[end - 1].isWhitespace()) end--
+        var i = start
+        var negative = false
+        if (i < end && (this[i] == '-' || this[i] == '+')) {
+            negative = this[i] == '-'
+            i++
+        }
+        if (i >= end) return null
+        var value = 0L
+        while (i < end) {
+            val c = this[i]
+            if (c < '0' || c > '9') return null
+            value = value * 10 + (c - '0')
+            if (value > 2_147_483_648L) return null // jenseits von |Int.MIN_VALUE|
+            i++
+        }
+        val signed = if (negative) -value else value
+        if (signed < Int.MIN_VALUE || signed > Int.MAX_VALUE) return null
+        return signed.toInt()
+    }
+
+    /**
      * Zerlegt eine Inhalts-Zeile (`<typ>tag,zeile[,spalte]:x,y[:breite[,höhe,tiefe]]`)
      * und legt sie in [target] ab. Fehlt etwas oder ist es unlesbar, wird der
      * Datensatz verworfen statt geraten – eine falsche Zuordnung wäre schlimmer
@@ -227,34 +258,32 @@ object SyncTexParser {
         xOffset: Float,
         yOffset: Float,
     ) {
-        val body = line.substring(1)
-        val firstColon = body.indexOf(':')
-        if (firstColon <= 0) return
-        val ids = body.substring(0, firstColon)
-        val comma = ids.indexOf(',')
-        if (comma <= 0) return
-        val tag = ids.substring(0, comma).trim().toIntOrNull() ?: return
+        // Alle Indizes zeigen in [line] selbst; die Zahlen liest [intIn] an Ort
+        // und Stelle. Das Typ-Zeichen steht auf Index 0, dahinter die Felder.
+        val firstColon = line.indexOf(':', 1)
+        if (firstColon < 2) return
+        val comma = line.indexOf(',', 1)
+        if (comma !in 2 until firstColon) return
+        val tag = line.intIn(1, comma) ?: return
         // Nach der Zeile darf noch eine Spalte folgen – die interessiert hier nicht.
-        val lineEnd = ids.indexOf(',', comma + 1).takeIf { it > 0 } ?: ids.length
-        val srcLine = ids.substring(comma + 1, lineEnd).trim().toIntOrNull() ?: return
+        val lineEnd = line.indexOf(',', comma + 1).takeIf { it in 0 until firstColon } ?: firstColon
+        val srcLine = line.intIn(comma + 1, lineEnd) ?: return
 
-        val rest = body.substring(firstColon + 1)
-        val secondColon = rest.indexOf(':')
-        val position = if (secondColon < 0) rest else rest.substring(0, secondColon)
-        val posComma = position.indexOf(',')
-        if (posComma <= 0) return
-        val h = position.substring(0, posComma).trim().toIntOrNull() ?: return
-        val v = position.substring(posComma + 1).trim().toIntOrNull() ?: return
+        val secondColon = line.indexOf(':', firstColon + 1)
+        val posEnd = if (secondColon < 0) line.length else secondColon
+        val posComma = line.indexOf(',', firstColon + 1)
+        if (posComma !in (firstColon + 2) until posEnd) return
+        val h = line.intIn(firstColon + 1, posComma) ?: return
+        val v = line.intIn(posComma + 1, posEnd) ?: return
 
-        // `breite,höhe,tiefe` – von Hand zerlegt wie tag/zeile oben: split()
-        // hieße eine Wegwerf-Liste pro Datensatz, hunderttausendfach pro Parse.
+        // `breite,höhe,tiefe` – jedes Feld optional, fehlend oder unlesbar = 0.
         val extents = IntArray(3)
         if (secondColon >= 0) {
             var start = secondColon + 1
             for (slot in extents.indices) {
-                if (start > rest.length) break
-                val end = rest.indexOf(',', start).let { if (it < 0) rest.length else it }
-                extents[slot] = rest.substring(start, end).trim().toIntOrNull() ?: 0
+                if (start > line.length) break
+                val end = line.indexOf(',', start).let { if (it < 0) line.length else it }
+                extents[slot] = line.intIn(start, end) ?: 0
                 start = end + 1
             }
         }

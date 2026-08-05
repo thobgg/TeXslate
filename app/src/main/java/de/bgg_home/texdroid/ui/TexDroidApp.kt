@@ -826,9 +826,7 @@ fun TexDroidApp(
      *
      * Der SyncTeX-Index wird hier beim ersten Tipp nach einem Compile gelesen und
      * bis zum nächsten behalten – das Parsen läuft auf dem IO-Dispatcher, die
-     * Datei kann bei einem Buch etliche Megabyte haben. Auch ein Fehlschlag wird
-     * behalten (das Deferred liefert dann null): dieselbe Datei noch einmal zu
-     * parsen, brächte nichts.
+     * Datei kann bei einem Buch etliche Megabyte haben.
      */
     val onPdfTap: (PdfPoint) -> Unit = { point ->
         scope.launch {
@@ -837,7 +835,16 @@ fun TexDroidApp(
                 scope.async(Dispatchers.IO) { SyncTexParser.parse(file) }
                     .also { syncTexIndex = it }
             }
-            val hit = parsing.await()?.inverseSearch(point)
+            val index = parsing.await()
+            // Hat ein Compile das Warten überholt (runCompile setzt den Cache
+            // zurück), gehören Tipp-Koordinaten und Index zu verschiedenen
+            // PDFs – das Ergebnis wäre eine falsche Zeile, also verwerfen.
+            if (syncTexIndex !== parsing) return@launch
+            // Fehlschlag nicht dauerhaft merken: Er kann vorübergehend sein
+            // (die Datei wurde z.B. gerade vom laufenden Compile geschrieben)
+            // – der nächste Tipp liest sie dann frisch.
+            if (index == null) syncTexIndex = null
+            val hit = index?.inverseSearch(point)
             when {
                 // Ohne Zuordnung passiert sonst gar nichts und man rätselt, ob
                 // der Tipp überhaupt angekommen ist.
