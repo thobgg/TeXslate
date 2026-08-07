@@ -87,10 +87,10 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
 
 ## Documents from your desktop
 
-Most `.tex` files out there are written for **pdfLaTeX on a computer** — TeXslate
-runs XeTeX. Rather than making you adapt your document, the app adapts itself. It
-never touches **your file**: only the working copy for that one compile run is
-rewritten, every change is reported, and line numbers in the error panel stay valid.
+Most `.tex` files out there are written for **pdfLaTeX on a computer**, while
+TeXslate runs XeTeX. The app bridges those differences itself. It never touches
+**your file**: only the working copy for that one compile run is rewritten, every
+change is reported, and line numbers in the error panel stay valid.
 
 | What differs on the desktop | What TeXslate does |
 |---|---|
@@ -117,14 +117,13 @@ There is no open-source Android app that combines an editor, a PDF preview and a
 Android do exist — what is missing is the combination of *open source + compiles
 truly on the device, without a cloud or a PC*:
 
-- **Termux + TeX Live / Tectonic**: fully capable, but pure terminal use — no
-  integrated UX, a high barrier to entry.
-- **VerbTeX** (the best-known direct comparison): proprietary, and it **never
-  compiles on the device** — the free version sends your project to the Verbosus
+- **Termux + TeX Live / Tectonic**: fully capable, but pure terminal use with a
+  correspondingly high barrier to entry.
+- **VerbTeX** (the best-known direct comparison): proprietary, and the compile
+  always happens elsewhere. The free version sends your project to the Verbosus
   **cloud** (account + internet required), and “VerbTeX Local” needs a server you
-  run on a **PC on the same network**. No real offline/on-device compile, not open
-  source. This is exactly where TeXslate comes in.
-- Formula-only renderers (e.g. jlatexmath): not a full engine.
+  run on a **PC on the same network**. This is exactly where TeXslate comes in.
+- Formula-only renderers (e.g. jlatexmath): they lack a full engine.
 
 ## Tech stack
 

@@ -93,11 +93,11 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
 
 ## Dokumente vom PC
 
-Die meisten `.tex`-Dateien sind für **pdfLaTeX auf einem Rechner** geschrieben —
-TeXslate rechnet mit XeTeX. Statt dich dein Dokument anpassen zu lassen, passt sich
-die App an. Geändert wird dabei **nie deine Datei**, sondern nur die Arbeitskopie
-für den einen Compile-Lauf; jeder Eingriff wird gemeldet, und die Zeilennummern im
-Fehlerpanel bleiben gültig.
+Die meisten `.tex`-Dateien sind für **pdfLaTeX auf einem Rechner** geschrieben,
+TeXslate rechnet mit XeTeX. Die App gleicht diese Unterschiede selbst aus. Sie
+ändert dabei **nie deine Datei**, sondern arbeitet auf einer Kopie für den einen
+Compile-Lauf; jeder Eingriff wird gemeldet, und die Zeilennummern im Fehlerpanel
+bleiben gültig.
 
 | Was am PC anders ist | Was TeXslate tut |
 |---|---|
@@ -121,16 +121,16 @@ Abstürze. Die Sammlung läuft als Regressionstest mit, siehe
 
 Es gibt keine Open-Source-Android-App, die Editor, PDF-Vorschau und einen
 **XeTeX-fähigen Compiler auf dem Gerät, offline** in einer Oberfläche vereint.
-LaTeX-Editoren für Android existieren durchaus — was fehlt, ist die Kombination aus
+LaTeX-Editoren für Android gibt es durchaus; was fehlt, ist die Kombination aus
 *Open Source + kompiliert wirklich auf dem Gerät, ohne Cloud oder PC*:
 
-- **Termux + TeX Live / Tectonic**: voll funktionsfähig, aber reine Terminal-
-  Nutzung — keine integrierte UX, hohe Einstiegshürde.
-- **VerbTeX** (der bekannteste direkte Vergleich): proprietär und **kompiliert nie
-  auf dem Gerät** — die kostenlose Version schickt dein Projekt in die Verbosus-
-  **Cloud** (Konto + Internet nötig), und „VerbTeX Local" braucht einen Server, den
-  du auf einem **PC im selben Netz** betreibst. Kein echtes Offline-/On-Device-
-  Compile, nicht Open Source. Genau hier setzt TeXslate an.
+- **Termux + TeX Live / Tectonic**: voll funktionsfähig, aber reine
+  Terminal-Nutzung mit entsprechender Einstiegshürde.
+- **VerbTeX** (der bekannteste direkte Vergleich): proprietär, und der Compile
+  läuft immer woanders. Die kostenlose Version schickt dein Projekt in die
+  Verbosus-**Cloud** (Konto + Internet nötig), und „VerbTeX Local" braucht einen
+  Server, den du auf einem **PC im selben Netz** betreibst. Genau hier setzt
+  TeXslate an.
 - Reine Formel-Renderer (z. B. jlatexmath): keine vollständige Engine.
 
 ## Technik
