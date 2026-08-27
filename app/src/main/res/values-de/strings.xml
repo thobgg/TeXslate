@@ -139,7 +139,6 @@
 
     <!-- App-Kopfzeile -->
     <string name="header_project">Projekt</string>
-    <string name="header_title_with_file">TeXslate — %1$s</string>
     <string name="search_replace_title">Suchen &amp; Ersetzen</string>
     <string name="ai_assistant">KI-Assistent</string>
 
@@ -221,6 +220,7 @@
     <string name="errors_count">Fehler (%1$d)</string>
     <string name="prev_error">Vorheriger Fehler</string>
     <string name="next_error">Nächster Fehler</string>
+    <string name="dismiss_errors">Meldungen ausblenden</string>
     <string name="error_line_prefix">"Zeile %1$d: "</string>
     <string name="explain">Erklären</string>
     <string name="loading_bundle">Lade TeX-Pakete …\nDas passiert nur beim ersten Mal und kann eine Minute dauern.</string>

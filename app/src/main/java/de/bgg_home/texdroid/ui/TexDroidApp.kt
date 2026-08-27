@@ -51,6 +51,7 @@ import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -324,7 +325,11 @@ fun TexDroidApp(
     var selectedTab by remember { mutableStateOf(Tab.Editor) }
 
     // Auto-Compile (QW 3.1): zählt Editor-Änderungen; ein LaunchedEffect debounced darauf.
-    var autoCompile by remember { mutableStateOf(true) }
+    // Persistiert: Wer Auto-Compile abschaltet (z.B. weil die Engine auf dem Gerät
+    // lange braucht), will das nicht nach jedem App-Start neu tun. Ein Nutzer hat
+    // gemeldet, dass die Einstellung „gern mal vergessen" wird (08/2026) – sie lag
+    // nur im remember und war nach dem Prozess-Ende wieder auf dem Vorgabewert.
+    var autoCompile by remember { mutableStateOf(appPrefs.getBoolean("autoCompile", true)) }
     var textVersion by remember { mutableIntStateOf(0) }
 
     // „Trotz Fehlern kompilieren" (Issue #2, Overleaf-Vorbild): Engine läuft bei
@@ -897,7 +902,10 @@ fun TexDroidApp(
                 fileName = currentName,
                 compiling = compiling,
                 autoCompile = autoCompile,
-                onAutoCompileChange = { autoCompile = it },
+                onAutoCompileChange = {
+                    autoCompile = it
+                    appPrefs.edit().putBoolean("autoCompile", it).apply()
+                },
                 continueOnErrors = continueOnErrors,
                 onContinueOnErrorsChange = {
                     continueOnErrors = it
@@ -984,6 +992,7 @@ fun TexDroidApp(
                         onExplainError = onExplainError,
                         onPrevError = { jumpToError(errorIndex - 1) },
                         onNextError = { jumpToError(errorIndex + 1) },
+                        onDismissErrors = { errors = emptyList() },
                         modifier = paneModifier,
                     )
                 }
@@ -1403,11 +1412,11 @@ private fun AppHeader(
             // Titel + aktueller Dateiname. weight(1f) + Ellipsis: der Titel schrumpft,
             // damit die Toolbar rechts IMMER sichtbar bleibt (nie aus dem Bild geschoben).
             Text(
-                text = if (fileName != null) {
-                    stringResource(R.string.header_title_with_file, fileName)
-                } else {
-                    stringResource(R.string.app_name)
-                },
+                // Nur der Dateiname: Der App-Name davor kostete auf schmalen
+                // Bildschirmen genau den Platz, an dem der Dateiname abgeschnitten
+                // wurde – und wo man ist, weiß man ohnehin. Ohne offene Datei
+                // bleibt der App-Name stehen, damit die Zeile nicht leer wirkt.
+                text = fileName ?: stringResource(R.string.app_name),
                 style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 maxLines = 1,
@@ -1763,6 +1772,7 @@ private fun EditorPane(
     onExplainError: (CompileError) -> Unit,
     onPrevError: () -> Unit,
     onNextError: () -> Unit,
+    onDismissErrors: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
@@ -1774,7 +1784,7 @@ private fun EditorPane(
             modifier = Modifier.weight(1f).fillMaxWidth(),
         )
         if (errors.isNotEmpty()) {
-            ErrorPanel(errors, onErrorClick, onExplainError, onPrevError, onNextError)
+            ErrorPanel(errors, onErrorClick, onExplainError, onPrevError, onNextError, onDismissErrors)
         }
     }
 }
@@ -1786,6 +1796,7 @@ private fun ErrorPanel(
     onExplainError: (CompileError) -> Unit,
     onPrevError: () -> Unit,
     onNextError: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
     Surface(
         color = MaterialTheme.colorScheme.errorContainer,
@@ -1812,6 +1823,14 @@ private fun ErrorPanel(
                 }
                 IconButton(onClick = onNextError, modifier = Modifier.size(32.dp)) {
                     Icon(Icons.Filled.KeyboardArrowDown, stringResource(R.string.next_error), tint = navTint)
+                }
+                // Wegklicken: Das Panel blieb bisher bis zum nächsten Compile stehen –
+                // auch bei einem geglückten Lauf mit bloßen Warnungen, und es frisst
+                // auf kleinen Bildschirmen ein Sechstel der Editorhöhe. Der Wortlaut
+                // ist nicht verloren, das vollständige Log bleibt über „Log anzeigen"
+                // erreichbar. (Nutzerbericht 08/2026)
+                IconButton(onClick = onDismiss, modifier = Modifier.size(32.dp)) {
+                    Icon(Icons.Filled.Close, stringResource(R.string.dismiss_errors), tint = navTint)
                 }
             }
             errors.forEach { err ->

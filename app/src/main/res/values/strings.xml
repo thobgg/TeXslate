@@ -141,7 +141,6 @@
 
     <!-- App header -->
     <string name="header_project">Project</string>
-    <string name="header_title_with_file">TeXslate — %1$s</string>
     <string name="search_replace_title">Search &amp; replace</string>
     <string name="ai_assistant">AI assistant</string>
 
@@ -223,6 +222,7 @@
     <string name="errors_count">Errors (%1$d)</string>
     <string name="prev_error">Previous error</string>
     <string name="next_error">Next error</string>
+    <string name="dismiss_errors">Dismiss messages</string>
     <string name="error_line_prefix">"Line %1$d: "</string>
     <string name="explain">Explain</string>
     <string name="loading_bundle">Downloading TeX packages …\nThis happens only the first time and may take a minute.</string>
