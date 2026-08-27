@@ -1,0 +1,3 @@
+* Auto-Compile is remembered: the toggle fell back to “on” after every app start, so anyone who had switched it off had to do it again each time.
+* Red messages can be dismissed: a ✕ next to the jump arrows clears the error panel and the red underlines in the editor. The full text stays reachable through “Show log”.
+* The header now shows the filename alone. The app name in front of it cost exactly the space where the name was being cut off on narrow screens.

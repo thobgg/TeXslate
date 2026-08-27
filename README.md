@@ -55,7 +55,8 @@ _Optional AI assistant (BYOK): select a piece of LaTeX you don't understand and 
   drop into the app's font folder. Missing fonts are substituted instead of
   aborting the compile — see [Documents from your desktop](#documents-from-your-desktop).
 - **Localized errors**: the most common TeX messages are rewritten as short,
-  readable sentences in the UI language; tapping jumps to the error line.
+  readable sentences in the UI language; tapping jumps to the error line, and the
+  panel can be dismissed once you have read it.
 - **Chinese and other CJK languages**: `ctex` and `xeCJK` work. Templates that
   hard-wire Windows fonts (`SimSun`, `黑体`, `KaiTi`, `Microsoft YaHei`) are typeset
   with the free **Fandol** fonts from the TeX bundle, so no CJK system font has to be

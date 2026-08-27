@@ -1,0 +1,3 @@
+* Auto-Compile wird gemerkt: Der Schalter fiel nach jedem App-Start auf „an“ zurück, wer ihn abgeschaltet hatte, musste das jedes Mal neu tun.
+* Rote Meldungen lassen sich wegklicken: Ein ✕ neben den Sprungpfeilen räumt den Fehlerkasten weg, samt der roten Unterschlängelungen im Editor. Der vollständige Text bleibt über „Log ansehen“ erreichbar.
+* In der Kopfzeile steht jetzt nur noch der Dateiname. Der App-Name davor kostete auf schmalen Bildschirmen genau den Platz, an dem der Name abgeschnitten wurde.

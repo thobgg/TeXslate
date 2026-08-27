@@ -58,7 +58,7 @@ _Optionaler KI-Assistent (BYOK): markiere ein Stück LaTeX, das du nicht versteh
   siehe [Dokumente vom PC](#dokumente-vom-pc).
 - **Eingedeutschte Fehler**: die häufigsten TeX-Meldungen werden als kurze,
   verständliche Sätze in der UI-Sprache umformuliert; ein Tipp springt zur
-  Fehlerzeile.
+  Fehlerzeile, und der Kasten lässt sich wegklicken, wenn man ihn gelesen hat.
 - **Chinesisch und andere CJK-Sprachen**: `ctex` und `xeCJK` funktionieren. Vorlagen,
   die Windows-Schriften fest verdrahten (`SimSun`, `黑体`, `KaiTi`, `Microsoft YaHei`),
   werden mit den freien **Fandol**-Schriften aus dem TeX-Bundle gesetzt — es muss also
