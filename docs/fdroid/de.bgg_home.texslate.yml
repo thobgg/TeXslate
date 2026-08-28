@@ -14,9 +14,9 @@ RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
 
 Builds:
-  - versionName: 1.0-alpha19
-    versionCode: 19
-    commit: v1.0-alpha19
+  - versionName: 1.0-alpha20
+    versionCode: 20
+    commit: v1.0-alpha20
     sudo:
       - apt-get update
       - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin
@@ -44,5 +44,5 @@ Builds:
 
 AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
-CurrentVersion: 1.0-alpha19
-CurrentVersionCode: 19
+CurrentVersion: 1.0-alpha20
+CurrentVersionCode: 20
