@@ -162,6 +162,17 @@ import java.io.File
 private const val AUTO_COMPILE_DEBOUNCE_MS = 800L
 
 /**
+ * Startordner des Projektordner-Dialogs: „Dokumente" auf dem internen Speicher.
+ *
+ * Ohne Vorgabe öffnet der System-Dialog dort, wo der Nutzer zuletzt war – oft
+ * „Downloads", und genau den lässt Android seit 11 nicht als Projektordner zu.
+ * Die Vorgabe ist ein Wunsch, kein Befehl: Manche Hersteller-Dialoge ignorieren
+ * `EXTRA_INITIAL_URI`, dann öffnet er eben wie bisher. Schaden kann es nicht.
+ */
+private val INITIAL_FOLDER: Uri =
+    Uri.parse("content://com.android.externalstorage.documents/document/primary%3ADocuments")
+
+/**
  * Beispiel-Dokument beim ersten Start – zeigt alle gehighlighteten Elemente.
  * Der *Inhalt* folgt der UI-Sprache (Deutsch bei deutscher Locale, sonst Englisch);
  * die LaTeX-Struktur bleibt identisch.
@@ -531,6 +542,16 @@ fun TexDroidApp(
     }
 
     // SAF: Projektordner öffnen (ACTION_OPEN_DOCUMENT_TREE).
+    //
+    // ⚠️ Android lässt seit 11 (API 30) bestimmte Ordner NICHT als Baum freigeben:
+    // die Wurzel des internen Speichers, die Wurzel jeder SD-Karte und
+    // ausgerechnet `Download`. Der Nutzer landet dort in einer Sackgasse, ohne
+    // dass die App etwas davon erfährt – abgelehnt wird im System-Dialog, und
+    // zurück kommt dasselbe `null` wie beim normalen Abbrechen. Deshalb zwei
+    // Gegenmaßnahmen: der Dialog startet gleich in „Dokumente" (siehe
+    // [INITIAL_FOLDER]), und der Hinweistext in der leeren Sidebar sagt es vorher.
+    // Eine Meldung *nach* dem Abbruch wäre falsch – sie träfe genauso jeden, der
+    // es sich einfach anders überlegt hat.
     val openFolderLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocumentTree(),
     ) { uri ->
@@ -887,7 +908,7 @@ fun TexDroidApp(
                     canGoUp = projectStack.isNotEmpty(),
                     entries = projectEntries,
                     currentUri = currentUri,
-                    onOpenFolder = { openFolderLauncher.launch(null) },
+                    onOpenFolder = { openFolderLauncher.launch(INITIAL_FOLDER) },
                     onUp = ::projectUp,
                     onEntryClick = ::openProjectEntry,
                 )

@@ -46,7 +46,7 @@
     <!-- Projekt-Sidebar -->
     <string name="project_none">Kein Projekt</string>
     <string name="open_folder">Ordner öffnen</string>
-    <string name="project_drawer_hint">Tippe auf das Ordner-Symbol, um einen Projektordner zu öffnen. Alle .tex-Dateien darin erscheinen hier.</string>
+    <string name="project_drawer_hint">Tippe auf das Ordner-Symbol, um einen Projektordner zu öffnen. Alle .tex-Dateien darin erscheinen hier. Android lässt „Download“ selbst nicht als Projektordner zu — lege deine Dateien unter „Dokumente“ ab oder wähle einen Unterordner von Download.</string>
 
     <!-- PDF-Vorschau -->
     <string name="pdf_none_loaded">Kein PDF geladen</string>

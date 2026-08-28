@@ -48,7 +48,7 @@
     <!-- Project drawer -->
     <string name="project_none">No project</string>
     <string name="open_folder">Open folder</string>
-    <string name="project_drawer_hint">Tap the folder icon to open a project folder. All .tex files inside will appear here.</string>
+    <string name="project_drawer_hint">Tap the folder icon to open a project folder. All .tex files inside will appear here. Android does not allow &#8220;Download&#8221; itself as a project folder — keep your files under &#8220;Documents&#8221;, or pick a subfolder of Download.</string>
 
     <!-- PDF preview -->
     <string name="pdf_none_loaded">No PDF loaded</string>
