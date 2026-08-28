@@ -17,6 +17,7 @@ Builds:
   - versionName: 1.0-alpha20
     versionCode: 20
     commit: v1.0-alpha20
+    subdir: app
     sudo:
       - apt-get update
       - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin
@@ -24,6 +25,7 @@ Builds:
     gradle:
       - core
     prebuild:
+      - cd ..
       - sed -i -e '/foojay/d' settings.gradle.kts
       - sed -i 's/include("arm64-v8a", "x86_64")/include("arm64-v8a")/' app/build.gradle.kts
       - rustup target add aarch64-linux-android
