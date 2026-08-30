@@ -1,0 +1,1 @@
+* AI assistant: new Anthropic keys scoped to “all workspaces” require a workspace ID on every request – the AI settings now have an optional field for it, and the error message explains what is missing. Tip: a key scoped to “Default” needs none.

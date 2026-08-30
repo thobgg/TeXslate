@@ -1,0 +1,1 @@
+* KI-Assistent: Neue Anthropic-Keys mit Scope „Alle Arbeitsbereiche“ verlangen bei jeder Anfrage eine Workspace-ID – dafür gibt es jetzt ein optionales Feld in den KI-Einstellungen. Die Fehlermeldung dazu erklärt, was fehlt. Tipp: Ein Key mit Scope „Default“ kommt ohne aus.
