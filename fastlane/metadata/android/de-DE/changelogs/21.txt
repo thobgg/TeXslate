@@ -1,0 +1,1 @@
+* KI-Assistent: Senden klappt jetzt auch ohne getippte Frage. Bisher blieb „Vorschau & senden“ grau, solange das Fragefeld leer war – auch mit markiertem Code. Jetzt springt eine Standardfrage ein (Markierung erklären bzw. Dokument prüfen), der Platzhalter sagt das an, und die Vorschau zeigt den tatsächlich gesendeten Text.

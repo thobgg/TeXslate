@@ -1,0 +1,1 @@
+* AI assistant: sending now works without typing a question. “Preview & send” used to stay greyed out while the question field was empty – even with code selected. A default question now steps in (explain the selection / check the document), the placeholder says so, and the preview shows the text that is actually sent.
