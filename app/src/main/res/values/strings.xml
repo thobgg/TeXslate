@@ -116,6 +116,7 @@
     <string name="ai_empty_answer">(empty answer)</string>
     <string name="ai_question_label">Question for the AI</string>
     <string name="ai_question_placeholder">e.g. “Create a 3×3 table with a header row”</string>
+    <string name="ai_question_placeholder_context">Leave empty to have the selected code explained</string>
     <string name="ai_context">Context</string>
     <string name="ai_preview_and_send">Preview &amp; send</string>
     <string name="ai_followup_label">Follow-up …</string>

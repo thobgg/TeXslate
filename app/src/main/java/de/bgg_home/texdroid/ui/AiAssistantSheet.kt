@@ -105,14 +105,20 @@ fun AiAssistantSheet(
     val ready = settings.enabled && settings.activeKey.isNotBlank()
     val isFollowUp = turns.isNotEmpty()
 
+    // Leeres Fragefeld + gewählter Kontext ⇒ Standardfrage („erkläre die
+    // Markierung"). Sonst musste man trotz Markierung erst etwas tippen, und der
+    // Senden-Button blieb grau – das wirkte wie „KI geht nicht".
+    fun effectiveQuestion(): String =
+        question.ifBlank { if (isFollowUp) "" else AiPrompt.defaultQuestion(contextScope) }
+
     // Text der aktuellen Frage, so wie er real gesendet wird: erste Runde mit
     // Editor-Kontext, Rückfragen ohne (der Kontext steckt schon im Verlauf).
     fun currentApiContent(): String =
-        if (isFollowUp) question else AiPrompt.build(question, contextScope, selection, document)
+        if (isFollowUp) question else AiPrompt.build(effectiveQuestion(), contextScope, selection, document)
 
     fun send() {
         val apiContent = currentApiContent()
-        val display = question
+        val display = effectiveQuestion()
         showPreview = false
         stage = Stage.LOADING
         scope.launch {
@@ -175,6 +181,7 @@ fun AiAssistantSheet(
         when (stage) {
             Stage.INPUT -> InputStage(
                 question = question,
+                canSend = effectiveQuestion().isNotBlank(),
                 onQuestionChange = { question = it },
                 contextScope = contextScope,
                 onScopeChange = { contextScope = it },
@@ -254,7 +261,7 @@ fun AiAssistantSheet(
                 }
             },
             confirmButton = {
-                Button(onClick = { send() }, enabled = question.isNotBlank()) {
+                Button(onClick = { send() }, enabled = effectiveQuestion().isNotBlank()) {
                     Text(stringResource(R.string.ai_send))
                 }
             },
@@ -290,6 +297,7 @@ private fun Conversation(turn: Turn) {
 @Composable
 private fun InputStage(
     question: String,
+    canSend: Boolean,
     onQuestionChange: (String) -> Unit,
     contextScope: ContextScope,
     onScopeChange: (ContextScope) -> Unit,
@@ -301,7 +309,14 @@ private fun InputStage(
         value = question,
         onValueChange = onQuestionChange,
         label = { Text(stringResource(R.string.ai_question_label)) },
-        placeholder = { Text(stringResource(R.string.ai_question_placeholder)) },
+        placeholder = {
+            Text(
+                stringResource(
+                    if (contextScope == ContextScope.NONE) R.string.ai_question_placeholder
+                    else R.string.ai_question_placeholder_context,
+                ),
+            )
+        },
         modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
     )
 
@@ -329,7 +344,7 @@ private fun InputStage(
 
     Button(
         onClick = onAsk,
-        enabled = question.isNotBlank(),
+        enabled = canSend,
         modifier = Modifier.padding(top = 16.dp),
     ) { Text(stringResource(R.string.ai_preview_and_send)) }
 }

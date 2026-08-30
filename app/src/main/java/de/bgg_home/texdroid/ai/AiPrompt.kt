@@ -45,6 +45,21 @@ object AiPrompt {
         }
     }
 
+    /**
+     * Standardfrage, wenn der Nutzer nur Kontext (Markierung/Dokument) mitgibt,
+     * aber nichts tippt – dann soll sich der Assistent den Code einfach ansehen.
+     * Ohne Kontext gibt es keinen Standard (leerer String).
+     */
+    fun defaultQuestion(scope: ContextScope): String = when (scope) {
+        ContextScope.NONE -> ""
+        ContextScope.SELECTION ->
+            if (german) "Erkläre diesen LaTeX-Code kurz und weise auf Fehler oder Verbesserungen hin."
+            else "Briefly explain this LaTeX code and point out any errors or improvements."
+        ContextScope.DOCUMENT ->
+            if (german) "Prüfe dieses LaTeX-Dokument kurz auf Fehler und nenne die wichtigsten Verbesserungen."
+            else "Briefly check this LaTeX document for errors and name the most important improvements."
+    }
+
     fun build(question: String, scope: ContextScope, selection: String, document: String): String {
         val context = when (scope) {
             ContextScope.NONE -> ""

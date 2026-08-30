@@ -114,6 +114,7 @@
     <string name="ai_empty_answer">(leere Antwort)</string>
     <string name="ai_question_label">Frage an die KI</string>
     <string name="ai_question_placeholder">z. B. „Erzeuge eine 3×3-Tabelle mit Kopfzeile“</string>
+    <string name="ai_question_placeholder_context">Leer lassen – dann wird der markierte Code erklärt</string>
     <string name="ai_context">Kontext</string>
     <string name="ai_preview_and_send">Vorschau &amp; senden</string>
     <string name="ai_followup_label">Nachfragen …</string>
