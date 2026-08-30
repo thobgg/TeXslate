@@ -58,6 +58,15 @@ class AiSettings(context: Context) {
         )
         .apply()
 
+    /**
+     * Anthropic-Workspace-ID (`wrkspc_…`), nur nötig für identitätsgebundene
+     * Console-Keys – die API verlangt dann den Header `anthropic-workspace-id`.
+     * Kein Geheimnis, daher unverschlüsselt.
+     */
+    var anthropicWorkspaceId: String
+        get() = prefs.getString(KEY_WORKSPACE, null)?.trim() ?: ""
+        set(value) = prefs.edit().putString(KEY_WORKSPACE, value.trim().ifBlank { null }).apply()
+
     /** Key/Modell des aktuell gewählten Providers. */
     val activeKey: String get() = keyFor(provider)
     val activeModel: String get() = modelFor(provider)
@@ -71,5 +80,6 @@ class AiSettings(context: Context) {
     private companion object {
         const val KEY_ENABLED = "enabled"
         const val KEY_PROVIDER = "provider"
+        const val KEY_WORKSPACE = "anthropic_workspace_id"
     }
 }

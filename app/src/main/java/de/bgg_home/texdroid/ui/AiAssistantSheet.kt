@@ -132,6 +132,7 @@ fun AiAssistantSheet(
                 apiKey = settings.activeKey,
                 systemPrompt = AiPrompt.SYSTEM,
                 messages = messages,
+                workspaceId = settings.anthropicWorkspaceId,
             )) {
                 is AiResult.Success -> {
                     turns = turns + Turn(display, apiContent, r.text)

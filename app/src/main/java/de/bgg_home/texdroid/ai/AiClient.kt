@@ -37,10 +37,12 @@ object AiClient {
         apiKey: String,
         systemPrompt: String,
         messages: List<AiMessage>,
+        /** Nur Anthropic: Workspace-ID für identitätsgebundene Keys (sonst leer). */
+        workspaceId: String = "",
     ): AiResult = withContext(Dispatchers.IO) {
         try {
             when (provider) {
-                AiProvider.ANTHROPIC -> anthropic(model, apiKey, systemPrompt, messages)
+                AiProvider.ANTHROPIC -> anthropic(model, apiKey, systemPrompt, messages, workspaceId)
                 AiProvider.OPENAI -> openai(model, apiKey, systemPrompt, messages)
                 AiProvider.GEMINI -> gemini(model, apiKey, systemPrompt, messages)
             }
@@ -57,7 +59,13 @@ object AiClient {
 
     // --- Provider-Adapter -----------------------------------------------------
 
-    private fun anthropic(model: String, key: String, system: String, messages: List<AiMessage>): AiResult {
+    private fun anthropic(
+        model: String,
+        key: String,
+        system: String,
+        messages: List<AiMessage>,
+        workspaceId: String,
+    ): AiResult {
         val arr = JSONArray()
         messages.forEach { arr.put(JSONObject().put("role", it.role).put("content", it.content)) }
         val body = JSONObject()
@@ -65,15 +73,15 @@ object AiClient {
             .put("max_tokens", 1500)
             .put("messages", arr)
         if (system.isNotBlank()) body.put("system", system)
-        val res = post(
-            "https://api.anthropic.com/v1/messages",
-            mapOf(
-                "x-api-key" to key,
-                "anthropic-version" to "2023-06-01",
-                "content-type" to "application/json",
-            ),
-            body,
+        val headers = mutableMapOf(
+            "x-api-key" to key,
+            "anthropic-version" to "2023-06-01",
+            "content-type" to "application/json",
         )
+        // Identitätsgebundene Console-Keys verlangen die Workspace-ID als Header;
+        // klassische Keys ignorieren ihn.
+        if (workspaceId.isNotBlank()) headers["anthropic-workspace-id"] = workspaceId
+        val res = post("https://api.anthropic.com/v1/messages", headers, body)
         if (!res.ok) return httpError(res.code, res.body)
         val parts = JSONObject(res.body).getJSONArray("content")
         val text = (0 until parts.length()).joinToString("") { i ->
@@ -164,6 +172,20 @@ object AiClient {
         val detail = runCatching {
             JSONObject(body).getJSONObject("error").getString("message")
         }.getOrNull()
+        // Sonderfall mit klarer Abhilfe: Anthropic verlangt eine Workspace-ID.
+        if (code == 400 && detail?.contains("anthropic-workspace-id") == true) {
+            return AiResult.Failure(
+                if (german) {
+                    "Dieser Anthropic-Key ist an ein Konto gebunden und braucht zusätzlich die " +
+                        "Workspace-ID (wrkspc_…). Bitte in den KI-Einstellungen eintragen – zu " +
+                        "finden in der Anthropic Console unter Settings → Workspaces.\n\n$detail"
+                } else {
+                    "This Anthropic key is identity-linked and also needs the workspace ID " +
+                        "(wrkspc_…). Enter it in the AI settings – found in the Anthropic Console " +
+                        "under Settings → Workspaces.\n\n$detail"
+                },
+            )
+        }
         val base = if (german) {
             when (code) {
                 400 -> "Anfrage abgelehnt (400) – evtl. falsche Modell-ID?"

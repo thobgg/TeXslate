@@ -48,6 +48,7 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
     var key by remember { mutableStateOf(settings.keyFor(settings.provider)) }
     var model by remember { mutableStateOf(settings.modelFor(settings.provider)) }
     var showKey by remember { mutableStateOf(false) }
+    var workspaceId by remember { mutableStateOf(settings.anthropicWorkspaceId) }
 
     // Anbieterwechsel: Eingaben des bisherigen sichern, den neuen laden.
     fun selectProvider(p: AiProvider) {
@@ -102,6 +103,19 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
             )
 
+            // Nur Anthropic: identitätsgebundene Console-Keys brauchen die Workspace-ID.
+            if (provider == AiProvider.ANTHROPIC) {
+                OutlinedTextField(
+                    value = workspaceId,
+                    onValueChange = { workspaceId = it },
+                    label = { Text(stringResource(R.string.ai_workspace_id_label)) },
+                    placeholder = { Text("wrkspc_…") },
+                    singleLine = true,
+                    supportingText = { Text(stringResource(R.string.ai_workspace_id_hint)) },
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                )
+            }
+
             SectionLabel(stringResource(R.string.ai_model))
             FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 provider.modelPresets.forEach { preset ->
@@ -149,6 +163,7 @@ fun AiSettingsSheet(settings: AiSettings, onDismiss: () -> Unit) {
                     settings.provider = provider
                     settings.setKeyFor(provider, key)
                     settings.setModelFor(provider, model)
+                    settings.anthropicWorkspaceId = workspaceId
                     onDismiss()
                 },
                 // Speichern sperren, solange im Modell-Feld ein Key steht — sonst
