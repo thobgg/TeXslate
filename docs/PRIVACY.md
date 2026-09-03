@@ -22,7 +22,7 @@
   verschlüsselt über den Android-Keystore, gespeichert. Ohne ausdrückliche Bestätigung
   verlässt kein Text das Gerät.
 - **Berechtigungen:** INTERNET wird nur für die beiden oben genannten Zwecke genutzt.
-- **Kontakt:** thomas@bgg-mail.de
+- **Kontakt:** texslate@bgg-mail.de
 
 ## English
 
@@ -42,4 +42,4 @@
   API key is supplied by the user and stored only locally, encrypted via the Android
   Keystore. No text leaves the device without explicit confirmation.
 - **Permissions:** INTERNET is used only for the two purposes above.
-- **Contact:** thomas@bgg-mail.de
+- **Contact:** texslate@bgg-mail.de
