@@ -10,13 +10,16 @@ AuthorName: thobgg
 SourceCode: https://github.com/thobgg/TeXslate
 IssueTracker: https://github.com/thobgg/TeXslate/issues
 
+AutoName: TeXslate
+
 RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
+Binaries: https://github.com/thobgg/TeXslate/releases/download/v%v/TeXslate-%v-core-arm64-v8a.apk
 
 Builds:
   - versionName: 1.0-alpha22
     versionCode: 22
-    commit: v1.0-alpha22
+    commit: ed0d9113d90a29b0b10c76cf3f64c71ba81657d8
     subdir: app
     sudo:
       - apt-get update
@@ -48,3 +51,4 @@ AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
 CurrentVersion: 1.0-alpha22
 CurrentVersionCode: 22
+AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca672e9f5c
