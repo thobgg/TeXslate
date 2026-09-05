@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TexDroid"
+rootProject.name = "TeXslate"
 include(":app")
  

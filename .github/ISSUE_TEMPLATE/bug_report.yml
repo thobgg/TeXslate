@@ -12,7 +12,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: TexDroid version
+      label: TeXslate version
       description: See the About screen (overflow menu) or the release tag.
       placeholder: e.g. 1.0-alpha6 (arm64-v8a)
     validations:

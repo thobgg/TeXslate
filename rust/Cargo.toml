@@ -1,13 +1,13 @@
 [package]
-name = "texdroid_native"
+name = "texslate_native"
 version = "0.1.0"
 edition = "2021"
-description = "Native Rust-Bibliothek für TexDroid (JNI-Brücke; später Tectonic)"
+description = "Native Rust-Bibliothek für TeXslate (JNI-Brücke; später Tectonic)"
 license = "GPL-3.0-or-later"
 
 [lib]
 # cdylib = dynamische Bibliothek (.so), die Android/JNI laden kann.
-name = "texdroid_native"
+name = "texslate_native"
 crate-type = ["cdylib"]
 
 [dependencies]

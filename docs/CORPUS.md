@@ -62,7 +62,7 @@ adb push /tmp/corpus.zip /sdcard/Android/data/de.bgg_home.texslate/files/corpus.
 
 ./gradlew :app:installThesisDebug :app:installThesisDebugAndroidTest
 adb shell am instrument -w \
-  -e class de.bgg_home.texdroid.compile.CorpusRegressionTest \
+  -e class de.bgg_home.texslate.compile.CorpusRegressionTest \
   de.bgg_home.texslate.test/androidx.test.runner.AndroidJUnitRunner
 
 adb logcat -d -s CORPUS

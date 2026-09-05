@@ -3318,7 +3318,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "texdroid_native"
+name = "texslate_native"
 version = "0.1.0"
 dependencies = [
  "jni",

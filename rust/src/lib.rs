@@ -1,4 +1,4 @@
-// TexDroid – native Rust-Seite der JNI-Brücke.
+// TeXslate – native Rust-Seite der JNI-Brücke.
 //
 // Für QW 0.2 nur ein Minimalbeweis: add(a, b) in Rust, aufgerufen aus Kotlin.
 // Später hängt an genau diesem Mechanismus der Tectonic-Compiler.
@@ -39,17 +39,17 @@ fn json_escape(s: &str) -> String {
 //
 //     Java_<paket_mit_unterstrichen>_<Klasse>_<Methode>
 //
-// Kotlin-Seite:  Paket  de.bgg_home.texdroid   Klasse  RustBridge   Methode  add
+// Kotlin-Seite:  Paket  de.bgg_home.texslate   Klasse  RustBridge   Methode  add
 //
 // ⚠️ Stolperfalle: Ein echter Unterstrich im Paketnamen (bgg_home) wird in
 //    JNI-Symbolen zu "_1" maskiert. Aus  bgg_home  wird also  bgg_1home.
 //    Deshalb heißt die Funktion exakt:
-//        Java_de_bgg_1home_texdroid_RustBridge_add
+//        Java_de_bgg_1home_texslate_RustBridge_add
 //    Stimmt das nicht 1:1, findet Kotlin die Funktion zur Laufzeit nicht
 //    (UnsatisfiedLinkError).
 // ─────────────────────────────────────────────────────────────
 #[no_mangle]
-pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_add(
+pub extern "system" fn Java_de_bgg_1home_texslate_RustBridge_add(
     _env: JNIEnv,   // JNI-Umgebung (hier ungenutzt, aber Pflicht-Parameter)
     _class: JClass, // die aufrufende Kotlin-Klasse (ebenfalls Pflicht)
     a: jint,        // jint == Kotlin Int (32-bit)
@@ -63,7 +63,7 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_add(
 // auf dem Gerät auszulesen ist der Nachweis, dass Tectonic für Android gebaut
 // und gelinkt wurde. Rückgabe: ein Java-String (jstring).
 #[no_mangle]
-pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicVersion<'a>(
+pub extern "system" fn Java_de_bgg_1home_texslate_RustBridge_tectonicVersion<'a>(
     mut env: JNIEnv<'a>,
     _class: JClass<'a>,
 ) -> jstring {
@@ -85,7 +85,7 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicVersion<'a>
 // ⚠️ Muss von einem Hintergrund-Thread aufgerufen werden: blockiert mehrere
 //    Sekunden und lädt beim ersten Mal übers Netz.
 #[no_mangle]
-pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompile<'a>(
+pub extern "system" fn Java_de_bgg_1home_texslate_RustBridge_tectonicCompile<'a>(
     mut env: JNIEnv<'a>,
     _class: JClass<'a>,
     cache_dir: JString<'a>,
@@ -102,7 +102,7 @@ pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompile<'a>
 
     let tex = r#"\documentclass{article}
 \begin{document}
-Hallo aus TexDroid! Native XeTeX-Engine auf Android. Formel: $E = mc^2$.
+Hallo aus TeXslate! Native XeTeX-Engine auf Android. Formel: $E = mc^2$.
 \end{document}
 "#;
 
@@ -134,7 +134,7 @@ Hallo aus TexDroid! Native XeTeX-Engine auf Android. Formel: $E = mc^2$.
 //    Hintergrund-Thread aufrufen.
 // ─────────────────────────────────────────────────────────────
 #[no_mangle]
-pub extern "system" fn Java_de_bgg_1home_texdroid_RustBridge_tectonicCompileToFile<'a>(
+pub extern "system" fn Java_de_bgg_1home_texslate_RustBridge_tectonicCompileToFile<'a>(
     mut env: JNIEnv<'a>,
     _class: JClass<'a>,
     tex_source: JString<'a>,

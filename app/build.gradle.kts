@@ -15,7 +15,7 @@ val keystoreProps = Properties().apply {
 }
 
 android {
-    namespace = "de.bgg_home.texdroid"
+    namespace = "de.bgg_home.texslate"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1

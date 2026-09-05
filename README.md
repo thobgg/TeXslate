@@ -219,7 +219,7 @@ Prebuilt, signed APKs are on the
 
 ## Native build (Tectonic)
 
-The native library (`rust/` → `libtexdroid_native.so`) embeds the Tectonic
+The native library (`rust/` → `libtexslate_native.so`) embeds the Tectonic
 compiler. Tectonic needs an Android cross-compiled C stack (ICU, HarfBuzz,
 FreeType, graphite2, libpng, fontconfig) — we use **vcpkg** as
 `TECTONIC_DEP_BACKEND`.
@@ -254,7 +254,7 @@ ANDROID_NDK_HOME=~/Android/Sdk/ndk/<version> "$VCPKG_ROOT"/vcpkg install --tripl
 ./gradlew :app:installDebug          # installs the variant matching the device
 ```
 
-The script places `libtexdroid_native.so` **and** `libc++_shared.so` in
+The script places `libtexslate_native.so` **and** `libc++_shared.so` in
 `app/src/main/jniLibs/<abi>/` (HarfBuzz/ICU are C++ and need the NDK runtime).
 
 **ABI splits** produce separate APKs per architecture (each native Tectonic lib is

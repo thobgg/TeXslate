@@ -1,0 +1,398 @@
+package de.bgg_home.texslate.ui
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import de.bgg_home.texslate.R
+import de.bgg_home.texslate.ai.AiClient
+import de.bgg_home.texslate.ai.AiMessage
+import de.bgg_home.texslate.ai.AiPrompt
+import de.bgg_home.texslate.ai.AiResult
+import de.bgg_home.texslate.ai.AiSettings
+import de.bgg_home.texslate.ai.ContextScope
+import kotlinx.coroutines.launch
+
+private enum class Stage { INPUT, LOADING, CHAT, ERROR }
+
+/** Eine abgeschlossene Runde: angezeigte Frage, tatsächlich gesendeter Text, Antwort. */
+private data class Turn(val displayQuestion: String, val apiUserContent: String, val answer: String)
+
+/** Wie viele der letzten Runden als Gesprächskontext mitgeschickt werden. */
+private const val CONTEXT_ROUNDS = 3
+
+private val CODE_FENCE = Regex("```(?:latex|tex)?[ \\t]*\\r?\\n(.*?)```", RegexOption.DOT_MATCHES_ALL)
+
+/**
+ * Bereitet die KI-Antwort fürs Einfügen ins Dokument auf: Steckt der LaTeX-Code
+ * in Markdown-Zäunen (```` ```latex … ``` ````), wird nur der Code-Inhalt
+ * genommen (mehrere Blöcke aneinandergehängt). Ohne Zäune bleibt die Antwort wie
+ * sie ist.
+ */
+private fun latexForInsert(answer: String): String {
+    val blocks = CODE_FENCE.findAll(answer).map { it.groupValues[1].trim('\n', '\r') }.toList()
+    return if (blocks.isNotEmpty()) blocks.joinToString("\n\n") else answer.trim()
+}
+
+/**
+ * KI-Assistent (QW A2/A4/A5). Frage stellen, Kontext-Umfang wählen, **vor jedem
+ * Aufruf** den zu sendenden Text im Vorschau-Dialog bestätigen, echter Roundtrip.
+ * Rückfragen bleiben im Gespräch: die letzten [CONTEXT_ROUNDS] Runden werden
+ * mitgeschickt, sodass die KI den Zusammenhang kennt.
+ *
+ * Verlässt das Gerät nur nach ausdrücklicher Bestätigung im Vorschau-Dialog.
+ */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun AiAssistantSheet(
+    settings: AiSettings,
+    selection: String,
+    document: String,
+    onInsert: (String) -> Unit,
+    onInsertBody: (String) -> Unit,
+    onOpenSettings: () -> Unit,
+    onDismiss: () -> Unit,
+    initialQuestion: String = "",
+) {
+    val scope = rememberCoroutineScope()
+    val clipboard = LocalClipboardManager.current
+
+    var stage by remember { mutableStateOf(Stage.INPUT) }
+    var question by remember { mutableStateOf(initialQuestion) }
+    var turns by remember { mutableStateOf(listOf<Turn>()) }
+    var contextScope by remember {
+        mutableStateOf(
+            when {
+                selection.isNotBlank() -> ContextScope.SELECTION
+                document.isNotBlank() -> ContextScope.DOCUMENT
+                else -> ContextScope.NONE
+            },
+        )
+    }
+    var showPreview by remember { mutableStateOf(false) }
+    var errorMsg by remember { mutableStateOf("") }
+
+    val ready = settings.enabled && settings.activeKey.isNotBlank()
+    val isFollowUp = turns.isNotEmpty()
+
+    // Leeres Fragefeld + gewählter Kontext ⇒ Standardfrage („erkläre die
+    // Markierung"). Sonst musste man trotz Markierung erst etwas tippen, und der
+    // Senden-Button blieb grau – das wirkte wie „KI geht nicht".
+    fun effectiveQuestion(): String =
+        question.ifBlank { if (isFollowUp) "" else AiPrompt.defaultQuestion(contextScope) }
+
+    // Text der aktuellen Frage, so wie er real gesendet wird: erste Runde mit
+    // Editor-Kontext, Rückfragen ohne (der Kontext steckt schon im Verlauf).
+    fun currentApiContent(): String =
+        if (isFollowUp) question else AiPrompt.build(effectiveQuestion(), contextScope, selection, document)
+
+    fun send() {
+        val apiContent = currentApiContent()
+        val display = effectiveQuestion()
+        showPreview = false
+        stage = Stage.LOADING
+        scope.launch {
+            val history = turns.takeLast(CONTEXT_ROUNDS).flatMap {
+                listOf(AiMessage("user", it.apiUserContent), AiMessage("assistant", it.answer))
+            }
+            val messages = history + AiMessage("user", apiContent)
+            when (val r = AiClient.complete(
+                provider = settings.provider,
+                model = settings.activeModel,
+                apiKey = settings.activeKey,
+                systemPrompt = AiPrompt.SYSTEM,
+                messages = messages,
+                workspaceId = settings.anthropicWorkspaceId,
+            )) {
+                is AiResult.Success -> {
+                    turns = turns + Turn(display, apiContent, r.text)
+                    question = ""
+                    stage = Stage.CHAT
+                }
+                is AiResult.Failure -> { errorMsg = r.message; stage = Stage.ERROR }
+            }
+        }
+    }
+
+    KeyboardAwareDialog(onDismiss = onDismiss) {
+        Text(
+            stringResource(R.string.ai_settings_title),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+
+        if (!ready) {
+            Text(
+                if (!settings.enabled) {
+                    stringResource(R.string.ai_not_enabled)
+                } else {
+                    stringResource(R.string.ai_no_key, settings.provider.displayName)
+                },
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            Button(
+                onClick = { onDismiss(); onOpenSettings() },
+                modifier = Modifier.padding(top = 12.dp),
+            ) { Text(stringResource(R.string.ai_open_settings)) }
+            return@KeyboardAwareDialog
+        }
+
+        Text(
+            "${settings.provider.displayName} · ${settings.activeModel}",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        // Bisheriger Gesprächsverlauf (falls vorhanden).
+        turns.forEach { turn ->
+            Conversation(turn)
+        }
+
+        when (stage) {
+            Stage.INPUT -> InputStage(
+                question = question,
+                canSend = effectiveQuestion().isNotBlank(),
+                onQuestionChange = { question = it },
+                contextScope = contextScope,
+                onScopeChange = { contextScope = it },
+                hasSelection = selection.isNotBlank(),
+                hasDocument = document.isNotBlank(),
+                onAsk = { showPreview = true },
+            )
+
+            Stage.LOADING -> Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(vertical = 24.dp),
+            ) {
+                CircularProgressIndicator()
+                Text(stringResource(R.string.ai_sending), modifier = Modifier.padding(start = 16.dp))
+            }
+
+            Stage.CHAT -> ChatStage(
+                followUp = question,
+                onFollowUpChange = { question = it },
+                hasSelection = selection.isNotBlank(),
+                canInsertBody = document.contains("\\end{document}"),
+                onAsk = { showPreview = true },
+                onInsert = { onInsert(latexForInsert(turns.last().answer)); onDismiss() },
+                onInsertBody = { onInsertBody(latexForInsert(turns.last().answer)); onDismiss() },
+                onCopy = { clipboard.setText(AnnotatedString(turns.last().answer)) },
+                onNewConversation = { turns = emptyList(); question = ""; stage = Stage.INPUT },
+            )
+
+            Stage.ERROR -> Column(Modifier.padding(top = 12.dp)) {
+                Text(
+                    errorMsg,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(top = 12.dp),
+                ) {
+                    Button(onClick = { stage = if (isFollowUp) Stage.CHAT else Stage.INPUT }) {
+                        Text(stringResource(R.string.ai_back))
+                    }
+                    TextButton(onClick = { showPreview = true }) { Text(stringResource(R.string.ai_resend)) }
+                }
+            }
+        }
+    }
+
+    // Verpflichtende Vorschau: zeigt exakt, was das Gerät verlässt.
+    if (showPreview) {
+        AlertDialog(
+            onDismissRequest = { showPreview = false },
+            title = { Text(stringResource(R.string.ai_preview_title)) },
+            text = {
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    Text(
+                        stringResource(
+                            R.string.ai_preview_note,
+                            settings.provider.displayName,
+                            settings.activeModel,
+                        ) + if (isFollowUp) stringResource(R.string.ai_preview_context_suffix) else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        modifier = Modifier.padding(top = 12.dp).fillMaxWidth(),
+                    ) {
+                        Text(
+                            currentApiContent(),
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier
+                                .heightIn(max = 320.dp)
+                                .verticalScroll(rememberScrollState())
+                                .padding(12.dp),
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                Button(onClick = { send() }, enabled = effectiveQuestion().isNotBlank()) {
+                    Text(stringResource(R.string.ai_send))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPreview = false }) { Text(stringResource(R.string.cancel)) }
+            },
+        )
+    }
+}
+
+/** Eine Runde im Verlauf: Frage (fett) + Antwort in einer Box. */
+@Composable
+private fun Conversation(turn: Turn) {
+    Text(
+        turn.displayQuestion,
+        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 12.dp),
+    )
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.padding(top = 4.dp).fillMaxWidth(),
+    ) {
+        Text(
+            turn.answer.ifBlank { stringResource(R.string.ai_empty_answer) },
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(12.dp),
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+private fun InputStage(
+    question: String,
+    canSend: Boolean,
+    onQuestionChange: (String) -> Unit,
+    contextScope: ContextScope,
+    onScopeChange: (ContextScope) -> Unit,
+    hasSelection: Boolean,
+    hasDocument: Boolean,
+    onAsk: () -> Unit,
+) {
+    OutlinedTextField(
+        value = question,
+        onValueChange = onQuestionChange,
+        label = { Text(stringResource(R.string.ai_question_label)) },
+        placeholder = {
+            Text(
+                stringResource(
+                    if (contextScope == ContextScope.NONE) R.string.ai_question_placeholder
+                    else R.string.ai_question_placeholder_context,
+                ),
+            )
+        },
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+    )
+
+    Text(
+        stringResource(R.string.ai_context),
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+    )
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+        val scopes = listOf(
+            ContextScope.NONE to true,
+            ContextScope.SELECTION to hasSelection,
+            ContextScope.DOCUMENT to hasDocument,
+        )
+        scopes.forEach { (s, enabled) ->
+            FilterChip(
+                selected = contextScope == s,
+                enabled = enabled,
+                onClick = { onScopeChange(s) },
+                label = { Text(stringResource(scopeLabelRes(s))) },
+            )
+        }
+    }
+
+    Button(
+        onClick = onAsk,
+        enabled = canSend,
+        modifier = Modifier.padding(top = 16.dp),
+    ) { Text(stringResource(R.string.ai_preview_and_send)) }
+}
+
+/** UI-Beschriftung eines [ContextScope] (Prompt-seitige Sprache steckt in [AiPrompt]). */
+private fun scopeLabelRes(scope: ContextScope): Int = when (scope) {
+    ContextScope.NONE -> R.string.ai_scope_none
+    ContextScope.SELECTION -> R.string.ai_scope_selection
+    ContextScope.DOCUMENT -> R.string.ai_scope_document
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun ChatStage(
+    followUp: String,
+    onFollowUpChange: (String) -> Unit,
+    hasSelection: Boolean,
+    canInsertBody: Boolean,
+    onAsk: () -> Unit,
+    onInsert: () -> Unit,
+    onInsertBody: () -> Unit,
+    onCopy: () -> Unit,
+    onNewConversation: () -> Unit,
+) {
+    HorizontalDivider(Modifier.padding(top = 12.dp))
+    OutlinedTextField(
+        value = followUp,
+        onValueChange = onFollowUpChange,
+        label = { Text(stringResource(R.string.ai_followup_label)) },
+        placeholder = { Text(stringResource(R.string.ai_followup_placeholder)) },
+        modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+    )
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.padding(top = 12.dp),
+    ) {
+        Button(onClick = onAsk, enabled = followUp.isNotBlank()) {
+            Text(stringResource(R.string.ai_followup_button))
+        }
+        // Nur reinen Code-Block einfügen (Markdown-Zäune werden entfernt).
+        if (canInsertBody && !hasSelection) {
+            TextButton(onClick = onInsertBody) { Text(stringResource(R.string.ai_insert_end)) }
+        }
+        TextButton(onClick = onInsert) {
+            Text(stringResource(if (hasSelection) R.string.ai_replace else R.string.ai_insert_cursor))
+        }
+        TextButton(onClick = onCopy) { Text(stringResource(R.string.ai_copy)) }
+        TextButton(onClick = onNewConversation) { Text(stringResource(R.string.ai_new_question)) }
+    }
+}
