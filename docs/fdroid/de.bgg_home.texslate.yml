@@ -37,7 +37,7 @@ Builds:
       - $$vcpkg$$/bootstrap-vcpkg.sh -disableMetrics
       - VCPKG_ROOT=$$vcpkg$$ $$vcpkg$$/vcpkg install --triplet arm64-android "harfbuzz[core,freetype,graphite2,icu,png]"
         freetype graphite2 icu libpng fontconfig
-      - printf 'vcpkgRoot=%s\n' $$vcpkg$$ >> gradle.properties
+      - printf '\nvcpkgRoot=%s\n' $$vcpkg$$ >> gradle.properties
     ndk: 27.2.12479018
 
 AutoUpdateMode: Version v%v
