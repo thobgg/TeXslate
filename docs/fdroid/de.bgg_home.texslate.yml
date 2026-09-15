@@ -22,8 +22,8 @@ Builds:
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y cmake ninja-build pkg-config autoconf automake libtool-bin
-        bison gperf autoconf-archive
+      - apt-get install -y build-essential cmake ninja-build pkg-config autoconf automake
+        libtool-bin bison flex gettext gperf autoconf-archive zip
     gradle:
       - core
     srclibs:
