@@ -1,0 +1,9 @@
+# Rust-Version fest verdrahtet, damit der Build reproduzierbar ist: F-Droid
+# verlangt eine gepinnte Toolchain (MR !42882, Review linsui 15.09.2026), und
+# rustup zieht Version samt Targets anhand dieser Datei automatisch — lokal wie
+# auf dem Buildserver. Beim Anheben: vorher `./build-native.sh x86_64 arm64-v8a`
+# gegenprüfen, der Tectonic-Stack reagiert empfindlich auf Toolchain-Wechsel.
+[toolchain]
+channel = "1.96.1"
+targets = ["aarch64-linux-android", "x86_64-linux-android"]
+profile = "minimal"

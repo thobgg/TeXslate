@@ -1,0 +1,2 @@
+* Build: Die native Bibliothek wird jetzt als Teil des Gradle-Builds erzeugt statt vorab. Für Nutzer ändert sich nichts — die App ist identisch.
+* Rust-Toolchain auf eine feste Version gepinnt, damit sich der Build reproduzierbar nachbauen lässt.

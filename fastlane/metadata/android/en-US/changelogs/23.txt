@@ -1,0 +1,2 @@
+* Build: the native library is now produced as part of the Gradle build instead of beforehand. Nothing changes for users — the app is identical.
+* Pinned the Rust toolchain to a fixed version so the build can be reproduced.

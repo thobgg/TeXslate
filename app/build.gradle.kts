@@ -26,8 +26,8 @@ android {
         applicationId = "de.bgg_home.texslate"
         minSdk = 26
         targetSdk = 36
-        versionCode = 22
-        versionName = "1.0-alpha22"
+        versionCode = 23
+        versionName = "1.0-alpha23"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -110,6 +110,38 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+// ── Nativen Build optional in Gradle ziehen ─────────────────────────────────
+// F-Droid baut die Rust/Tectonic-Lib NICHT im prebuild: deren Quell-Scanner
+// laeuft zwischen prebuild und Gradle (build.py: prebuild -> scan_source ->
+// gradle) und meldet jede .so im Baum als "shared library". `scanignore` ist
+// laut Review nicht erlaubt (MR !42882, linsui 15.09.2026) — also muss die .so
+// erst nach dem Scan entstehen, sprich hier.
+//
+// Der Task greift nur, wenn -PvcpkgRoot gesetzt ist; F-Droid schreibt die Zeile
+// im prebuild nach gradle.properties. Lokal aendert sich nichts: dort laeuft
+// weiterhin ./build-native.sh von Hand, und ohne die Property haengt hier kein
+// Task im Graph.
+val vcpkgRootProp: String? = providers.gradleProperty("vcpkgRoot").orNull
+
+if (vcpkgRootProp != null) {
+    val nativeAbis = providers.gradleProperty("nativeAbis").getOrElse("arm64-v8a")
+
+    val buildNativeLibs = tasks.register<Exec>("buildNativeLibs") {
+        description = "Baut libtexslate_native.so via build-native.sh (nur im F-Droid-Build)"
+        workingDir = rootProject.projectDir
+        commandLine(listOf("./build-native.sh") + nativeAbis.split(","))
+        environment("VCPKG_ROOT", vcpkgRootProp)
+        // jniLibs entsteht erst hier — deshalb kein Input/Output-Tracking, der
+        // Task soll im F-Droid-Lauf genau einmal durchlaufen.
+        outputs.upToDateWhen { false }
+    }
+
+    // Vor dem Einsammeln der jniLibs einhaengen, sonst landet ein leeres
+    // Verzeichnis im APK.
+    tasks.matching { it.name.startsWith("merge") && it.name.endsWith("JniLibFolders") }
+        .configureEach { dependsOn(buildNativeLibs) }
 }
 
 dependencies {
