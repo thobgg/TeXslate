@@ -87,7 +87,7 @@ echo "ABIs:       ${ABIS[*]}"
 # Wir machen das zweite Schliessen zum No-Op.
 patch_bridge_double_close() {
   local f
-  f="$(ls -d "$HOME"/.cargo/registry/src/*/tectonic_bridge_core-*/src/lib.rs 2>/dev/null | head -1)"
+  f="$(ls -d "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/tectonic_bridge_core-*/src/lib.rs 2>/dev/null | head -1 || true)"
   if [ -z "$f" ]; then
     echo "  double-close-Fix: Quelle noch nicht im cargo-Cache (kommt beim ersten Build)."
     return 0
@@ -113,7 +113,7 @@ patch_bridge_double_close() {
 
 patch_xetex_print_glyph_name() {
   local f
-  f="$(ls -d "$HOME"/.cargo/registry/src/*/tectonic_engine_xetex-*/xetex/xetex-ext.c 2>/dev/null | head -1)"
+  f="$(ls -d "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/tectonic_engine_xetex-*/xetex/xetex-ext.c 2>/dev/null | head -1 || true)"
   if [ -z "$f" ]; then
     echo "  print_glyph_name-Fix: Quelle noch nicht im cargo-Cache (kommt beim ersten Build; einfach erneut aufrufen)."
     return 0
@@ -133,8 +133,32 @@ patch_xetex_print_glyph_name() {
     echo "  WARN: print_glyph_name-Fix nicht angewandt (Quelltext der Crate abweichend?)."
   fi
 }
+# Crate-Quellen zuerst holen: auf einer frischen Maschine (F-Droid-Buildserver)
+# ist die Registry leer, und die Patches unten liefen frueher stumm ins Leere
+# ("kommt beim ersten Build") -> .so ohne die Android-Crash-Fixes. Deshalb
+# vor dem Patchen ein cargo fetch fuer alle angeforderten ABIs.
+echo "── cargo fetch (Crate-Quellen fuer die Patches) ─────────────────────────"
+for ABI in "${ABIS[@]}"; do
+  case "$ABI" in
+    x86_64)      T=x86_64-linux-android ;;
+    arm64-v8a)   T=aarch64-linux-android ;;
+    armeabi-v7a) T=armv7-linux-androideabi ;;
+    x86)         T=i686-linux-android ;;
+    *) echo "FEHLER: unbekanntes ABI $ABI" >&2; exit 1 ;;
+  esac
+  ( cd "$PROJECT_DIR/rust" && cargo fetch --target "$T" )
+done
+
 patch_xetex_print_glyph_name
 patch_bridge_double_close
+# Beide Fixes sind Pflicht — ein Build ohne sie stuerzt auf Android bei
+# unicode-math bzw. beim doppelten Schliessen einer Ausgabe ab.
+for f in "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/tectonic_engine_xetex-*/xetex/xetex-ext.c; do
+  [ -f "$f" ] && grep -q 'SCUDO print_glyph_name fix' "$f" || { echo "FEHLER: print_glyph_name-Fix fehlt in $f" >&2; exit 1; }
+done
+for f in "${CARGO_HOME:-$HOME/.cargo}"/registry/src/*/tectonic_bridge_core-*/src/lib.rs; do
+  [ -f "$f" ] && grep -q 'double-close fix' "$f" || { echo "FEHLER: double-close-Fix fehlt in $f" >&2; exit 1; }
+done
 
 # ── ABI → vcpkg-Triplet + NDK-Lib-Verzeichnis (für libc++_shared.so) ─────────
 abi_to_triplet() { case "$1" in
