@@ -58,3 +58,19 @@ Stand 14.07.2026. Milestone **M5**. Das Native-Build-Gate ist genommen
 - Erst-Einreichung eines Tectonic-basierten Projekts bei F-Droid (kein
   Präzedenz-Rezept) → mit Nachfragen der Reviewer rechnen, v. a. zum
   vcpkg-Schritt und zum Bundle-Download.
+
+## Reproducible Builds — zurückgestellt (15.09.2026)
+
+`Binaries:` und `AllowedAPKSigningKeys:` stehen bewusst nicht im Rezept; F-Droid
+signiert selbst. Der Vergleich gegen das Referenz-APK scheitert an
+`libtexslate_native.so`: openssl-sys (vendored über `native-tls-vendored`)
+brennt absolute Pfade ein — `ENGINESDIR`/`MODULESDIR` unter `rust/target` und
+die komplette Compiler-Kommandozeile samt NDK-Pfad. Dazu ~730 Panic-Locations
+aus `~/.cargo/registry`. Ein Wechsel auf rustls ist blockiert, weil
+`tectonic_geturl` reqwest ohne `default-features = false` einbindet.
+
+Der Befund wurde lokal mit fdroidserver nachgestellt (Referenz-APK über
+`python3 -m http.server`, `Binaries:` in einer Test-Metadata darauf gezeigt).
+`libc++_shared.so` stimmt seit dem NDK-Pin (`ndkVersion` in
+`app/build.gradle.kts`) überein. Beim Rezept-`commit:` im echten MR den vollen
+Hash des Tags eintragen — der Reviewer hat das in Runde 2 verlangt.

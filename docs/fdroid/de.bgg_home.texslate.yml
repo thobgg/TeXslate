@@ -14,12 +14,11 @@ AutoName: TeXslate
 
 RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
-Binaries: https://github.com/thobgg/TeXslate/releases/download/v%v/TeXslate-%v-core-arm64-v8a.apk
 
 Builds:
   - versionName: 1.0-alpha23
     versionCode: 23
-    commit: PLATZHALTER_COMMIT_ALPHA23
+    commit: v1.0-alpha23
     subdir: app
     sudo:
       - apt-get update
@@ -44,4 +43,3 @@ AutoUpdateMode: Version v%v
 UpdateCheckMode: Tags
 CurrentVersion: 1.0-alpha23
 CurrentVersionCode: 23
-AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca672e9f5c
