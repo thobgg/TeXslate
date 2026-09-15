@@ -22,6 +22,15 @@ android {
         }
     }
 
+    // NDK fest verdrahtet — zwei Gruende. Erstens muss AGP ein NDK finden, sonst
+    // ueberspringt es stripCoreReleaseDebugSymbols ("Unable to strip ..., packaging
+    // them as they are") und packt ungestrippte .so ein; F-Droid strippt (deren
+    // Rezept setzt ndk:), und dann weicht das Referenz-APK ab -> Reproducible Build
+    // scheitert. Zweitens darf nicht die neueste installierte Version gewinnen: der
+    // Rust-Link muss gegen dasselbe NDK laufen wie auf dem Buildserver.
+    // MUSS mit dem `ndk:`-Feld in docs/fdroid/de.bgg_home.texslate.yml uebereinstimmen.
+    ndkVersion = "27.2.12479018"
+
     defaultConfig {
         applicationId = "de.bgg_home.texslate"
         minSdk = 26

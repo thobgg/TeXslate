@@ -30,9 +30,20 @@ ABIS=("$@")
 # ── Toolchain-Env ────────────────────────────────────────────────────────────
 [ -f "$HOME/.cargo/env" ] && source "$HOME/.cargo/env"
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Android/Sdk}"
+# NDK-Version aus app/build.gradle.kts lesen statt "die neueste nehmen": sind
+# mehrere NDKs installiert, linkt der Rust-Teil sonst gegen ein anderes NDK als
+# der Buildserver (Rezept-Feld `ndk:`) — und der Reproducible-Build-Vergleich
+# scheitert an einer .so, die sich nur in der Toolchain unterscheidet.
+NDK_PINNED="$(sed -n 's/^[[:space:]]*ndkVersion[[:space:]]*=[[:space:]]*"\([^"]*\)".*/\1/p' \
+              "$PROJECT_DIR/app/build.gradle.kts" | head -1)"
 if [ -z "${ANDROID_NDK_HOME:-}" ]; then
-  ANDROID_NDK_HOME="$(ls -d "$ANDROID_HOME/ndk/"*/ 2>/dev/null | sort -V | tail -1)"
-  export ANDROID_NDK_HOME="${ANDROID_NDK_HOME%/}"
+  if [ -n "$NDK_PINNED" ] && [ -d "$ANDROID_HOME/ndk/$NDK_PINNED" ]; then
+    export ANDROID_NDK_HOME="$ANDROID_HOME/ndk/$NDK_PINNED"
+  else
+    echo "FEHLER: NDK $NDK_PINNED (aus app/build.gradle.kts) nicht unter $ANDROID_HOME/ndk/" >&2
+    echo "        Per SDK-Manager nachinstallieren oder ANDROID_NDK_HOME selbst setzen." >&2
+    exit 1
+  fi
 fi
 # Default: XDG-Datenverzeichnis (~/.local/share/texslate/vcpkg). Der alte Ort
 # ~/vcpkg wird weiter akzeptiert, damit bestehende Arbeitsplätze nichts merken.
