@@ -22,21 +22,18 @@ Builds:
     subdir: app
     sudo:
       - apt-get update
-      - apt-get install -y build-essential cmake ninja-build pkg-config autoconf automake
-        libtool-bin bison flex gettext gperf autoconf-archive zip
+      - apt-get install -y rustup build-essential cmake ninja-build pkg-config autoconf
+        automake libtool-bin bison flex gettext gperf autoconf-archive zip
     gradle:
       - core
     srclibs:
-      - rustup@1.28.2
       - vcpkg@2026.06.24
     prebuild:
       - cd ..
       - sed -i -e '/foojay/d' settings.gradle.kts
       - sed -i 's/include("arm64-v8a", "x86_64")/include("arm64-v8a")/' app/build.gradle.kts
-      - export RUST_VERSION=$(sed -n 's/channel = "\(.*\)"/\1/p' rust-toolchain.toml)
-      - $$rustup$$/rustup-init.sh -y --profile minimal --default-toolchain $RUST_VERSION --target
-        aarch64-linux-android
-      - source $HOME/.cargo/env
+      - rustup default 1.96.1
+      - rustup target add aarch64-linux-android
       - cargo install cargo-ndk --version 3.5.4 --locked
       - $$vcpkg$$/bootstrap-vcpkg.sh -disableMetrics
       - VCPKG_ROOT=$$vcpkg$$ $$vcpkg$$/vcpkg install --triplet arm64-android "harfbuzz[core,freetype,graphite2,icu,png]"
