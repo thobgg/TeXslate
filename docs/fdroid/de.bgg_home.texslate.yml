@@ -14,9 +14,8 @@ AutoName: TeXslate
 
 RepoType: git
 Repo: https://github.com/thobgg/TeXslate.git
-Binaries:
+Binaries: 
   https://github.com/thobgg/TeXslate/releases/download/v%v/TeXslate-%v-core-arm64-v8a.apk
-AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca672e9f5c
 
 Builds:
   - versionName: 1.0-alpha23
@@ -46,6 +45,8 @@ Builds:
       - cd rust && cargo fetch --target aarch64-linux-android && cd ..
       - VCPKG_ROOT=$$vcpkg$$ ./build-native.sh arm64-v8a
     ndk: 27.2.12479018
+
+AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca672e9f5c
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
