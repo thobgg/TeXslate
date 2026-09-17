@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
@@ -126,28 +127,39 @@ fun PdfPreview(
 
     var scale by remember { mutableFloatStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
-    val transformState = rememberTransformableState { zoomChange, panChange, _ ->
-        scale = (scale * zoomChange).coerceIn(1f, 5f)
-        offset = if (scale > 1f) offset + panChange else Offset.Zero
-    }
     // Scroll-Position über Reloads hinweg halten.
     val listState = rememberLazyListState()
 
-    BoxWithConstraints(modifier.fillMaxSize()) {
+    // clipToBounds: Die gezoomte Seite darf nicht über den Editor nebenan laufen.
+    BoxWithConstraints(modifier.fillMaxSize().clipToBounds()) {
         val widthPx = constraints.maxWidth
+        val heightPx = constraints.maxHeight
+        val transformState = rememberTransformableState { zoomChange, panChange, _ ->
+            scale = (scale * zoomChange).coerceIn(1f, 5f)
+            // Skaliert wird um die Mitte: Je Seite steht also (scale - 1) / 2 der
+            // Fläche über. Weiter darf man nicht schieben, sonst verschwindet die
+            // Seite aus dem Fenster und lässt sich nicht mehr zurückholen.
+            val maxX = (scale - 1f) * widthPx / 2f
+            val maxY = (scale - 1f) * heightPx / 2f
+            val moved = offset + panChange
+            offset = Offset(moved.x.coerceIn(-maxX, maxX), moved.y.coerceIn(-maxY, maxY))
+        }
         LazyColumn(
             state = listState,
             contentPadding = PaddingValues(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier
                 .fillMaxSize()
+                // transformable VOR graphicsLayer: So misst die Geste in den
+                // unverzerrten Koordinaten des Fensters. Andersherum verschiebt
+                // jeder Zoomschritt das Koordinatensystem unter den Fingern.
+                .transformable(transformState)
                 .graphicsLayer {
                     scaleX = scale
                     scaleY = scale
                     translationX = offset.x
                     translationY = offset.y
-                }
-                .transformable(transformState),
+                },
         ) {
             items(document.pageCount) { index ->
                 PdfPageItem(
