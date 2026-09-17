@@ -1,0 +1,1 @@
+* PDF-Vorschau: Die gezoomte Seite bleibt in ihrem Fenster. Sie läuft in der geteilten Ansicht nicht mehr über den Editor und lässt sich nicht mehr unerreichbar wegschieben (#7).
