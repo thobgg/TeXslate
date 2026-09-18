@@ -4,7 +4,7 @@
 
 <p align="center"><strong>Nativer LaTeX/XeTeX-Editor für Android — Tablet-first.</strong></p>
 
-<p align="center">🇬🇧 <a href="./README.md">English</a> · 🇩🇪 <strong>Deutsch</strong></p>
+<p align="center">🇬🇧 <a href="./README.md">English</a> · 🇩🇪 <strong>Deutsch</strong> · 🇨🇳 <a href="./README.zh-CN.md">简体中文</a></p>
 
 Schreibe LaTeX direkt auf dem Tablet und sieh das PDF live daneben entstehen —
 ohne Terminal, ohne Cloud, ohne Begleit-PC. TeXslate vereint Editor, einen
