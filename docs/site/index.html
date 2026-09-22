@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TeXslate — LaTeX auf dem Tablet, mit eingebautem Compiler</title>
+<meta name="description" content="TeXslate: nativer LaTeX-Editor für Android mit on-device Compiler (Tectonic/XeTeX). Schreib LaTeX auf dem Tablet und sieh das PDF live daneben — offline, ohne Cloud, ohne PC. Open Source (GPLv3), Alpha.">
+<meta name="author" content="Thomas Bugge">
+<meta name="robots" content="index,follow">
+<link rel="canonical" href="https://bgg-schule.de/texslate/">
+<link rel="icon" type="image/png" href="icon-TexSlate.png">
+<meta property="og:type" content="website">
+<meta property="og:title" content="TeXslate — LaTeX auf dem Tablet, mit eingebautem Compiler">
+<meta property="og:description" content="Schreib LaTeX auf dem Tablet und sieh das PDF live daneben — offline, ohne Cloud, ohne PC. Open Source, Alpha.">
+<meta property="og:url" content="https://bgg-schule.de/texslate/">
+<meta property="og:image" content="https://bgg-schule.de/texslate/icon-TexSlate.png">
+<meta property="og:locale" content="de_DE">
+<style>
+:root { --gold:#c8922a; --rblue:#5B9BD5; --blue:#2E75B6; --grey:#7F8C8D; --lgrey:#95a5a6; --dark:#0d1117; --card:#11161d; --border:rgba(91,155,213,0.2); }
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--dark); color:#e8e6e0; font-family:Georgia,'Times New Roman',serif; line-height:1.6; }
+a { color:var(--rblue); }
+
+.wrap { max-width:900px; margin:0 auto; padding:0 2rem; }
+
+/* Hero */
+.hero { text-align:center; padding:4rem 2rem 3rem; max-width:820px; margin:0 auto; }
+.hero-icon { width:104px; height:104px; border-radius:22px; box-shadow:0 8px 30px rgba(0,0,0,0.5); margin-bottom:1.6rem; }
+.badge-alpha { display:inline-block; font-family:-apple-system,sans-serif; font-size:0.66rem; letter-spacing:0.18em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(200,146,42,0.5); border-radius:2px; padding:0.25rem 0.7rem; margin-bottom:1.2rem; }
+.hero h1 { font-size:clamp(2.4rem,6vw,3.8rem); font-weight:400; color:#fff; letter-spacing:-0.01em; line-height:1.05; margin-bottom:0.8rem; }
+.hero h1 em { color:var(--rblue); font-style:italic; }
+.hero-tag { font-family:Georgia,serif; font-style:italic; font-size:clamp(1.05rem,2vw,1.3rem); color:#cfc8b8; max-width:640px; margin:0 auto 0.6rem; line-height:1.5; }
+.hero-tag-en { font-family:-apple-system,sans-serif; font-style:normal; font-size:0.82rem; color:var(--grey); max-width:600px; margin:0 auto 2rem; }
+
+.cta-row { display:flex; gap:0.9rem; justify-content:center; flex-wrap:wrap; }
+.btn { display:inline-flex; align-items:center; gap:0.5rem; font-family:-apple-system,sans-serif; font-size:0.86rem; font-weight:500; letter-spacing:0.03em; padding:0.7rem 1.4rem; border-radius:3px; text-decoration:none; border:1px solid; transition:all 0.2s; }
+.btn-primary { color:#0d1117; background:var(--gold); border-color:var(--gold); }
+.btn-primary:hover { background:#e0a63a; }
+.btn-ghost { color:var(--rblue); border-color:var(--border); background:transparent; }
+.btn-ghost:hover { border-color:var(--rblue); background:rgba(46,117,182,0.08); }
+.cta-note { font-family:-apple-system,sans-serif; font-size:0.72rem; color:var(--grey); margin-top:1rem; }
+
+.divider { height:1px; max-width:900px; margin:0 auto; background:linear-gradient(to right,transparent,var(--border),transparent); }
+
+section { padding:3.5rem 2rem; max-width:900px; margin:0 auto; }
+.sec-label { font-family:-apple-system,sans-serif; font-size:0.68rem; letter-spacing:0.22em; text-transform:uppercase; color:var(--gold); margin-bottom:0.9rem; }
+.sec-title { font-size:clamp(1.5rem,2.6vw,2rem); font-weight:400; color:#fff; line-height:1.2; margin-bottom:1.4rem; }
+.sec-title em { color:var(--rblue); font-style:italic; }
+.prose p { color:#cfc8b8; margin-bottom:1rem; max-width:720px; }
+.prose p strong { color:#e8e6e0; font-weight:500; }
+
+/* Screenshots */
+.shots { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1.4rem; margin-top:1.6rem; }
+.shot { background:var(--card); border:1px solid var(--border); border-radius:6px; overflow:hidden; }
+.shot img { display:block; width:100%; height:auto; }
+.shot figcaption { font-family:-apple-system,sans-serif; font-size:0.76rem; color:var(--lgrey); padding:0.7rem 0.9rem; border-top:1px solid var(--border); }
+
+/* Features */
+.feat-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:1.1rem; margin-top:1.6rem; }
+.feat { padding:1.2rem 1.4rem; background:rgba(46,117,182,0.04); border:1px solid var(--border); border-left:3px solid var(--rblue); border-radius:3px; }
+.feat h3 { font-family:Georgia,serif; font-size:1.05rem; font-weight:400; color:#fff; margin-bottom:0.4rem; }
+.feat p { font-family:-apple-system,sans-serif; font-size:0.86rem; color:#cfc8b8; line-height:1.6; margin:0; }
+
+/* Install steps */
+.steps { counter-reset:step; margin-top:1.6rem; max-width:720px; }
+.step { position:relative; padding:0.6rem 0 0.6rem 2.6rem; font-family:-apple-system,sans-serif; font-size:0.9rem; color:#cfc8b8; line-height:1.6; }
+.step::before { counter-increment:step; content:counter(step); position:absolute; left:0; top:0.5rem; width:1.7rem; height:1.7rem; display:flex; align-items:center; justify-content:center; font-size:0.78rem; color:var(--gold); border:1px solid rgba(200,146,42,0.5); border-radius:50%; }
+.step strong { color:#e8e6e0; }
+.step code { font-family:ui-monospace,Menlo,monospace; font-size:0.82rem; color:var(--rblue); background:rgba(46,117,182,0.08); padding:0.05rem 0.35rem; border-radius:3px; }
+
+/* Alpha call-out */
+.alpha { background:linear-gradient(180deg,rgba(200,146,42,0.06),rgba(200,146,42,0.02)); border:1px solid rgba(200,146,42,0.3); border-radius:6px; padding:2rem 2.2rem; }
+.alpha h2 { font-size:1.5rem; font-weight:400; color:#fff; margin-bottom:1rem; }
+.alpha h2 em { color:var(--gold); font-style:italic; }
+.alpha p { color:#cfc8b8; margin-bottom:0.9rem; max-width:720px; }
+.alpha p:last-child { margin-bottom:0; }
+.alpha strong { color:#e8e6e0; }
+
+.meta-tags { display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1.4rem; }
+.mtag { font-family:-apple-system,sans-serif; font-size:0.72rem; letter-spacing:0.04em; color:var(--lgrey); border:1px solid var(--border); border-radius:2px; padding:0.25rem 0.7rem; }
+
+footer { max-width:900px; margin:0 auto; padding:3rem 2rem 4rem; border-top:1px solid var(--border); font-family:-apple-system,sans-serif; font-size:0.76rem; color:var(--grey); display:flex; flex-wrap:wrap; gap:0.8rem 2rem; justify-content:space-between; align-items:center; }
+footer a { color:var(--lgrey); text-decoration:none; border-bottom:1px dotted var(--lgrey); }
+footer a:hover { color:var(--rblue); border-bottom-color:var(--rblue); }
+
+/* Dokumentation (aus README.de.md generiert — nicht von Hand editieren) */
+.doc { max-width:760px; }
+.doc h3 { font-family:Georgia,serif; font-size:1.3rem; font-weight:400; color:#fff; margin:2.2rem 0 0.8rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+.doc h3:first-child { margin-top:0; border-top:0; padding-top:0; }
+.doc p, .doc li { font-family:-apple-system,sans-serif; font-size:0.9rem; color:#cfc8b8; line-height:1.65; }
+.doc p { margin-bottom:0.9rem; }
+.doc ul, .doc ol { margin:0 0 1rem 1.3rem; }
+.doc li { margin-bottom:0.45rem; }
+.doc strong { color:#e8e6e0; font-weight:500; }
+.doc em { color:#cfc8b8; }
+.doc code { font-family:ui-monospace,Menlo,monospace; font-size:0.82rem; color:var(--rblue); background:rgba(46,117,182,0.08); padding:0.05rem 0.35rem; border-radius:3px; }
+.doc blockquote { border-left:3px solid var(--gold); padding:0.2rem 0 0.2rem 1rem; margin:0 0 1rem; color:#bdb6a6; }
+.doc blockquote p { margin:0; }
+.doc table { border-collapse:collapse; width:100%; margin:0 0 1.2rem; font-family:-apple-system,sans-serif; font-size:0.84rem; }
+.doc th, .doc td { text-align:left; vertical-align:top; padding:0.5rem 0.7rem; border:1px solid var(--border); color:#cfc8b8; }
+.doc th { color:#e8e6e0; font-weight:500; background:rgba(46,117,182,0.06); }
+.doc img { display:block; max-width:100%; height:auto; border:1px solid var(--border); border-radius:6px; margin:0.6rem 0 0.4rem; }
+.doc-note { font-family:-apple-system,sans-serif; font-size:0.74rem; color:var(--grey); margin-top:1.6rem; }
+@media(max-width:640px){ .doc table { display:block; overflow-x:auto; } }
+
+@media(max-width:640px){ .hero{padding:2.5rem 1.5rem 2rem;} section{padding:2.5rem 1.5rem;} .wrap{padding:0 1.5rem;} }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img class="hero-icon" src="icon-TexSlate.png" alt="TeXslate App-Icon" width="104" height="104">
+  <p class="badge-alpha">🧪 Alpha · v1.0.24</p>
+  <h1>TeXslate</h1>
+  <p class="hero-tag">Schreib LaTeX direkt auf dem Tablet — und sieh das PDF live daneben entstehen. Offline, ohne Cloud, ohne Begleit-PC.</p>
+  <p class="hero-tag-en">„Write LaTeX right on your tablet and watch the PDF render live beside it — no terminal, no cloud, no companion PC."</p>
+  <div class="cta-row">
+    <a class="btn btn-primary" href="texslate-v1.0.24.apk">↓ APK laden (50 MB · arm64)</a>
+    <a class="btn btn-ghost" href="obtainium://app/%7B%22id%22%3A%20%22de.bgg_home.texslate%22%2C%20%22url%22%3A%20%22https%3A//bgg-schule.de/texslate/%22%2C%20%22author%22%3A%20%22Thomas%20%28BGG%29%22%2C%20%22name%22%3A%20%22TexSlate%22%2C%20%22preferredApkIndex%22%3A%200%2C%20%22additionalSettings%22%3A%20%22%7B%5C%22intermediateLink%5C%22%3A%20%5B%5D%2C%20%5C%22customLinkFilterRegex%5C%22%3A%20%5C%22texslate-v%5B0-9.%5D%2B%5C%5C%5C%5C.apk%24%5C%22%2C%20%5C%22filterByLinkText%5C%22%3A%20false%2C%20%5C%22skipSort%5C%22%3A%20false%2C%20%5C%22reverseSort%5C%22%3A%20false%2C%20%5C%22sortByLastLinkSegment%5C%22%3A%20false%2C%20%5C%22versionExtractWholePage%5C%22%3A%20false%2C%20%5C%22requestHeader%5C%22%3A%20%5B%5D%2C%20%5C%22defaultPseudoVersioningMethod%5C%22%3A%20%5C%22APKLinkHash%5C%22%2C%20%5C%22trackOnly%5C%22%3A%20false%2C%20%5C%22versionExtractionRegEx%5C%22%3A%20%5C%22v%28%5C%5C%5C%5Cd%2B%28%3F%3A%5C%5C%5C%5C.%5C%5C%5C%5Cd%2B%29%2B%29%5C%22%2C%20%5C%22matchGroupToUse%5C%22%3A%20%5C%221%5C%22%2C%20%5C%22apkFilterRegEx%5C%22%3A%20%5C%22%5C%22%2C%20%5C%22invertAPKFilter%5C%22%3A%20false%2C%20%5C%22autoApkFilterByArch%5C%22%3A%20false%2C%20%5C%22allowInsecure%5C%22%3A%20false%2C%20%5C%22exemptFromBackgroundUpdates%5C%22%3A%20false%2C%20%5C%22skipUpdateNotifications%5C%22%3A%20false%2C%20%5C%22about%5C%22%3A%20%5C%22%5C%22%7D%22%2C%20%22overrideSource%22%3A%20%22HTML%22%7D">In Obtainium hinzufügen</a>
+  </div>
+  <p class="cta-note">Android 8+ · Open Source (GPLv3) · signierte APK, nicht im Play Store</p>
+</header>
+
+<div class="divider"></div>
+
+<section>
+  <p class="sec-label">Wofür</p>
+  <h2 class="sec-title">Ein LaTeX-Compiler,<br><em>der ins Tablet passt.</em></h2>
+  <div class="prose">
+    <p><strong>LaTeX</strong> begleitet das ganze wissenschaftliche und akademische Schreiben — vom ersten Übungsblatt über Praktikumsprotokolle und Präsentationen bis zur Abschluss- oder Doktorarbeit und darüber hinaus. Wer es unterwegs oder ohne Laptop nutzen will, scheitert bisher an der Werkzeugkette: TeX-Distribution installieren, Compiler, Editor. TeXslate nimmt diese Hürde weg — der vollständige Satz-Stack passt aufs Tablet.</p>
+    <p>Die App bringt einen <strong>vollwertigen LaTeX/XeTeX-Compiler direkt aufs Gerät</strong> — auf Basis von <a href="https://tectonic-typesetting.github.io/" rel="noopener">Tectonic</a> (Rust), eingebunden über eine native JNI-Brücke. Du tippst im Editor, daneben rendert live das PDF. Kein Terminal, keine Cloud, kein zweiter Rechner. Nach dem ersten Start läuft alles <strong>komplett offline</strong>.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="screenshots">
+  <p class="sec-label">Einblick</p>
+  <h2 class="sec-title">Split-View: <em>Editor links, PDF rechts.</em></h2>
+  <div class="shots">
+    <figure class="shot"><img src="img/shot-split.png" alt="Split-View mit Editor und Live-PDF-Vorschau" loading="lazy"><figcaption>Split-View mit ziehbarem Teiler — Editor und Live-PDF nebeneinander.</figcaption></figure>
+    <figure class="shot"><img src="img/shot-palette.png" alt="Touch-Palette für Symbole und Umgebungen" loading="lazy"><figcaption>Touch-Palette für Symbole &amp; Umgebungen — ohne Tastatur-Akrobatik.</figcaption></figure>
+    <figure class="shot"><img src="img/shot-fonts.png" alt="Schriftauflösung per Name" loading="lazy"><figcaption>Schriften nach Name (<code style="color:var(--rblue)">\setmainfont</code>) — Latin Modern, TeX Gyre &amp; Systemschriften.</figcaption></figure>
+    <figure class="shot"><img src="img/shot-files.png" alt="Datei-Sidebar für Mehrdatei-Projekte" loading="lazy"><figcaption>Datei-Sidebar: Mehrdatei-Projekte mit <code style="color:var(--rblue)">\input</code>/<code style="color:var(--rblue)">\include</code> und BibTeX.</figcaption></figure>
+    <figure class="shot"><img src="img/shot-biber.png" alt="biblatex mit backend=biber auf dem Tablet" loading="lazy"><figcaption><code style="color:var(--rblue)">biblatex</code> mit <strong>biber</strong> — läuft direkt auf dem Gerät (Vollversion).</figcaption></figure>
+    <figure class="shot"><img src="img/shot-ai.png" alt="Optionaler KI-Assistent" loading="lazy"><figcaption>Optionaler KI-Assistent (BYOK) — erklärt Compiler-Fehler, standardmäßig aus.</figcaption></figure>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+  <p class="sec-label">Funktionen</p>
+  <h2 class="sec-title">Alles drin,<br><em>nichts in der Cloud.</em></h2>
+  <div class="feat-grid">
+    <div class="feat"><h3>On-device Compiler</h3><p>Tectonic/XeTeX läuft lokal auf dem Gerät. Kompilieren ohne Internet, ohne PC, ohne Konto.</p></div>
+    <div class="feat"><h3>Live-PDF-Vorschau</h3><p>Split-View mit ziehbarem Teiler oder Tab-Modus. Optional Auto-Compile während der Eingabe.</p></div>
+    <div class="feat"><h3>Editor mit Highlighting</h3><p>LaTeX-Syntaxfarben, Touch-Palette für Symbole/Umgebungen, Suchen &amp; Ersetzen (Regex), Gehe-zu-Zeile, Outline.</p></div>
+    <div class="feat"><h3>Schriften nach Name</h3><p><code>\setmainfont{…}</code> mit gebündelten Latin-Modern- und TeX-Gyre-Fonts plus Systemschriften.</p></div>
+    <div class="feat"><h3>Projekte, BibTeX &amp; biber</h3><p>Mehrdatei-Projekte mit Dateibaum, <code>\input</code>/<code>\include</code>. Literatur mit BibTeX oder <code>biblatex</code> + biber — auf dem Gerät.</p></div>
+    <div class="feat"><h3>Vorlagen &amp; Wizards</h3><p>Fertige Gerüste für Beamer-Präsentation, Thesis, Brief und Klausur.</p></div>
+    <div class="feat"><h3>Fehler in Klartext</h3><p>Lokalisierte Fehlermeldungen (Deutsch &amp; Englisch) statt kryptischer TeX-Logs.</p></div>
+    <div class="feat"><h3>Optionaler KI-Assistent</h3><p>Bring-your-own-Key (Anthropic, OpenAI, Gemini). Schlüssel lokal verschlüsselt, standardmäßig aus.</p></div>
+    <div class="feat"><h3>Open Source</h3><p>GPLv3, Kotlin/Jetpack Compose. Quellcode offen auf GitHub, keine Tracker, keine Telemetrie.</p></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+  <p class="sec-label">Installieren</p>
+  <h2 class="sec-title">In fünf Schritten<br><em>auf dem Tablet.</em></h2>
+  <div class="steps">
+    <div class="step">Android-Tablet oder -Handy mit <strong>Android 8.0+</strong> (ARM-Gerät).</div>
+    <div class="step"><strong>APK laden:</strong> <a href="texslate-v1.0.24.apk">texslate-v1.0.24.apk</a> (50 MB, arm64-v8a).</div>
+    <div class="step">In den Android-Einstellungen einmalig <strong>„Installation aus unbekannten Quellen"</strong> erlauben. Die App ist signiert, nur nicht im Play Store.</div>
+    <div class="step">Beim <strong>ersten Kompilieren</strong> lädt TeXslate einmalig das TeX-Bundle (~1–2 Minuten). Danach läuft alles offline.</div>
+    <div class="step"><em>Optional für automatische Updates:</em> <a href="obtainium://app/%7B%22id%22%3A%20%22de.bgg_home.texslate%22%2C%20%22url%22%3A%20%22https%3A//bgg-schule.de/texslate/%22%2C%20%22author%22%3A%20%22Thomas%20%28BGG%29%22%2C%20%22name%22%3A%20%22TexSlate%22%2C%20%22preferredApkIndex%22%3A%200%2C%20%22additionalSettings%22%3A%20%22%7B%5C%22intermediateLink%5C%22%3A%20%5B%5D%2C%20%5C%22customLinkFilterRegex%5C%22%3A%20%5C%22texslate-v%5B0-9.%5D%2B%5C%5C%5C%5C.apk%24%5C%22%2C%20%5C%22filterByLinkText%5C%22%3A%20false%2C%20%5C%22skipSort%5C%22%3A%20false%2C%20%5C%22reverseSort%5C%22%3A%20false%2C%20%5C%22sortByLastLinkSegment%5C%22%3A%20false%2C%20%5C%22versionExtractWholePage%5C%22%3A%20false%2C%20%5C%22requestHeader%5C%22%3A%20%5B%5D%2C%20%5C%22defaultPseudoVersioningMethod%5C%22%3A%20%5C%22APKLinkHash%5C%22%2C%20%5C%22trackOnly%5C%22%3A%20false%2C%20%5C%22versionExtractionRegEx%5C%22%3A%20%5C%22v%28%5C%5C%5C%5Cd%2B%28%3F%3A%5C%5C%5C%5C.%5C%5C%5C%5Cd%2B%29%2B%29%5C%22%2C%20%5C%22matchGroupToUse%5C%22%3A%20%5C%221%5C%22%2C%20%5C%22apkFilterRegEx%5C%22%3A%20%5C%22%5C%22%2C%20%5C%22invertAPKFilter%5C%22%3A%20false%2C%20%5C%22autoApkFilterByArch%5C%22%3A%20false%2C%20%5C%22allowInsecure%5C%22%3A%20false%2C%20%5C%22exemptFromBackgroundUpdates%5C%22%3A%20false%2C%20%5C%22skipUpdateNotifications%5C%22%3A%20false%2C%20%5C%22about%5C%22%3A%20%5C%22%5C%22%7D%22%2C%20%22overrideSource%22%3A%20%22HTML%22%7D">in Obtainium hinzufügen</a> — dazu braucht es die App <a href="https://github.com/ImranR98/Obtainium/releases/latest/download/app-release.apk" rel="noopener">Obtainium</a>.</div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section>
+  <div class="alpha">
+    <h2>Für meine Abiturienten: <em>mittesten erwünscht.</em></h2>
+    <p>Wer von euch in ein MINT-Fach oder ein anderes Studium mit wissenschaftlichem Schreiben startet, trifft dort früher oder später auf LaTeX. TeXslate ist in der <strong>Alpha</strong>: läuft, hat aber sicher noch Ecken. Genau dabei helft ihr mir — <strong>ausprobieren und sagen, was hakt.</strong> Komplett freiwillig, ohne jeden Zusammenhang mit Noten.</p>
+    <p>Ladet die App (Schritte oben), baut euer erstes Dokument, und schickt mir Rückmeldung: Was ist abgestürzt, was hat gefehlt, was würdet ihr euch wünschen? Jede Meldung hilft weiter.</p>
+    <p><strong>Feedback:</strong> <a href="mailto:texslate@bgg-mail.de?subject=TeXslate%20Alpha-Feedback">texslate@bgg-mail.de</a>.</p>
+    <p style="font-size:0.82rem;color:var(--grey);"><strong style="color:var(--lgrey);">Datenschutz:</strong> TeXslate arbeitet komplett lokal auf eurem Gerät — es werden keine Daten an mich oder Dritte gesendet. Der optionale KI-Assistent ist standardmäßig ausgeschaltet.</p>
+  </div>
+
+  <div class="meta-tags">
+    <span class="mtag">Kotlin · Jetpack Compose</span>
+    <span class="mtag">Tectonic (Rust) · JNI</span>
+    <span class="mtag">Android 8.0+</span>
+    <span class="mtag">arm64-v8a</span>
+    <span class="mtag">GPLv3</span>
+    <span class="mtag">v1.0.24 · September 2026</span>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="doku">
+  <p class="sec-label">Dokumentation</p>
+  <h2 class="sec-title">Im Detail —<br><em>direkt aus der README.</em></h2>
+  <div class="doc">
+<!-- README:START -->
+<h3 id="funktionen">Funktionen</h3>
+<ul>
+<li><strong>Editor</strong> mit LaTeX-Syntax-Hervorhebung (TextMate-Grammatik) und einer Touch-
+  Palette für gängige Bausteine, Umgebungen und Mathe-Symbole; der Cursor landet
+  automatisch an der richtigen Stelle.</li>
+<li><strong>Compiler auf dem Gerät</strong> (Tectonic/XeTeX) — kein Terminal, keine Cloud.
+  Optionales <strong>Auto-Compile</strong> beim Tippen. Hilfsdateien bleiben zwischen den Läufen
+  erhalten (spart bei Inhaltsverzeichnis und Querverweisen einen kompletten
+  Durchlauf), Projektdateien werden nur kopiert, wenn sie sich geändert haben.</li>
+<li><strong>PDF-Vorschau</strong> daneben (Tablet-Split-View mit verschiebbarem Trenner) oder als
+  Tab auf schmalen Displays.</li>
+<li><strong>Tipp ins PDF, Cursor im Quelltext</strong> (SyncTeX): Auf eine Stelle in der Vorschau
+  tippen, und der Cursor springt in die Zeile, aus der sie gesetzt wurde — auch
+  innerhalb eines umbrochenen Absatzes, wo die linke und die rechte Hälfte
+  derselben gesetzten Zeile aus verschiedenen Quellzeilen stammen.</li>
+<li><strong>Schriften über den Namen</strong>: <code>\setmainfont{…}</code> funktioniert offline — ein
+  kuratierter Satz (Latin Modern Roman, TeX Gyre Termes/Pagella/Heros, <strong>DejaVu
+  Sans</strong>) ist gebündelt und über den Namen auflösbar, ebenso deine
+  Android-Systemschriften und jede <code>.otf</code>/<code>.ttf</code>, die du in den Schriften-Ordner der
+  App legst. Fehlt eine Schrift, wird sie ersetzt statt den Compile abzubrechen —
+  siehe <a href="#dokumente-vom-pc">Dokumente vom PC</a>.</li>
+<li><strong>Eingedeutschte Fehler</strong>: die häufigsten TeX-Meldungen werden als kurze,
+  verständliche Sätze in der UI-Sprache umformuliert; ein Tipp springt zur
+  Fehlerzeile, und der Kasten lässt sich wegklicken, wenn man ihn gelesen hat.</li>
+<li><strong>Chinesisch und andere CJK-Sprachen</strong>: <code>ctex</code> und <code>xeCJK</code> funktionieren. Vorlagen,
+  die Windows-Schriften fest verdrahten (<code>SimSun</code>, <code>黑体</code>, <code>KaiTi</code>, <code>Microsoft YaHei</code>),
+  werden mit den freien <strong>Fandol</strong>-Schriften aus dem TeX-Bundle gesetzt — es muss also
+  keine CJK-Systemschrift auf dem Gerät liegen. Geprüft mit
+  <a href="https://github.com/latexstudio/CUMCMThesis">CUMCMThesis</a>, der Vorlage des nationalen
+  chinesischen Mathematik-Modellierungswettbewerbs.</li>
+<li><strong>Stichwortverzeichnis</strong>: <code>\printindex</code> funktioniert — TeXslate erzeugt das
+  Verzeichnis selbst (Unterpunkte, Sortierschlüssel, Seitenbereiche), weil die Engine
+  kein <code>makeindex</code> mitbringt.</li>
+<li><strong>Mehrdatei-Projekte</strong>: Projektordner-Sidebar (Dateibaum), Dateiwechsel per Tipp,
+  <code>\input</code>/<code>\include</code> und Bibliografie (<code>bibtex</code>; <code>biblatex</code> mit <code>backend=bibtex</code>,
+  oder <code>backend=biber</code> in der thesis-Edition — siehe <a href="#editionen">Editionen</a>).</li>
+<li><strong>Editor-Komfort</strong>: Suchen &amp; Ersetzen (inkl. Regex), Gehe zu Zeile,
+  <strong>Dokument-Gliederung</strong> (zu Abschnitten springen wie in Kile), Kommentar ein/aus
+  für eine Zeile oder Auswahl, ein greifbarer Scroll-Griff.</li>
+<li><strong>Assistenten &amp; Vorlagen</strong>: Dokument- und Tabellen-Assistent, kuratierte Vorlagen
+  (Beamer, Abschlussarbeit, Brief, Klausur) plus <strong>eigene Vorlagen</strong> — das aktuelle
+  Dokument als benannte Vorlage speichern (offline, interner Speicher) und jederzeit
+  laden oder löschen.</li>
+<li><strong>Teilen &amp; Speichern</strong>: das PDF und/oder den <code>.tex</code>-Quelltext teilen, das PDF
+  exportieren, Dateien über das Storage Access Framework öffnen und speichern.</li>
+<li><strong>KI-Assistent (optional, Opt-in)</strong>: eigener API-Schlüssel (<strong>BYOK</strong>) für
+  Anthropic, OpenAI oder Google Gemini; Kontext ist eine Auswahl oder das ganze
+  Dokument; <strong>Rückfragen im Gespräch</strong> (die letzten Runden werden mitgeschickt,
+  damit das Modell den Zusammenhang behält); <strong>„Fehler erklären"</strong> direkt an jedem
+  Compile-Fehler; Ergebnis einfügen/ersetzen oder kopieren. Vor jedem Aufruf ein
+  verpflichtender Vorschau-Dialog. Schlüssel bleiben <strong>lokal verschlüsselt</strong>
+  (Android Keystore). Die Kern-App funktioniert <strong>vollständig offline</strong>, und der
+  Assistent antwortet in der UI-Sprache.</li>
+<li><strong>Über-Bildschirm</strong> (Überlauf-Menü): Version, Entwickler, Lizenz und die
+  gebündelten Open-Source-Komponenten.</li>
+</ul>
+<h3 id="dokumente-vom-pc">Dokumente vom PC</h3>
+<p>Die meisten <code>.tex</code>-Dateien sind für <strong>pdfLaTeX auf einem Rechner</strong> geschrieben,
+TeXslate rechnet mit XeTeX. Die App gleicht diese Unterschiede selbst aus. Sie
+ändert dabei <strong>nie deine Datei</strong>, sondern arbeitet auf einer Kopie für den einen
+Compile-Lauf; jeder Eingriff wird gemeldet, und die Zeilennummern im Fehlerpanel
+bleiben gültig.</p>
+<table>
+<thead>
+<tr>
+<th>Was am PC anders ist</th>
+<th>Was TeXslate tut</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Arial</code>, <code>Times New Roman</code>, <code>Calibri</code>, <code>Consolas</code> … sind nicht da</td>
+<td>setzt eine passende mitgelieferte Familie ein (~60 Namen zugeordnet, unbekannte über eine Heuristik)</td>
+</tr>
+<tr>
+<td><code>\usepackage[latin1]{inputenc}</code></td>
+<td>blendet es aus — XeTeX liest ohnehin UTF-8</td>
+</tr>
+<tr>
+<td>Datei ist Latin-1-kodiert</td>
+<td>wird richtig gelesen (vorher gingen Umlaute beim Speichern verloren)</td>
+</tr>
+<tr>
+<td><code>\usepackage[pdftex]{hyperref}</code></td>
+<td>stellt die Treiberoption auf <code>xetex</code> um</td>
+</tr>
+<tr>
+<td><code>Bild.PDF</code> im Dokument, <code>bild.pdf</code> auf der Platte</td>
+<td>gleicht die Schreibweise an (Windows/macOS sind da unempfindlich, Android nicht)</td>
+</tr>
+<tr>
+<td><code>SimSun</code>, <code>黑体</code>, <code>KaiTi</code> … in einer chinesischen Vorlage</td>
+<td>setzt mit den freien Fandol-Schriften aus dem TeX-Bundle — ohne CJK-Systemschrift</td>
+</tr>
+<tr>
+<td>Schrift steckt in der <strong>Dokumentklasse</strong> statt im Text</td>
+<td>wird dort ebenfalls ersetzt (viele Universitäts- und Journal-Klassen verdrahten Times New Roman fest)</td>
+</tr>
+<tr>
+<td><code>.eps</code>-Abbildungen</td>
+<td>setzt einen beschrifteten Platzhalter — das Dokument kompiliert, nur die Bildstelle bleibt leer (EPS bräuchte Ghostscript). Liegt eine <code>.pdf</code> daneben, wird die genommen</td>
+</tr>
+</tbody>
+</table>
+<p>Geprüft an <strong>18 echten Dokumenten</strong> von CTAN, GitHub und arXiv — Artikel, Paper mit
+Nebendateien, Beamer-Vortrag, Buch, Lebenslauf, Brief, Diagramme, die Journal-Klassen
+von IEEE, Elsevier und der American Physical Society (REVTeX), AMS-Mathematik,
+<code>biblatex</code> mit biber und Editionsphilologie (reledmac). Alle 18 kompilieren, keine
+Abstürze. Die Sammlung läuft als Regressionstest mit, siehe
+<a href="https://github.com/thobgg/TeXslate/blob/main/docs/CORPUS.md"><code>docs/CORPUS.md</code></a>.</p>
+<h3 id="warum">Warum</h3>
+<p>Es gibt keine Open-Source-Android-App, die Editor, PDF-Vorschau und einen
+<strong>XeTeX-fähigen Compiler auf dem Gerät, offline</strong> in einer Oberfläche vereint.
+LaTeX-Editoren für Android gibt es durchaus; was fehlt, ist die Kombination aus
+<em>Open Source + kompiliert wirklich auf dem Gerät, ohne Cloud oder PC</em>:</p>
+<ul>
+<li><strong>Termux + TeX Live / Tectonic</strong>: voll funktionsfähig, aber reine
+  Terminal-Nutzung mit entsprechender Einstiegshürde.</li>
+<li><strong>VerbTeX</strong> (der bekannteste direkte Vergleich): proprietär, und der Compile
+  läuft immer woanders. Die kostenlose Version schickt dein Projekt in die
+  Verbosus-<strong>Cloud</strong> (Konto + Internet nötig), und „VerbTeX Local" braucht einen
+  Server, den du auf einem <strong>PC im selben Netz</strong> betreibst. Genau hier setzt
+  TeXslate an.</li>
+<li>Reine Formel-Renderer (z. B. jlatexmath): keine vollständige Engine.</li>
+</ul>
+<h3 id="technik">Technik</h3>
+<table>
+<thead>
+<tr>
+<th>Komponente</th>
+<th>Technologie</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>UI</td>
+<td>Jetpack Compose (Kotlin), adaptive Layouts über <code>WindowSizeClass</code></td>
+</tr>
+<tr>
+<td>Editor</td>
+<td><a href="https://github.com/Rosemoe/sora-editor"><code>sora-editor</code></a> — Syntax-Hervorhebung</td>
+</tr>
+<tr>
+<td>Compiler</td>
+<td><a href="https://tectonic-typesetting.github.io/">Tectonic</a> (Rust, MIT) via <code>cargo-ndk</code> als <code>.so</code>, JNI-Brücke Rust ↔ Kotlin</td>
+</tr>
+<tr>
+<td>PDF-Rendering</td>
+<td>Android <code>PdfRenderer</code> (eingebaut)</td>
+</tr>
+<tr>
+<td>Dateizugriff</td>
+<td>Storage Access Framework (SAF), Teilen über <code>FileProvider</code></td>
+</tr>
+<tr>
+<td>KI-Assistent</td>
+<td>optional, BYOK — Anthropic · OpenAI · Gemini über <code>HttpURLConnection</code> (keine Netzwerk-Abhängigkeit); Schlüssel verschlüsselt via Android Keystore</td>
+</tr>
+</tbody>
+</table>
+<p><strong>ABI-Ziele:</strong> <code>arm64-v8a</code> (echte Geräte) + <code>x86_64</code> (Emulator), jeweils als eigene
+APK (ABI-Splits). <code>armeabi-v7a</code> (ältere 32-bit-Geräte) ist noch offen.</p>
+<h3 id="status">Status</h3>
+<p>🧪 <strong>Alpha</strong> — nutzbar auf echten Geräten (Galaxy Tab S8 Ultra, S9, S5e; Android 11
+&amp; 16). Roadmap und Meilensteine: siehe <a href="https://github.com/thobgg/TeXslate/blob/main/PROJECT.md"><code>PROJECT.md</code></a>.</p>
+<ul>
+<li>✅ <strong>M0</strong> — Machbarkeitsnachweis (Rust↔Kotlin-Brücke, erstes PDF lokal erzeugt)</li>
+<li>✅ <strong>M1</strong> — Basis-Editor + Compile-Schleife</li>
+<li>✅ <strong>M2</strong> — PDF-Vorschau + Tablet-Split-View</li>
+<li>✅ <strong>M3</strong> — Live-/Auto-Compile &amp; UX</li>
+<li>✅ <strong>Extras</strong> — Assistenten &amp; Vorlagen, PDF/<code>.tex</code> teilen, eingedeutschte Fehler, Schriften über den Namen</li>
+<li>✅ <strong>MA — KI-Assistent</strong> — optionaler BYOK-Assistent (Anthropic · OpenAI · Gemini), „Fehler erklären"</li>
+<li>✅ <strong>M4</strong> — Projektverwaltung (Mehrdatei, Bibliografie)</li>
+<li>✅ <strong>ME</strong> — Editor-Komfort (Suchen &amp; Ersetzen, Gehe zu Zeile, Kommentar) + TeX-Branding</li>
+<li>✅ <strong>MR</strong> — Alpha-Releases: signierte APKs, auf drei Geräten geprüft; englische + deutsche UI</li>
+<li>✅ <strong>MB — biber</strong> — <code>biblatex</code> mit <code>backend=biber</code> läuft auf dem Gerät (thesis-Edition,
+      cross-kompilierte Perl-Runtime + biber 2.17)</li>
+<li>✅ <strong>MK — Fremde Dokumente</strong> — Ersatzschriften, <code>inputenc</code>/Treiberoptionen, Latin-1,
+      Dateinamen-Schreibweise, EPS-Platzhalter, Stichwortverzeichnis, CJK/Chinesisch;
+      geprüft an 18 echten Dokumenten von CTAN, GitHub und arXiv auf drei Geräten</li>
+<li>⬜ <strong>M5</strong> — F-Droid-Release</li>
+<li>⬜ <strong>M6</strong> — Play-Store-Release (optional)</li>
+</ul>
+<blockquote>
+<p>Der KI-Assistent ist <strong>standardmäßig aus</strong> und völlig optional. Nur wenn du ihn
+aktivierst und deinen eigenen API-Schlüssel hinterlegst, spricht die App mit einem
+externen Dienst (F-Droid-Anti-Feature <code>NonFreeNetwork</code>). Ohne ihn bleibt TeXslate
+vollständig offline und Open Source.</p>
+</blockquote>
+<h3 id="editionen">Editionen</h3>
+<p>TeXslate baut aus einer Codebasis zwei Editionen (Gradle-Product-Flavors). Fixes
+und Features liegen im gemeinsamen <code>main</code>-Sourceset, beide Editionen haben sie also;
+der <code>thesis</code>-Flavor ergänzt nur biber.</p>
+<ul>
+<li><strong>core</strong> — die Basis-App (~48 MB). Literaturverzeichnisse laufen über <code>bibtex</code>
+  (<code>backend=bibtex</code>); ein Preflight erklärt das, falls ein Dokument biber verlangt.
+  Keine gebündelten Binaries, F-Droid-kompatibel.
+  Bauen: <code>installCoreDebug</code> / <code>assembleCoreRelease</code>.</li>
+<li><strong>thesis</strong> — core plus gebündelte biber-Runtime (Perl 5.36.3 + XS + biber 2.17,
+  cross-kompiliert für Android, ~14 MB), sodass <code>biblatex</code> mit <code>backend=biber</code> auf
+  dem Gerät läuft. Bauen: <code>installThesisDebug</code> / <code>assembleThesisRelease</code>. Die
+  Runtime-Binaries werden separat bereitgestellt, siehe
+  <a href="https://github.com/thobgg/TeXslate/blob/main/app/src/thesis/README.md"><code>app/src/thesis/README.md</code></a>.</li>
+</ul>
+<p>Die aktive Edition ist im Code als <code>BuildConfig.HAS_BIBER</code> verfügbar.</p>
+<p><img alt="TeXslate thesis-Edition: biblatex mit backend=biber auf dem Tablet kompiliert, mit sortiertem nummeriertem Literaturverzeichnis" src="https://raw.githubusercontent.com/thobgg/TeXslate/main/docs/screenshots-de/05-biblatex-biber.png" /></p>
+<p><em>biber auf dem Tablet (thesis-Edition): die mitgelieferte Vorlage <code>Bibliografie (biber)</code> — <code>biblatex</code> mit <code>backend=biber</code>, <code>\textcite</code>/<code>\parencite</code> und ein sortiertes, nummeriertes Literaturverzeichnis, auf dem Gerät aufgelöst vom cross-kompilierten biber (Perl + biber 2.17).</em></p>
+<!-- README:END -->
+  </div>
+  <p class="doc-note">Dieser Abschnitt wird bei jedem Release aus <a href="https://github.com/thobgg/TeXslate/blob/main/README.de.md">README.de.md</a> erzeugt. Vollständige Doku, Quellcode und Issues: <a href="https://github.com/thobgg/TeXslate">github.com/thobgg/TeXslate</a>.</p>
+</section>
+
+<footer>
+  <span>© 2026 Thomas Bugge · <a href="mailto:texslate@bgg-mail.de">texslate@bgg-mail.de</a></span>
+  <span>Open Source (GPLv3) · <a href="https://github.com/thobgg/TeXslate">Quellcode auf GitHub</a> · <a href="https://github.com/thobgg/TeXslate/releases">Releases</a></span>
+</footer>
+
+<script>
+/* Screenshots, die (noch) fehlen, sauber ausblenden — inkl. Sektion, falls alle fehlen */
+document.querySelectorAll('.shot img').forEach(function(img){
+  img.addEventListener('error', function(){
+    var fig = img.closest('.shot'); if(fig) fig.style.display='none';
+    var sec = document.getElementById('screenshots');
+    if(sec && !sec.querySelector('.shot:not([style*="display: none"])')){
+      var d = sec.previousElementSibling, dd = sec.nextElementSibling;
+      sec.style.display='none';
+      if(d && d.classList.contains('divider')) d.style.display='none';
+    }
+  });
+});
+</script>
+</body>
+</html>

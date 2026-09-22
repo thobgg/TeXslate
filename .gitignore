@@ -66,3 +66,9 @@ app/src/androidTest/assets/biber-tree.zip
 /Screenshot_*.jpg
 /Screenshot_*.png
 /Gemini_Generated_Image_*.png
+
+# Bleibt lokal, nie auf GitHub: Regieanweisungen, Arbeitsstand, Hilfswerkzeuge, Testdaten, Schluessel
+CLAUDE.md
+STAND.md
+tools/
+testdata/
