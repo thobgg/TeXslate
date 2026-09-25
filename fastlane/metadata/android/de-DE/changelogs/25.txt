@@ -1,0 +1,2 @@
+* Editor: Scrollen mit zwei Fingern auf dem Touchpad funktioniert (Tastatur-Cover, DeX) (#8).
+* Tastenkürzel: Strg+S speichern, Strg+O öffnen, Strg+F suchen, Strg+G zu Zeile, Strg+Enter kompilieren (#8).

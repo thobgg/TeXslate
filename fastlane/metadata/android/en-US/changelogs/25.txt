@@ -1,0 +1,2 @@
+* Editor: two-finger touchpad scrolling works (keyboard covers, DeX) (#8).
+* Keyboard shortcuts: Ctrl+S save, Ctrl+O open, Ctrl+F search, Ctrl+G go to line, Ctrl+Enter compile (#8).
