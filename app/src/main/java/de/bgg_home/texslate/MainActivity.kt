@@ -1,6 +1,7 @@
 package de.bgg_home.texslate
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,9 @@ class MainActivity : ComponentActivity() {
     // Punkt vor einem Hintergrund-Kill durch das System.
     private var saveDraft: (() -> Unit)? = null
 
+    // Tastenkürzel (Strg+S usw.), ebenfalls von der Compose-Schicht registriert.
+    private var shortcutHandler: ((KeyEvent) -> Boolean)? = null
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,9 +30,15 @@ class MainActivity : ComponentActivity() {
                 TeXslateApp(
                     windowSizeClass = windowSizeClass,
                     onRegisterDraftSaver = { saveDraft = it },
+                    onRegisterShortcutHandler = { shortcutHandler = it },
                 )
             }
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (shortcutHandler?.invoke(event) == true) return true
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onStop() {

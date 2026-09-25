@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.view.KeyEvent
 import androidx.core.content.FileProvider
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -100,6 +101,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.movableContentOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -296,6 +298,7 @@ private fun stripLatexComment(line: String): String {
 fun TeXslateApp(
     windowSizeClass: WindowSizeClass,
     onRegisterDraftSaver: (() -> Unit) -> Unit = {},
+    onRegisterShortcutHandler: ((KeyEvent) -> Boolean) -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -893,6 +896,26 @@ fun TeXslateApp(
         aiInitialQuestion = context.getString(R.string.ai_explain_error, where, err.message)
         showAi = true
     }
+
+    // Tastenkürzel für Hardware-Tastaturen (Issue #8, DeX/Tastatur-Cover). Die
+    // Activity reicht jede Taste zuerst hierher, noch vor dem Editor – sonst
+    // schluckt sora z. B. Strg+Enter als Zeilenumbruch.
+    fun handleShortcut(event: KeyEvent): Boolean {
+        if (event.action != KeyEvent.ACTION_DOWN || !event.isCtrlPressed || event.isAltPressed) {
+            return false
+        }
+        when (event.keyCode) {
+            KeyEvent.KEYCODE_S -> if (!compiling) saveDocument()
+            KeyEvent.KEYCODE_O -> if (!compiling) openDocument()
+            KeyEvent.KEYCODE_F -> if (showSearch) closeSearch() else showSearch = true
+            KeyEvent.KEYCODE_G -> showGoToLine = true
+            KeyEvent.KEYCODE_ENTER -> runCompile(manual = true)
+            else -> return false
+        }
+        return true
+    }
+    SideEffect { onRegisterShortcutHandler(::handleShortcut) }
+    DisposableEffect(Unit) { onDispose { onRegisterShortcutHandler { false } } }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
