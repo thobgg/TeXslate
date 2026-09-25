@@ -18,9 +18,9 @@ Binaries:
   https://github.com/thobgg/TeXslate/releases/download/v%v/TeXslate-%v-core-arm64-v8a.apk
 
 Builds:
-  - versionName: 1.0-alpha24
-    versionCode: 24
-    commit: 505789a1c410a8159e290c8bc5a2e2095a084acb
+  - versionName: 1.0-alpha25
+    versionCode: 25
+    commit: 7eb6500f87a57699cc2927e3053d48f3194959f3
     subdir: app
     sudo:
       - apt-get update
@@ -50,5 +50,5 @@ AllowedAPKSigningKeys: 42f7bed83cb0b21bac74a14dc7aebdde50e7b37f2259bcf1e0dc1aca6
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0-alpha24
-CurrentVersionCode: 24
+CurrentVersion: 1.0-alpha25
+CurrentVersionCode: 25
