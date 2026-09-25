@@ -110,6 +110,8 @@ fun LatexEditor(
                 //    Niemals im update-Block erneut – das würde die laufende Analyse
                 //    abbrechen und nur die erste Zeile gefärbt zurücklassen.
                 setEditorLanguage(TextMateLanguage.create(LATEX_SCOPE, true))
+                // Touchpad-Wischen (Tastatur-Cover, DeX) wie Fingerwischen scrollen.
+                setOnTouchListener(TouchpadScrollListener)
                 // Breiterer, gut sichtbarer vertikaler Scroll-Griff: der schmale
                 // Standard-Balken ist auf dem Touchscreen schwer zu fassen. Ein
                 // abgerundetes, halbtransparentes Thumb-Drawable vergrößert die
