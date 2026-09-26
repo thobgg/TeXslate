@@ -14,7 +14,7 @@ Features:
 
 Good to know:
 
-* The very first compile downloads the TeX package bundle once (needs internet that one time); afterwards everything runs offline.
+* The first compile downloads the TeX packages it needs (internet needed that one time). Afterwards compiling works offline; when a connection is available, the app checks the bundle server and fetches packages a document uses for the first time.
 * The optional AI assistant contacts third-party services only when you enable it with your own key.
 
 Free software, licensed under GPL-3.0-or-later. Built for tablets first: split view, external keyboard and stylus.

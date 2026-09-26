@@ -14,7 +14,7 @@ Funktionen:
 
 Gut zu wissen:
 
-* Der allererste Compile lädt einmalig das TeX-Paket-Bundle (dafür einmal Internet nötig); danach läuft alles offline.
+* Der erste Compile lädt die benötigten TeX-Pakete (dafür einmal Internet nötig). Danach kompiliert die App offline; ist eine Verbindung da, fragt sie beim Bundle-Server nach und lädt Pakete, die ein Dokument zum ersten Mal braucht.
 * Der optionale KI-Assistent kontaktiert Drittanbieter-Dienste nur, wenn du ihn mit deinem eigenen Schlüssel aktivierst.
 
 Freie Software unter GPL-3.0-or-later. Tablet-first gebaut: Split-View, externe Tastatur und Stift.
