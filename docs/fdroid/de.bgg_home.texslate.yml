@@ -1,3 +1,7 @@
+AntiFeatures:
+  TetheredNet:
+    en-US: On first use the TeX package bundle is downloaded from the Tectonic project's
+      server (fullyjustified.net); afterwards compilation works offline.
 Categories:
   - Writing
 License: GPL-3.0-or-later
