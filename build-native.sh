@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Copyright (C) 2026 Thomas Bugge
 #
 # Baut die native Rust/Tectonic-Bibliothek (libtexslate_native.so) für Android
 # und legt sie samt libc++_shared.so unter app/src/main/jniLibs/<abi>/ ab.

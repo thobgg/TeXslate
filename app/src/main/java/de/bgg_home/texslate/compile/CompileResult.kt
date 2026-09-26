@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Thomas Bugge
+
 package de.bgg_home.texslate.compile
 
 import org.json.JSONObject

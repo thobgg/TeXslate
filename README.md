@@ -267,8 +267,10 @@ The script places `libtexslate_native.so` **and** `libc++_shared.so` in
 
 ## License
 
-[GNU General Public License v3.0](./LICENSE) (GPLv3). Compatible with Tectonic
-(MIT). The source stays free; Play Store distribution remains permitted.
+TeXslate is free software: you can redistribute it and/or modify it under the
+terms of the [GNU General Public License](./LICENSE) as published by the Free
+Software Foundation, either version 3 of the License, or (at your option) any
+later version (`GPL-3.0-or-later`). Compatible with Tectonic (MIT). The source stays free; Play Store distribution remains permitted.
 
 ### Third-party / bundled assets
 

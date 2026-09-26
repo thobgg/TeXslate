@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Thomas Bugge
+
 package de.bgg_home.texslate
 
 import androidx.test.platform.app.InstrumentationRegistry

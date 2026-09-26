@@ -277,7 +277,11 @@ Laufzeit).
 
 ## Lizenz
 
-[GNU General Public License v3.0](./LICENSE) (GPLv3). Kompatibel mit Tectonic (MIT).
+TeXslate ist freie Software: Du kannst sie unter den Bedingungen der
+[GNU General Public License](./LICENSE), wie von der Free Software Foundation
+veröffentlicht, weitergeben und/oder verändern, entweder gemäß Version 3 der
+Lizenz oder (nach deiner Wahl) jeder späteren Version (`GPL-3.0-or-later`).
+Kompatibel mit Tectonic (MIT).
 Der Quellcode bleibt frei; eine Play-Store-Verteilung bleibt erlaubt.
 
 ### Fremd-/gebündelte Bestandteile
