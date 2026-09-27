@@ -1,0 +1,1 @@
+* Smaller app: the release build is now shrunk with R8 (core APK about 11 MB smaller). No functional changes.

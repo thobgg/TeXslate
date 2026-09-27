@@ -38,8 +38,8 @@ android {
         applicationId = "de.bgg_home.texslate"
         minSdk = 26
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.0-alpha25"
+        versionCode = 26
+        versionName = "1.0-alpha26"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -83,9 +83,14 @@ android {
             }
         }
         release {
-            optimization {
-                enable = false
-            }
+            // R8: schrumpft und optimiert den Release-Build (F-Droid-Review,
+            // linsui 27.09.2026). Keep-Regeln fuer die JNI-Bruecke in
+            // proguard-rules.pro.
+            isMinifyEnabled = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             // Nur signieren, wenn ein Keystore hinterlegt ist (sonst unsigniert).
             if (keystorePropsFile.exists()) {
                 signingConfig = signingConfigs.getByName("release")
