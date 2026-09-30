@@ -6,6 +6,8 @@
 
 <p align="center">🇬🇧 <strong>English</strong> · 🇩🇪 <a href="./README.de.md">Deutsch</a></p>
 
+<p align="center"><a href="https://f-droid.org/packages/de.bgg_home.texslate/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a></p>
+
 Write LaTeX right on your tablet and watch the PDF render live beside it — no
 terminal, no cloud, no companion PC. TeXslate combines an editor, an **on-device**
 compiler and a PDF preview in one native Android UI, with localized error output
@@ -159,7 +161,7 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 - [x] **MK — Documents from elsewhere** — font substitution, `inputenc`/driver options,
       Latin-1, file name case, EPS placeholders, index, CJK/Chinese; verified against 18
       real documents from CTAN, GitHub and arXiv on three devices
-- [ ] **M5** — F-Droid release
+- [x] **M5** — F-Droid release ([f-droid.org](https://f-droid.org/packages/de.bgg_home.texslate/), reproducible build)
 - [ ] **M6** — Play Store release (optional)
 
 > The AI assistant is **off by default** and entirely optional. Only if you enable
@@ -206,7 +208,11 @@ willkommen._
 
 ## Install (alpha)
 
-Prebuilt, signed APKs are on the
+- **[F-Droid](https://f-droid.org/packages/de.bgg_home.texslate/)** — the core edition
+  (everything except biber), built from source by F-Droid and signed with the same key
+  as the releases here, so you can switch between both without reinstalling.
+
+The full edition (with biber) and all builds are on the
 [**Releases**](https://github.com/thobgg/TeXslate/releases) page:
 
 - **Tablet/phone:** `…-arm64-v8a.apk` · **emulator:** `…-x86_64.apk`

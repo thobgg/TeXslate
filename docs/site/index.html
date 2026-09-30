@@ -38,6 +38,8 @@ a { color:var(--rblue); }
 .btn-primary:hover { background:#e0a63a; }
 .btn-ghost { color:var(--rblue); border-color:var(--border); background:transparent; }
 .btn-ghost:hover { border-color:var(--rblue); background:rgba(46,117,182,0.08); }
+.cta-fdroid { margin-top:1.1rem; text-align:center; }
+.cta-fdroid span { font-family:-apple-system,sans-serif; font-size:0.72rem; color:var(--grey); }
 .cta-note { font-family:-apple-system,sans-serif; font-size:0.72rem; color:var(--grey); margin-top:1rem; }
 
 .divider { height:1px; max-width:900px; margin:0 auto; background:linear-gradient(to right,transparent,var(--border),transparent); }
@@ -118,7 +120,8 @@ footer a:hover { color:var(--rblue); border-bottom-color:var(--rblue); }
     <a class="btn btn-primary" href="texslate-v1.0.26.apk">↓ APK laden (40 MB · arm64)</a>
     <a class="btn btn-ghost" href="obtainium://app/%7B%22id%22%3A%20%22de.bgg_home.texslate%22%2C%20%22url%22%3A%20%22https%3A//bgg-schule.de/texslate/%22%2C%20%22author%22%3A%20%22Thomas%20%28BGG%29%22%2C%20%22name%22%3A%20%22TexSlate%22%2C%20%22preferredApkIndex%22%3A%200%2C%20%22additionalSettings%22%3A%20%22%7B%5C%22intermediateLink%5C%22%3A%20%5B%5D%2C%20%5C%22customLinkFilterRegex%5C%22%3A%20%5C%22texslate-v%5B0-9.%5D%2B%5C%5C%5C%5C.apk%24%5C%22%2C%20%5C%22filterByLinkText%5C%22%3A%20false%2C%20%5C%22skipSort%5C%22%3A%20false%2C%20%5C%22reverseSort%5C%22%3A%20false%2C%20%5C%22sortByLastLinkSegment%5C%22%3A%20false%2C%20%5C%22versionExtractWholePage%5C%22%3A%20false%2C%20%5C%22requestHeader%5C%22%3A%20%5B%5D%2C%20%5C%22defaultPseudoVersioningMethod%5C%22%3A%20%5C%22APKLinkHash%5C%22%2C%20%5C%22trackOnly%5C%22%3A%20false%2C%20%5C%22versionExtractionRegEx%5C%22%3A%20%5C%22v%28%5C%5C%5C%5Cd%2B%28%3F%3A%5C%5C%5C%5C.%5C%5C%5C%5Cd%2B%29%2B%29%5C%22%2C%20%5C%22matchGroupToUse%5C%22%3A%20%5C%221%5C%22%2C%20%5C%22apkFilterRegEx%5C%22%3A%20%5C%22%5C%22%2C%20%5C%22invertAPKFilter%5C%22%3A%20false%2C%20%5C%22autoApkFilterByArch%5C%22%3A%20false%2C%20%5C%22allowInsecure%5C%22%3A%20false%2C%20%5C%22exemptFromBackgroundUpdates%5C%22%3A%20false%2C%20%5C%22skipUpdateNotifications%5C%22%3A%20false%2C%20%5C%22about%5C%22%3A%20%5C%22%5C%22%7D%22%2C%20%22overrideSource%22%3A%20%22HTML%22%7D">In Obtainium hinzufügen</a>
   </div>
-  <p class="cta-note">Android 8+ · Open Source (GPLv3) · signierte APK, nicht im Play Store</p>
+  <p class="cta-fdroid"><a href="https://f-droid.org/packages/de.bgg_home.texslate/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on-de.png" alt="Jetzt bei F-Droid" height="64"></a><br><span>core-Edition ohne biber · automatische Updates</span></p>
+  <p class="cta-note">Android 8+ · Open Source (GPLv3) · Download oben = Vollversion mit biber · gleicher Schlüssel wie F-Droid</p>
 </header>
 
 <div class="divider"></div>
@@ -387,7 +390,7 @@ APK (ABI-Splits). <code>armeabi-v7a</code> (ältere 32-bit-Geräte) ist noch off
 <li>✅ <strong>MK — Fremde Dokumente</strong> — Ersatzschriften, <code>inputenc</code>/Treiberoptionen, Latin-1,
       Dateinamen-Schreibweise, EPS-Platzhalter, Stichwortverzeichnis, CJK/Chinesisch;
       geprüft an 18 echten Dokumenten von CTAN, GitHub und arXiv auf drei Geräten</li>
-<li>⬜ <strong>M5</strong> — F-Droid-Release</li>
+<li>✅ <strong>M5</strong> — F-Droid-Release (<a href="https://f-droid.org/packages/de.bgg_home.texslate/">f-droid.org</a>, Reproducible Build)</li>
 <li>⬜ <strong>M6</strong> — Play-Store-Release (optional)</li>
 </ul>
 <blockquote>
