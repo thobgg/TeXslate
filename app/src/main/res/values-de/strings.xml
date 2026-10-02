@@ -164,6 +164,7 @@
     <string name="error_engine_internal">Interner Fehler der TeX-Engine – der Compile wurde abgebrochen, die App läuft weiter. Details stehen im Log.</string>
     <string name="eps_placeholder_label">EPS-Abbildung (auf Android nicht darstellbar)</string>
     <string name="note_eps_placeholder">EPS kann die TeX-Engine hier nicht einbetten – %1$s wurde durch einen Platzhalter ersetzt, der Rest ist normal gesetzt. Als PDF einbetten (am PC: epstopdf), dann erscheint die Abbildung.</string>
+    <string name="error_missing_sibling_files">Nicht gefunden: %1$s. Dieses Dokument ist nicht aus einem Projektordner geöffnet, darum sieht TeXslate die Bilder und Dateien daneben nicht. Den enthaltenden Ordner als Projekt öffnen (Menü ☰ → Ordnersymbol) und die .tex-Datei von dort öffnen.</string>
     <string name="error_eps_unsupported">EPS-Abbildungen kann die TeX-Engine auf Android nicht einbinden (dafür wäre Ghostscript nötig): %1$s. Bitte als PDF oder PNG einbetten – dann läuft das Dokument durch.</string>
     <string name="error_empty_document">Das Dokument enthält noch keinen Text: Zwischen \\begin{document} und \\end{document} steht nichts, deshalb entsteht keine Seite. Schreib etwas dazwischen und kompiliere erneut.</string>
     <string name="error_font_not_found">Schrift „%1$s“ nicht gefunden.</string>
@@ -198,7 +199,7 @@
     <string name="snackbar_synctex_unavailable">Für dieses PDF gibt es noch keine Zuordnung — bitte neu kompilieren</string>
     <string name="snackbar_synctex_other_file">Diese Stelle stammt aus %1$s — zum Springen die Datei öffnen</string>
     <string name="snackbar_fonts_changed_restart">Neue Schrift erkannt – App neu starten, damit sie per Name nutzbar ist.</string>
-    <string name="snackbar_multifile_hint">„%1$s“ bindet weitere Dateien ein (\\input …). Zum Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ den enthaltenden Ordner wählen.</string>
+    <string name="snackbar_multifile_hint">„%1$s“ bindet weitere Dateien ein (\\input, \\includegraphics …). Zum Kompilieren mehrteiliger Projekte im Menü „Projektordner öffnen“ den enthaltenden Ordner wählen.</string>
     <string name="fallback_document">Dokument</string>
     <string name="fallback_project">Projekt</string>
 

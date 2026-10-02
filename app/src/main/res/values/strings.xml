@@ -166,6 +166,7 @@
     <string name="error_engine_internal">Internal error in the TeX engine – the compile was aborted, the app keeps running. See the log for details.</string>
     <string name="eps_placeholder_label">EPS figure (cannot be rendered on Android)</string>
     <string name="note_eps_placeholder">The TeX engine cannot embed EPS here – %1$s was replaced with a placeholder, everything else is typeset normally. Embed as PDF (on your desktop: epstopdf) and the figure appears.</string>
+    <string name="error_missing_sibling_files">Not found: %1$s. This document is not open from a project folder, so TeXslate cannot see the pictures or files next to it. Open the containing folder as a project (☰ menu → folder icon) and open the .tex file from there.</string>
     <string name="error_eps_unsupported">The TeX engine on Android cannot embed EPS figures (that would require Ghostscript): %1$s. Please embed them as PDF or PNG – then the document compiles.</string>
     <string name="error_empty_document">The document has no content yet: there is nothing between \\begin{document} and \\end{document}, so no page is produced. Write something in between and compile again.</string>
     <string name="error_font_not_found">Font “%1$s” not found.</string>
@@ -200,7 +201,7 @@
     <string name="snackbar_synctex_unavailable">No source mapping for this PDF yet — compile again</string>
     <string name="snackbar_synctex_other_file">This spot comes from %1$s — open that file to jump there</string>
     <string name="snackbar_fonts_changed_restart">New font detected – restart the app so it can be used by name.</string>
-    <string name="snackbar_multifile_hint">“%1$s” includes other files (\\input …). To compile multi-part projects, choose the containing folder via the “Open project folder” menu.</string>
+    <string name="snackbar_multifile_hint">“%1$s” includes other files (\\input, \\includegraphics …). To compile multi-part projects, choose the containing folder via the “Open project folder” menu.</string>
     <string name="fallback_document">Document</string>
     <string name="fallback_project">Project</string>
 

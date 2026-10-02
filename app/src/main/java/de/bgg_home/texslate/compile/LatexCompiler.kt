@@ -128,7 +128,25 @@ object LatexCompiler {
                         )
                     }
                 }
-                if (extraNotes.isEmpty()) result else result.copy(notes = result.notes + extraNotes)
+                val withNotes =
+                    if (extraNotes.isEmpty()) result else result.copy(notes = result.notes + extraNotes)
+                // Einzeldatei geöffnet, aber Bilder/Teildateien eingebunden (Issue #9):
+                // XeTeX sagt nur „Unable to load picture". Der Weg zum Ziel (Ordner als
+                // Projekt öffnen) gehört an die erste Stelle des Fehlerpanels – die
+                // Snackbar beim Öffnen ist da längst verschwunden.
+                val missing = if (projectTree == null) MissingSiblingFiles.inLog(result.log) else emptyList()
+                if (missing.isEmpty()) {
+                    withNotes
+                } else {
+                    val hint = CompileError(
+                        line = null,
+                        message = context.getString(
+                            R.string.error_missing_sibling_files,
+                            missing.joinToString(", "),
+                        ),
+                    )
+                    withNotes.copy(errors = listOf(hint) + withNotes.errors)
+                }
             } catch (t: UnsatisfiedLinkError) {
                 // Alte .so ohne tectonicCompileToFile → freundlich erklären statt crashen.
                 CompileResult.nativeUnavailable(t)
