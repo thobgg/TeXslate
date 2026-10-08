@@ -4,7 +4,7 @@
 
 <p align="center"><strong>Native LaTeX/XeTeX editor for Android — tablet-first.</strong></p>
 
-<p align="center">🇬🇧 <strong>English</strong> · 🇩🇪 <a href="./README.de.md">Deutsch</a></p>
+<p align="center">🇬🇧 <strong>English</strong> · 🇩🇪 <a href="./README.de.md">Deutsch</a> · 🇨🇳 <a href="./README.zh-CN.md">简体中文</a></p>
 
 <p align="center"><a href="https://f-droid.org/packages/de.bgg_home.texslate/"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80"></a></p>
 
