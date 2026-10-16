@@ -57,6 +57,8 @@ import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.FullscreenExit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Menu
@@ -128,6 +130,8 @@ import androidx.compose.ui.unit.dp
 import de.bgg_home.texslate.ai.AiSettings
 import de.bgg_home.texslate.compile.CompileError
 import de.bgg_home.texslate.compile.LatexCompiler
+import de.bgg_home.texslate.editor.EditorTextSize
+import io.github.rosemoe.sora.event.TextSizeChangeEvent
 import de.bgg_home.texslate.editor.LatexEditor
 import de.bgg_home.texslate.editor.goToLine
 import de.bgg_home.texslate.editor.insertBeforeEndDocument
@@ -347,6 +351,16 @@ fun TeXslateApp(
     // gemeldet, dass die Einstellung „gern mal vergessen" wird (08/2026) – sie lag
     // nur im remember und war nach dem Prozess-Ende wieder auf dem Vorgabewert.
     var autoCompile by remember { mutableStateOf(appPrefs.getBoolean("autoCompile", true)) }
+    // Issue #10: Platz auf kleinen Bildschirmen. Schriftgröße, Kürzelleiste und
+    // Fokusmodus (obere Leiste aus) bleiben über Neustarts erhalten.
+    var editorTextSize by remember {
+        mutableFloatStateOf(
+            EditorTextSize.normalize(appPrefs.getFloat("editorTextSize", EditorTextSize.DEFAULT_SP)),
+        )
+    }
+    var showShortcutBar by remember { mutableStateOf(appPrefs.getBoolean("showShortcutBar", true)) }
+    var focusMode by remember { mutableStateOf(appPrefs.getBoolean("focusMode", false)) }
+    var showGeneralSettings by remember { mutableStateOf(false) }
     var textVersion by remember { mutableIntStateOf(0) }
 
     // „Trotz Fehlern kompilieren" (Issue #2, Overleaf-Vorbild): Engine läuft bei
@@ -900,6 +914,32 @@ fun TeXslateApp(
         showAi = true
     }
 
+    fun setFocusMode(on: Boolean) {
+        focusMode = on
+        appPrefs.edit().putBoolean("focusMode", on).apply()
+    }
+
+    fun setShortcutBar(on: Boolean) {
+        showShortcutBar = on
+        appPrefs.edit().putBoolean("showShortcutBar", on).apply()
+    }
+
+    fun setEditorTextSize(sp: Float) {
+        val v = EditorTextSize.normalize(sp)
+        if (v == editorTextSize) return
+        editorTextSize = v
+        appPrefs.edit().putFloat("editorTextSize", v).apply()
+    }
+
+    // Regler in den Einstellungen → Editor. Kam die Änderung aus der Zoomgeste,
+    // hat der Editor die Größe schon; dann nichts tun (sonst Rückkopplung).
+    LaunchedEffect(editor, editorTextSize) {
+        val ed = editor ?: return@LaunchedEffect
+        val metrics = ed.resources.displayMetrics
+        val current = EditorTextSize.pxToSp(ed.textSizePx, metrics)
+        if (kotlin.math.abs(current - editorTextSize) > 0.25f) ed.setTextSize(editorTextSize)
+    }
+
     // Tastenkürzel für Hardware-Tastaturen (Issue #8, DeX/Tastatur-Cover). Die
     // Activity reicht jede Taste zuerst hierher, noch vor dem Editor – sonst
     // schluckt sora z. B. Strg+Enter als Zeilenumbruch.
@@ -913,6 +953,7 @@ fun TeXslateApp(
             KeyEvent.KEYCODE_F -> if (showSearch) closeSearch() else showSearch = true
             KeyEvent.KEYCODE_G -> showGoToLine = true
             KeyEvent.KEYCODE_ENTER -> runCompile(manual = true)
+            KeyEvent.KEYCODE_M -> setFocusMode(!focusMode)
             else -> return false
         }
         return true
@@ -944,7 +985,7 @@ fun TeXslateApp(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            AppHeader(
+            if (!focusMode) AppHeader(
                 compact = isCompact,
                 fileName = currentName,
                 compiling = compiling,
@@ -975,7 +1016,10 @@ fun TeXslateApp(
                 canExportPdf = pdfFile != null,
                 onShowLog = { showLog = true },
                 canShowLog = lastLog.isNotBlank(),
-                onSettings = { showSettings = true },
+                onSettings = { showGeneralSettings = true },
+                showShortcutBar = showShortcutBar,
+                onShortcutBarChange = ::setShortcutBar,
+                onFocusMode = { setFocusMode(true) },
                 onAbout = { showAbout = true },
                 onUndo = { editor?.undo() },
                 onRedo = { editor?.redo() },
@@ -1011,7 +1055,7 @@ fun TeXslateApp(
                 HorizontalDivider()
             }
             // LaTeX-Favoriten-Leiste – nur zeigen, wenn der Editor sichtbar ist.
-            if (isWide || selectedTab == Tab.Editor) {
+            if ((isWide || selectedTab == Tab.Editor) && showShortcutBar && !focusMode) {
                 LatexFavoritesBar(
                     onInsert = { text, caret ->
                         editor?.insertText(text, caret)
@@ -1033,7 +1077,19 @@ fun TeXslateApp(
                         initialText = startupText,
                         errors = errors,
                         darkTheme = darkThemeState.value,
-                        onEditorCreated = { editor = it },
+                        onEditorCreated = { ed ->
+                            editor = ed
+                            // Zoomgeste: neue Größe merken (Issue #10). Grenzen der
+                            // Geste = Grenzen des Reglers.
+                            val metrics = ed.resources.displayMetrics
+                            ed.setScaleTextSizes(
+                                EditorTextSize.spToPx(EditorTextSize.MIN_SP, metrics),
+                                EditorTextSize.spToPx(EditorTextSize.MAX_SP, metrics),
+                            )
+                            ed.subscribeEvent(TextSizeChangeEvent::class.java) { e, _ ->
+                                setEditorTextSize(EditorTextSize.pxToSp(e.newTextSize, metrics))
+                            }
+                        },
                         onTextChanged = { textVersion++ },
                         onErrorClick = onErrorClick,
                         onExplainError = onExplainError,
@@ -1071,6 +1127,21 @@ fun TeXslateApp(
                         )
                         previewPane(Modifier.weight(1f - splitFraction).fillMaxSize())
                     }
+                    if (focusMode) {
+                        Surface(
+                            shape = MaterialTheme.shapes.medium,
+                            tonalElevation = 3.dp,
+                            shadowElevation = 2.dp,
+                            modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                        ) {
+                            FocusControls(
+                                compiling = compiling,
+                                onCompile = { runCompile(manual = true) },
+                                onStop = ::stopCompile,
+                                onExit = { setFocusMode(false) },
+                            )
+                        }
+                    }
                 }
             } else {
                 // Phone / schmal: Tab-Umschaltung Editor ↔ Vorschau. Beide Panes
@@ -1079,7 +1150,8 @@ fun TeXslateApp(
                 // sichtbar – sie früher bei offener Tastatur auszublenden konnte den
                 // Nutzer stranden lassen (hängende IME-Insets = kein Zurück).
                 Column(Modifier.fillMaxSize()) {
-                    TabRow(selectedTabIndex = selectedTab.ordinal) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    TabRow(selectedTabIndex = selectedTab.ordinal, modifier = Modifier.weight(1f)) {
                         Tab(
                             selected = selectedTab == Tab.Editor,
                             onClick = { selectedTab = Tab.Editor },
@@ -1090,6 +1162,15 @@ fun TeXslateApp(
                             onClick = { selectedTab = Tab.Preview },
                             text = { Text(stringResource(R.string.tab_preview)) },
                         )
+                    }
+                    if (focusMode) {
+                        FocusControls(
+                            compiling = compiling,
+                            onCompile = { runCompile(manual = true) },
+                            onStop = ::stopCompile,
+                            onExit = { setFocusMode(false) },
+                        )
+                    }
                     }
                     Box(Modifier.weight(1f).fillMaxSize()) {
                         editorPane(Modifier.fillMaxSize().keepAlive(selectedTab == Tab.Editor))
@@ -1230,6 +1311,18 @@ fun TeXslateApp(
     }
 
     // KI-Einstellungen (Kebab → „Einstellungen").
+    if (showGeneralSettings) {
+        SettingsSheet(
+            textSizeSp = editorTextSize,
+            onTextSizeChange = ::setEditorTextSize,
+            showShortcutBar = showShortcutBar,
+            onShowShortcutBarChange = ::setShortcutBar,
+            focusMode = focusMode,
+            onFocusModeChange = ::setFocusMode,
+            onOpenAiSettings = { showGeneralSettings = false; showSettings = true },
+            onDismiss = { showGeneralSettings = false },
+        )
+    }
     if (showSettings) {
         AiSettingsSheet(settings = aiSettings, onDismiss = { showSettings = false })
     }
@@ -1428,6 +1521,9 @@ private fun AppHeader(
     onShowLog: () -> Unit,
     canShowLog: Boolean,
     onSettings: () -> Unit,
+    showShortcutBar: Boolean,
+    onShortcutBarChange: (Boolean) -> Unit,
+    onFocusMode: () -> Unit,
     onAbout: () -> Unit,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
@@ -1511,6 +1607,9 @@ private fun AppHeader(
                     onToggleComment = onToggleComment,
                     onOutline = onOutline,
                     onSettings = onSettings,
+                    showShortcutBar = showShortcutBar,
+                    onShortcutBarChange = onShortcutBarChange,
+                    onFocusMode = onFocusMode,
                     onAbout = onAbout,
                     onAutoCompileChange = onAutoCompileChange,
                 )
@@ -1577,6 +1676,9 @@ private fun OverflowMenu(
     onToggleComment: () -> Unit,
     onOutline: () -> Unit,
     onSettings: () -> Unit,
+    showShortcutBar: Boolean,
+    onShortcutBarChange: (Boolean) -> Unit,
+    onFocusMode: () -> Unit,
     onAbout: () -> Unit,
     onAutoCompileChange: (Boolean) -> Unit,
 ) {
@@ -1672,6 +1774,21 @@ private fun OverflowMenu(
                 onClick = { onContinueOnErrorsChange(!continueOnErrors) }, // offen lassen: Haken-Wechsel sichtbar
             )
             DropdownMenuItem(
+                text = { Text(stringResource(R.string.menu_shortcut_bar)) },
+                leadingIcon = {
+                    Icon(
+                        if (showShortcutBar) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
+                        contentDescription = null,
+                    )
+                },
+                onClick = { onShortcutBarChange(!showShortcutBar) }, // offen lassen: Haken-Wechsel sichtbar
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.menu_focus_mode)) },
+                leadingIcon = { Icon(Icons.Filled.Fullscreen, contentDescription = null) },
+                onClick = { expanded = false; onFocusMode() },
+            )
+            DropdownMenuItem(
                 text = { Text(stringResource(R.string.menu_settings)) },
                 leadingIcon = { Icon(Icons.Filled.Settings, contentDescription = null) },
                 onClick = { expanded = false; onSettings() },
@@ -1759,6 +1876,27 @@ private fun CompileIconButton(
                 contentDescription = stringResource(R.string.compile),
                 tint = tint,
             )
+        }
+    }
+}
+
+/**
+ * Fokusmodus (Issue #10): Ohne obere Leiste bleiben nur Kompilieren und der Weg
+ * zurück – als zwei kleine Knöpfe, auf dem Phone neben den Tabs, im Split-View
+ * oben rechts über der Vorschau.
+ */
+@Composable
+private fun FocusControls(
+    compiling: Boolean,
+    onCompile: () -> Unit,
+    onStop: () -> Unit,
+    onExit: () -> Unit,
+) {
+    val tint = MaterialTheme.colorScheme.onSurfaceVariant
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        CompileIconButton(compiling = compiling, tint = tint, onCompile = onCompile, onStop = onStop)
+        IconButton(onClick = onExit) {
+            Icon(Icons.Filled.FullscreenExit, contentDescription = stringResource(R.string.focus_exit), tint = tint)
         }
     }
 }

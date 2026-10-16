@@ -180,6 +180,17 @@
     <string name="font_fallback_batch">Substituted unavailable fonts: %1$s. Your file stays unchanged.</string>
     <string name="font_fallback_note">Font “%1$s” is missing – typeset with “%2$s” instead.</string>
     <string name="error_font_restart">Fonts added just now are only found after restarting the app.</string>
+    <string name="settings_section_editor">Editor</string>
+    <string name="settings_font_size">Font size: %1$s sp</string>
+    <string name="settings_font_size_reset">Default</string>
+    <string name="settings_font_size_hint">Pinch-to-zoom in the editor changes it too, and the new size is kept.</string>
+    <string name="settings_shortcut_bar">Show LaTeX shortcut bar</string>
+    <string name="settings_focus_mode">Focus mode: hide the top bar</string>
+    <string name="settings_focus_mode_hint">Compile and exit stay available as small buttons. On a hardware keyboard, Ctrl+M toggles focus mode.</string>
+    <string name="settings_open_ai">AI assistant settings …</string>
+    <string name="menu_shortcut_bar">Shortcut bar</string>
+    <string name="menu_focus_mode">Focus mode</string>
+    <string name="focus_exit">Exit focus mode</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_about">About TeXslate</string>
 
