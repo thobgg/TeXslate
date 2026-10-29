@@ -1,0 +1,3 @@
+* Hardware-Tastatur: AltGr-Zeichen wie \ { } [ ] | ~ @ kommen jetzt im Editor an (Tastatur-Cover, DeX).
+* Kleine Bildschirme: Editor-Schriftgröße in den Einstellungen und dauerhaft, Kürzelleiste abschaltbar, Fokusmodus ohne obere Leiste (Strg+M).
+* Fehlende Bilder bei einer einzeln geöffneten .tex: Das Fehlerpanel nennt die Dateien und den Weg über den Projektordner.
