@@ -260,7 +260,7 @@ fun PdfPreview(
                                 coroutineScope.launch {
                                     listState.scrollBy(-drag.y)
                                 }
-                                if (wasZooming || wasDragging) { //avoid the event to be considered as a tap in the image's pointerInput modifier
+                                if (wasZooming || wasDragging) { //avoids the event to be considered as a tap in the image's pointerInput modifier
                                     event.changes.forEach {it.consume()}
                                 }
                             }
@@ -272,7 +272,7 @@ fun PdfPreview(
                             val velocity = velocityTracker.calculateVelocity()
                             val speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
                             val minFlingVelocity = 100f
-                            if (speed > minFlingVelocity) { //avoid dividing by 0 if speed is close to 0
+                            if (speed > minFlingVelocity) { //avoids dividing by 0 if speed is close to 0
                                 flingJob?.cancel()
                                 flingJob = coroutineScope.launch {
                                     launch {
