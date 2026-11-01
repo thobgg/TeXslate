@@ -7,14 +7,19 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
+import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.rememberTransformableState
-import androidx.compose.foundation.gestures.transformable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.calculateCentroid
+import androidx.compose.foundation.gestures.calculatePan
+import androidx.compose.foundation.gestures.calculateZoom
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,23 +37,37 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import de.bgg_home.texslate.R
 import de.bgg_home.texslate.synctex.PdfPoint
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Closeable
 import java.io.File
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import kotlinx.coroutines.Job
+import kotlin.math.sqrt
 
 /**
  * Hält einen offenen [PdfRenderer] auf einer PDF-Datei und rendert Seiten on demand.
@@ -63,6 +82,30 @@ class PdfDocument(file: File) : Closeable {
     private val lock = Any()
 
     val pageCount: Int get() = renderer.pageCount
+
+    //get all the pages' aspect ratios as to size the lazyColumn's place-holder items correctly
+    data class PageSize(
+        val widthPoints: Int,
+        val heightPoints: Int,
+    ) {
+        val aspectRatio: Float
+            get() = widthPoints.toFloat() / heightPoints
+    }
+    private val pageSizes = arrayOfNulls<PageSize>(renderer.pageCount)
+    fun loadPageSizes(): List<PageSize> = synchronized(lock) {
+        for (index in pageSizes.indices) {
+            if (pageSizes[index] == null) {
+                renderer.openPage(index).use { page ->
+                    pageSizes[index] = PageSize(
+                        widthPoints = page.width,
+                        heightPoints = page.height,
+                    )
+                }
+            }
+        }
+
+        pageSizes.map { requireNotNull(it) }
+    }
 
     /**
      * Eine gerenderte Seite samt ihrer Maße in PDF-Punkten.
@@ -123,7 +166,10 @@ fun PdfPreview(
 
     if (document == null || document.pageCount == 0) {
         Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.pdf_none_loaded), style = MaterialTheme.typography.bodyMedium)
+            Text(
+                stringResource(R.string.pdf_none_loaded),
+                style = MaterialTheme.typography.bodyMedium
+            )
         }
         return
     }
@@ -133,44 +179,190 @@ fun PdfPreview(
     // Scroll-Position über Reloads hinweg halten.
     val listState = rememberLazyListState()
 
+    var containerSize by remember { mutableStateOf(IntSize.Zero) }
+    val currentContainerSize by rememberUpdatedState(containerSize)
+
+    val coroutineScope = rememberCoroutineScope()
+
+    val density = LocalDensity.current
+    val decay = splineBasedDecay<Float>(density)
+    val flingAll = remember { Animatable(0f) }
+    var flingJob by remember { mutableStateOf<Job?>(null) }
+
     // clipToBounds: Die gezoomte Seite darf nicht über den Editor nebenan laufen.
-    BoxWithConstraints(modifier.fillMaxSize().clipToBounds()) {
-        val widthPx = constraints.maxWidth
-        val heightPx = constraints.maxHeight
-        val transformState = rememberTransformableState { zoomChange, panChange, _ ->
-            scale = (scale * zoomChange).coerceIn(1f, 5f)
-            // Skaliert wird um die Mitte: Je Seite steht also (scale - 1) / 2 der
-            // Fläche über. Weiter darf man nicht schieben, sonst verschwindet die
-            // Seite aus dem Fenster und lässt sich nicht mehr zurückholen.
-            val maxX = (scale - 1f) * widthPx / 2f
-            val maxY = (scale - 1f) * heightPx / 2f
-            val moved = offset + panChange
-            offset = Offset(moved.x.coerceIn(-maxX, maxX), moved.y.coerceIn(-maxY, maxY))
-        }
-        LazyColumn(
-            state = listState,
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                // transformable VOR graphicsLayer: So misst die Geste in den
-                // unverzerrten Koordinaten des Fensters. Andersherum verschiebt
-                // jeder Zoomschritt das Koordinatensystem unter den Fingern.
-                .transformable(transformState)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    translationX = offset.x
-                    translationY = offset.y
-                },
+    Box(
+        modifier
+            .fillMaxSize()
+            .clipToBounds()
+            .onSizeChanged { size -> containerSize = size }
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    val velocityTracker = VelocityTracker()
+                    var wasZooming = false
+                    var wasDragging = false
+                    var completedNormally = false
+                    var previousPointerCount = 0
+
+                    try {
+                        awaitFirstDown(requireUnconsumed = false)
+
+                        do {
+                            val event = awaitPointerEvent()
+                            val pressed = event.changes.any { it.pressed }
+                            val pointerCount = event.changes.count { it.pressed }
+
+                            // Avoid treating a change in finger count as a fling velocity.
+                            if (pointerCount != previousPointerCount && pressed) {
+                                velocityTracker.resetTracking()
+                                previousPointerCount = pointerCount
+                                flingJob?.cancel()
+                                //Log.d("PDF_FLING", "cancelled!")
+
+                            }
+
+                            if (pressed) {
+
+                                val centroid = event.calculateCentroid(
+                                    useCurrent = true
+                                )
+
+                                //Used to calculate fling velocity once the pan finishes
+                                velocityTracker.addPosition(
+                                    event.changes.first().uptimeMillis,
+                                    centroid
+                                )
+
+                                val pan = event.calculatePan()
+                                val zoom = event.calculateZoom()
+
+                                if (pointerCount >= 2 && zoom != 1f) {
+                                    wasZooming = true
+                                }
+
+                                if (pan.getDistance() > 3f) {
+                                    wasDragging = true
+                                }
+
+                                val oldScale = scale
+                                val newScale = (scale * zoom).coerceIn(1f, 5f)
+
+                                val widthPx = currentContainerSize.width.toFloat()
+                                val oldOffset = offset
+                                offset =
+                                    (offset + centroid / oldScale) - (centroid / newScale + pan / oldScale)
+                                val maxX =
+                                    (widthPx - widthPx / newScale).coerceAtLeast(0f)
+
+                                offset = Offset(offset.x.coerceIn(0f, maxX), offset.y)
+                                scale = newScale
+
+                                val drag = oldOffset - offset
+                                coroutineScope.launch {
+                                    listState.scrollBy(-drag.y)
+                                }
+                                if (wasZooming || wasDragging) { //avoid the event to be considered as a tap in the image's pointerInput modifier
+                                    event.changes.forEach {it.consume()}
+                                }
+                            }
+                        } while (pressed)
+
+                        completedNormally = true
+                    } finally {
+                        if (completedNormally && wasDragging && !wasZooming) {
+                            val velocity = velocityTracker.calculateVelocity()
+                            val speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
+                            val minFlingVelocity = 100f
+                            if (speed > minFlingVelocity) { //avoid dividing by 0 if speed is close to 0
+                                flingJob?.cancel()
+                                flingJob = coroutineScope.launch {
+                                    launch {
+                                        var previous = 0f
+                                        flingAll.snapTo(0f)
+                                        flingAll.animateDecay(
+                                            initialVelocity = speed,
+                                            animationSpec = decay
+                                        ) {
+                                            val delta =  value - previous
+                                            previous = value
+
+                                            val currentScale = scale
+                                            val widthPx = currentContainerSize.width.toFloat()
+                                            val maxX = (widthPx - widthPx / scale).coerceAtLeast(0f)
+
+                                            val deltaX = delta * (velocity.x / speed)
+                                            val deltaY = delta * (velocity.y / speed)
+                                            //Log.d("PDF_FLING", "speed: $speed, delta: $delta, velocityX: "+velocity.x.toString()+"currentScale: $currentScale")
+                                            offset = offset.copy((offset.x - deltaX / currentScale).coerceIn(0f, maxX), offset.y)
+                                            coroutineScope.launch {
+                                                listState.scrollBy(-deltaY / scale)
+                                            }
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+                translationX = -offset.x * scale
+                transformOrigin = TransformOrigin(0f, 0f)
+            }) {
+        val widthPx = currentContainerSize.width
+
+        val density = LocalDensity.current
+
+        val pageSizes by produceState<List<PdfDocument.PageSize>?>(
+            initialValue = null,
+            document,
         ) {
-            items(document.pageCount) { index ->
-                PdfPageItem(
-                    document = document,
-                    index = index,
-                    targetWidthPx = widthPx,
-                    onTapPosition = onTapPosition,
-                )
+            value = withContext(Dispatchers.IO) {
+                document.loadPageSizes()
+            }
+        }
+
+        if (pageSizes == null) {
+            Box(modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                userScrollEnabled = false, //scrollBy is used earlier as to distribute the pan motion on the x and y-axis
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(
+                    count = document.pageCount,
+                    key = { index -> "page$index" }
+                ) { index ->
+                    PdfPageItem(
+                        document = document,
+                        index = index,
+                        targetWidthPx = widthPx - with(density) {16.dp.toPx()}.toInt(), //changed to exactly match the showing pixels
+                        onTapPosition = onTapPosition,
+                        pageAspectRatio = pageSizes!![index].aspectRatio,
+                    )
+                }
+                item{
+                    //The zoom is made at the top of the showing screen. As a result the column has
+                    //to scroll further when zoomed so the end of the column can reach en end of the
+                    //zoomed rectangle
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(with(density) {
+                                (containerSize.height - (containerSize.height / scale)).toInt().coerceAtLeast(0).toDp()
+                            })
+                    )
+
+                }
             }
         }
     }
@@ -182,7 +374,9 @@ private fun PdfPageItem(
     index: Int,
     targetWidthPx: Int,
     onTapPosition: (PdfPoint) -> Unit,
+    pageAspectRatio: Float,
 ) {
+
     // Seite asynchron auf dem IO-Dispatcher rendern; solange Platzhalter zeigen.
     val rendered by produceState<PdfDocument.RenderedPage?>(
         initialValue = null,
@@ -196,12 +390,14 @@ private fun PdfPageItem(
     }
 
     val page = rendered
+
+    val pageModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 4.dp)
+        .aspectRatio(pageAspectRatio)
     if (page == null) {
         Box(
-            Modifier
-                .fillMaxWidth()
-                .aspectRatio(1f / 1.414f) // ~A4 als Platzhalter
-                .background(androidx.compose.ui.graphics.Color.White),
+            modifier = pageModifier.background(androidx.compose.ui.graphics.Color.White),
             contentAlignment = Alignment.Center,
         ) {
             CircularProgressIndicator()
@@ -211,26 +407,32 @@ private fun PdfPageItem(
             bitmap = page.bitmap.asImageBitmap(),
             contentDescription = stringResource(R.string.pdf_page, index + 1),
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp)
+            modifier = pageModifier
+                //.padding(horizontal = 4.dp)
                 // Ganz am Ende der Kette: So bekommt der Tipp Koordinaten
                 // relativ zum Bild selbst – Zoom und Scroll der Liste rechnet
                 // Compose bereits heraus, das Bild füllt die Breite exakt aus.
                 .pointerInput(onTapPosition, page) {
-                    detectTapGestures { offset ->
-                        val w = size.width.toFloat()
-                        val h = size.height.toFloat()
-                        if (w <= 0f || h <= 0f) return@detectTapGestures
-                        onTapPosition(
-                            PdfPoint(
-                                page = index + 1, // SyncTeX zählt Seiten ab 1
-                                x = offset.x / w * page.widthPoints,
-                                y = offset.y / h * page.heightPoints,
-                            ),
-                        )
+                    awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed = false)
+                        val up = waitForUpOrCancellation()
+
+                        if (up != null) {
+                            val w = size.width.toFloat()
+                            val h = size.height.toFloat()
+                            if (w > 0f && h > 0f) {
+                                onTapPosition(
+                                    PdfPoint(
+                                        page = index + 1, // SyncTeX zählt Seiten ab 1
+                                        x = up.position.x / w * page.widthPoints,
+                                        y = up.position.y / h * page.heightPoints,
+                                    ),
+                                )
+                            }
+                        }
                     }
                 },
+            //filterQuality = FilterQuality.None //uncomment to remove blurry effect of subpixel interpolation
         )
     }
 }
