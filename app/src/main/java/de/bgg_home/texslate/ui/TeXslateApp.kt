@@ -130,6 +130,7 @@ import androidx.compose.ui.unit.dp
 import de.bgg_home.texslate.ai.AiSettings
 import de.bgg_home.texslate.compile.CompileError
 import de.bgg_home.texslate.compile.LatexCompiler
+import de.bgg_home.texslate.editor.AltGrInput
 import de.bgg_home.texslate.editor.EditorTextSize
 import io.github.rosemoe.sora.event.TextSizeChangeEvent
 import de.bgg_home.texslate.editor.LatexEditor
@@ -944,6 +945,14 @@ fun TeXslateApp(
     // Activity reicht jede Taste zuerst hierher, noch vor dem Editor – sonst
     // schluckt sora z. B. Strg+Enter als Zeilenumbruch.
     fun handleShortcut(event: KeyEvent): Boolean {
+        // AltGr-Zeichen (\ { } [ ] …) selbst einfügen, sora verwirft sie (Issue #11).
+        AltGrInput.text(event)?.let { text ->
+            val ed = editor
+            if (ed != null && ed.hasFocus() && ed.isEditable) {
+                ed.commitText(text)
+                return true
+            }
+        }
         if (event.action != KeyEvent.ACTION_DOWN || !event.isCtrlPressed || event.isAltPressed) {
             return false
         }

@@ -1,0 +1,3 @@
+* Hardware keyboards: AltGr characters such as \ { } [ ] | ~ @ now reach the editor (keyboard covers, DeX).
+* Small screens: editor font size in Settings and remembered, shortcut bar can be switched off, focus mode without the top bar (Ctrl+M).
+* Missing images when a single .tex is opened: the error panel names the files and points to opening the project folder.
