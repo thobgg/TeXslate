@@ -7,7 +7,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.splineBasedDecay
 import androidx.compose.foundation.Image
@@ -62,7 +61,6 @@ import java.io.Closeable
 import java.io.File
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.ui.input.pointer.util.VelocityTracker
@@ -140,8 +138,7 @@ class PdfDocument(file: File) : Closeable {
 
 /**
  * Zeigt ein PDF mehrseitig (eine Seite pro [LazyColumn]-Item) mit Pinch-to-Zoom
- * und Pan (Zwei-Finger). Einzelfinger-Wischen scrollt weiterhin die Seitenliste –
- * `transformable` reagiert nur auf Mehrfinger-Gesten, daher kein Gestenkonflikt.
+ * und Pan. Einzelfinger-Wischen scrollt weiterhin die Seitenliste.
  *
  * @param file        das anzuzeigende PDF.
  * @param reloadToken bei jedem erfolgreichen Compile erhöhen → Preview lädt neu,
@@ -216,8 +213,6 @@ fun PdfPreview(
                                 velocityTracker.resetTracking()
                                 previousPointerCount = pointerCount
                                 flingJob?.cancel()
-                                //Log.d("PDF_FLING", "cancelled!")
-
                             }
 
                             if (pressed) {
@@ -260,7 +255,7 @@ fun PdfPreview(
                                 coroutineScope.launch {
                                     listState.scrollBy(-drag.y)
                                 }
-                                if (wasZooming || wasDragging) { //avoids the event to be considered as a tap in the image's pointerInput modifier
+                                if (wasZooming || wasDragging) { //avoid the event to be considered as a tap in the image's pointerInput modifier
                                     event.changes.forEach {it.consume()}
                                 }
                             }
@@ -272,7 +267,7 @@ fun PdfPreview(
                             val velocity = velocityTracker.calculateVelocity()
                             val speed = sqrt(velocity.x * velocity.x + velocity.y * velocity.y)
                             val minFlingVelocity = 100f
-                            if (speed > minFlingVelocity) { //avoids dividing by 0 if speed is close to 0
+                            if (speed > minFlingVelocity) { //avoid dividing by 0 if speed is close to 0
                                 flingJob?.cancel()
                                 flingJob = coroutineScope.launch {
                                     launch {
@@ -291,11 +286,9 @@ fun PdfPreview(
 
                                             val deltaX = delta * (velocity.x / speed)
                                             val deltaY = delta * (velocity.y / speed)
-                                            //Log.d("PDF_FLING", "speed: $speed, delta: $delta, velocityX: "+velocity.x.toString()+"currentScale: $currentScale")
                                             offset = offset.copy((offset.x - deltaX / currentScale).coerceIn(0f, maxX), offset.y)
-                                            coroutineScope.launch {
-                                                listState.scrollBy(-deltaY / scale)
-                                            }
+
+                                            listState.dispatchRawDelta(-deltaY / scale)
 
                                         }
                                     }
@@ -324,45 +317,44 @@ fun PdfPreview(
             }
         }
 
-        if (pageSizes == null) {
-            Box(modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            LazyColumn(
-                state = listState,
-                contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                userScrollEnabled = false, //scrollBy is used earlier as to distribute the pan motion on the x and y-axis
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                items(
-                    count = document.pageCount,
-                    key = { index -> "page$index" }
-                ) { index ->
-                    PdfPageItem(
-                        document = document,
-                        index = index,
-                        targetWidthPx = widthPx - with(density) {16.dp.toPx()}.toInt(), //changed to exactly match the showing pixels
-                        onTapPosition = onTapPosition,
-                        pageAspectRatio = pageSizes!![index].aspectRatio,
-                    )
-                }
-                item{
-                    //The zoom is made at the top of the showing screen. As a result the column has
-                    //to scroll further when zoomed so the end of the column can reach en end of the
-                    //zoomed rectangle
-                    Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(with(density) {
-                                (containerSize.height - (containerSize.height / scale)).toInt().coerceAtLeast(0).toDp()
-                            })
-                    )
+        val defaultAspectRatio = 1/1.414f
 
-                }
+
+
+        LazyColumn(
+            state = listState,
+            contentPadding = PaddingValues(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            userScrollEnabled = true,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(
+                count = document.pageCount,
+                key = { index -> "page$index" }
+            ) { index ->
+                PdfPageItem(
+                    document = document,
+                    index = index,
+                    targetWidthPx = widthPx - with(density) { 16.dp.toPx() }.toInt(), //changed to exactly match the showing pixels
+                    onTapPosition = onTapPosition,
+                    pageAspectRatio = pageSizes?.getOrNull(index)?.aspectRatio
+                        ?: defaultAspectRatio
+                )
+            }
+            item {
+                //The zoom is made at the top of the showing screen. As a result the column has
+                //to scroll further when zoomed so the end of the column can reach en end of the
+                //zoomed rectangle
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(with(density) {
+                            (containerSize.height - (containerSize.height / scale)).toInt()
+                                .coerceAtLeast(0).toDp()
+                        })
+                )
+
             }
         }
     }
@@ -432,7 +424,6 @@ private fun PdfPageItem(
                         }
                     }
                 },
-            //filterQuality = FilterQuality.None //uncomment to remove blurry effect of subpixel interpolation
         )
     }
 }
