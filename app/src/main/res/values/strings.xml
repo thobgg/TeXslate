@@ -175,6 +175,7 @@
     <string name="error_font_user_files">Currently in that folder: %1$s.</string>
     <string name="compat_inputenc_removed">Adapted for XeTeX: “inputenc” is not needed and was skipped for this run.</string>
     <string name="compat_driver_rewritten">Adapted for XeTeX: driver option (pdftex/dvips) was switched to “xetex” for this run.</string>
+    <string name="compat_fontenc_removed">Adapted for XeTeX: “fontenc” (T1) was skipped for this run, otherwise characters such as %1$s would be missing from the PDF. Packages for classic fonts (e.g. times) may then fall back to Latin Modern.</string>
     <string name="note_file_case_fixed">File names matched case-insensitively: %1$s. Desktop systems ignore case, Android does not.</string>
     <string name="note_index_not_built">The index could not be built for this document (for example because of a custom index style file) and stays empty. Everything else is typeset completely.</string>
     <string name="font_fallback_batch">Substituted unavailable fonts: %1$s. Your file stays unchanged.</string>

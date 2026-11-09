@@ -226,6 +226,17 @@ object LatexCompiler {
             notes += context.getString(R.string.font_fallback_note, missing, replacement)
             result = runEngine(current, jobDir, fontConfig, continueOnErrors)
         }
+        // \usepackage[T1]{fontenc} aus der pdfLaTeX-Welt: XeTeX lässt dann Zeichen
+        // jenseits von Latin-1 still weg (č, š, ł …, Issue #13). Nur in diesem Fall
+        // einmal ohne fontenc nachkompilieren – deutsche Dokumente bleiben unberührt.
+        val lost = EngineCompat.missingBeyondLatin1(result.log)
+        if (lost.isNotEmpty()) {
+            EngineCompat.dropT1Fontenc(current)?.let { adapted ->
+                current = adapted
+                notes += context.getString(R.string.compat_fontenc_removed, lost.take(8).joinToString(" "))
+                result = runEngine(current, jobDir, fontConfig, continueOnErrors)
+            }
+        }
         // Fehler gegen den ZULETZT kompilierten Quelltext auswerten, Hinweise anhängen.
         return withFriendlyEngineError(context, withFriendlyFontErrors(context, result)).copy(notes = notes)
     }

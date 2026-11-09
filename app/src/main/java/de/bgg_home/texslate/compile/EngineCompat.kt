@@ -20,8 +20,12 @@ package de.bgg_home.texslate.compile
  * niemand soll sein Dokument an die App anpassen müssen. Ersetzt wird jeweils nur
  * innerhalb der Zeile, also bleiben Zeilennummern für das Fehlerpanel gültig.
  *
- * Bewusst NICHT angetastet: `fontenc`. `\usepackage[T1]{fontenc}` funktioniert
- * unter XeTeX und ist in vielen Dokumenten sinnvoll gesetzt.
+ * `fontenc` bleibt vorab stehen: `\usepackage[T1]{fontenc}` funktioniert unter
+ * XeTeX für alle Zeichen bis U+00FF (ä, ö, ü, é …), weil T1 dort zufällig wie
+ * Unicode belegt ist. Zeichen darüber (č, ć, š, ž, đ, ł, ő …) gibt es in den
+ * T1-Schriften nicht, XeTeX lässt sie still weg (Issue #13, kroatischer Brief).
+ * Erst wenn das Log solche Lücken zeigt, nimmt [dropT1Fontenc] das Paket für
+ * einen zweiten Lauf heraus – siehe [LatexCompiler].
  */
 object EngineCompat {
 
@@ -67,6 +71,51 @@ object EngineCompat {
 
         if (adaptations.isEmpty()) return null
         return out to adaptations.distinct()
+    }
+
+    /** `\usepackage[…]{fontenc}`; Gruppe 1 = Optionen (ohne Klammern auch ohne Gruppe). */
+    private val FONTENC = Regex(
+        """\\(?:usepackage|RequirePackage)\s*(?:\[([^\]]*)\])?\s*\{\s*fontenc\s*\}""",
+    )
+
+    /** 8-Bit-Kodierungen, die unter XeTeX nur Latin-1 können; alles andere (T2A …) bleibt. */
+    private val LATIN_ENCODINGS = setOf("T1", "OT1", "LY1", "TS1")
+
+    /** „Missing character: There is no š ("161) in font ec-lmr10!" — Gruppe 1 = Zeichen. */
+    private val MISSING_CHAR = Regex("""Missing character: There is no (\S+) \(""")
+
+    /**
+     * Zeichen jenseits von U+00FF, die XeTeX laut [log] weggelassen hat, in
+     * Log-Reihenfolge ohne Dubletten. Leer, wenn nichts fehlt — oder nur Zeichen,
+     * die mit `fontenc` nichts zu tun haben (dann hilft das Herausnehmen nicht).
+     */
+    fun missingBeyondLatin1(log: String): List<String> =
+        MISSING_CHAR.findAll(log)
+            .map { it.groupValues[1] }
+            .filter { s -> s.codePointAt(0) > 0xFF }
+            .distinct()
+            .toList()
+
+    /**
+     * Nimmt `\usepackage[T1]{fontenc}` aus [source]. Danach gilt die XeTeX-Vorgabe
+     * (Unicode, Latin Modern), in der alle Zeichen vorhanden sind. Nur innerhalb der
+     * Zeile, Zeilennummern bleiben gültig.
+     *
+     * @return angepasster Quelltext oder null, wenn kein `fontenc` mit reinen
+     *   Latin-Kodierungen dasteht (dann ist es nicht die Ursache).
+     */
+    fun dropT1Fontenc(source: String): String? {
+        var changed = false
+        val out = FONTENC.replace(source) { m ->
+            val options = m.groups[1]?.value.orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
+            if (options.isNotEmpty() && options.all { it in LATIN_ENCODINGS } && "T1" in options) {
+                changed = true
+                ""
+            } else {
+                m.value
+            }
+        }
+        return if (changed) out else null
     }
 
     /**

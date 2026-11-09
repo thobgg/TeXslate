@@ -173,6 +173,7 @@
     <string name="error_font_user_files">Dort liegt derzeit: %1$s.</string>
     <string name="compat_inputenc_removed">Für XeTeX angepasst: „inputenc“ wird nicht gebraucht und wurde für den Lauf ausgeblendet.</string>
     <string name="compat_driver_rewritten">Für XeTeX angepasst: Treiberoption (pdftex/dvips) wurde für den Lauf auf „xetex“ umgestellt.</string>
+    <string name="compat_fontenc_removed">Für XeTeX angepasst: „fontenc“ (T1) wurde für den Lauf ausgeblendet, sonst fehlten im PDF Zeichen wie %1$s. Pakete für klassische Schriften (z. B. times) fallen dann eventuell auf Latin Modern zurück.</string>
     <string name="note_file_case_fixed">Dateinamen angeglichen (Groß-/Kleinschreibung): %1$s. Auf dem PC ist das egal, auf Android nicht.</string>
     <string name="note_index_not_built">Das Stichwortverzeichnis konnte für dieses Dokument nicht erzeugt werden (etwa wegen einer eigenen Index-Stildatei) und bleibt leer. Der Rest ist vollständig gesetzt.</string>
     <string name="font_fallback_batch">Nicht verfügbare Schriften ersetzt: %1$s. Deine Datei bleibt unverändert.</string>

@@ -73,4 +73,48 @@ class EngineCompatTest {
             what,
         )
     }
+
+    // ── Issue #13: [T1]{fontenc} verliert unter XeTeX Zeichen jenseits Latin-1 ──
+
+    @Test
+    fun fehlendeZeichen_nurJenseitsLatin1() {
+        val log = """
+            Missing character: There is no š ("161) in font ec-lmr10!
+            Missing character: There is no č ("10D) in font ec-lmr10!
+            Missing character: There is no š ("161) in font ec-lmr10!
+            Missing character: There is no ä ("E4) in font cmr10!
+        """.trimIndent()
+        assertEquals(listOf("š", "č"), EngineCompat.missingBeyondLatin1(log))
+    }
+
+    @Test
+    fun ohneFehlendeZeichen_leer() {
+        assertTrue(EngineCompat.missingBeyondLatin1("Output written on document.xdv").isEmpty())
+    }
+
+    @Test
+    fun t1Fontenc_wirdEntfernt_zeilenZahlBleibt() {
+        val src = "\\documentclass{letter}\n\\usepackage[T1]{fontenc}\n\\usepackage[croatian]{babel}\n"
+        val out = EngineCompat.dropT1Fontenc(src)!!
+        assertTrue(!out.contains("fontenc"))
+        assertTrue(out.contains("\\usepackage[croatian]{babel}"))
+        assertEquals(src.lines().size, out.lines().size)
+    }
+
+    @Test
+    fun fontencMitTS1_undRequirePackage() {
+        assertEquals("", EngineCompat.dropT1Fontenc("\\RequirePackage[TS1, T1]{fontenc}"))
+    }
+
+    @Test
+    fun kyrillischeKodierung_bleibt() {
+        // T2A ist keine Latin-Kodierung: Herausnehmen würde Kyrillisch kaputt machen.
+        assertNull(EngineCompat.dropT1Fontenc("\\usepackage[T2A,T1]{fontenc}"))
+    }
+
+    @Test
+    fun ohneT1_nichtsZuTun() {
+        assertNull(EngineCompat.dropT1Fontenc("\\usepackage{fontspec}"))
+        assertNull(EngineCompat.dropT1Fontenc("\\usepackage{fontenc}"))
+    }
 }
