@@ -1,0 +1,2 @@
+* PDF-Vorschau: Zoomen bleibt an der Stelle zwischen den Fingern, Wischen läuft mit Schwung aus, Seiten springen beim Zurückscrollen nicht mehr. Beitrag von rometrister.
+* Polnische, kroatische, tschechische u. a. Zeichen (č, š, ž, ł …) fehlten im PDF, wenn das Dokument \usepackage[T1]{fontenc} lädt. TeXslate kompiliert dann ohne fontenc nach und sagt Bescheid.

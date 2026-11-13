@@ -1,0 +1,2 @@
+* PDF preview: zooming stays at the point between your fingers, panning flings, pages no longer jump when scrolling back up. Contributed by rometrister.
+* Croatian, Polish, Czech and similar characters (č, š, ž, ł …) were missing from the PDF when a document loads \usepackage[T1]{fontenc}. TeXslate now recompiles without fontenc and tells you so.
