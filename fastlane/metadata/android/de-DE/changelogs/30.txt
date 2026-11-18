@@ -1,0 +1,1 @@
+* Kroatische, polnische, tschechische u. a. Zeichen (č, š, ž, ł …) fehlten im PDF auch dann, wenn nicht das Dokument, sondern die Dokumentklasse (.cls) oder ein Paket \usepackage[T1]{fontenc} lädt. TeXslate entfernt es jetzt auch dort für den Lauf (Ergänzung zu alpha28).
