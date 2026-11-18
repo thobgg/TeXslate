@@ -55,4 +55,34 @@ class FontencCompatCompileTest {
         assertTrue("PDF muss entstehen: ${r.engineError.take(160)}", r.ok && File(r.pdfPath).length() > 0)
         assertTrue("Deutsch braucht keinen Eingriff in fontenc: ${r.notes}", r.notes.none { it.contains("fontenc") })
     }
+
+    /** Issue #13, zweiter Teil: fontenc steht nicht im .tex, sondern in der Dokumentklasse. */
+    @Test
+    fun kroatisch_fontencInDerKlasse_alleZeichenImPdf() {
+        val cls = File(File(ctx.filesDir, "job").apply { mkdirs() }, "brief.cls")
+        try {
+            cls.writeText(
+                "\\NeedsTeXFormat{LaTeX2e}\n\\ProvidesClass{brief}[2026/11/18]\n\\LoadClass[11pt]{letter}\n" +
+                    "\\RequirePackage[T1]{fontenc}\n\\RequirePackage[utf8]{inputenc}\n\\RequirePackage[croatian]{babel}\n",
+            )
+            val src = """
+                \documentclass{brief}
+                \begin{document}
+                \begin{letter}{Kišpatićeva 12}
+                \opening{Poštovana prof.,}
+                Preporučena pošta, želio, đak, ČĆŠŽĐ.
+                \closing{Hvala}
+                \end{letter}
+                \end{document}
+            """.trimIndent()
+            val r = runBlocking { LatexCompiler.compile(ctx, src) }
+            val fehlend = EngineCompat.missingBeyondLatin1(r.log)
+            Log.i(tag, "klasse: ok=${r.ok} fehlend=$fehlend notes=${r.notes}")
+            assertTrue("PDF muss entstehen: ${r.engineError.take(160)}", r.ok && File(r.pdfPath).length() > 0)
+            assertTrue("Zeichen fehlen noch: $fehlend", fehlend.isEmpty())
+            assertTrue("Hinweis auf fontenc fehlt: ${r.notes}", r.notes.any { it.contains("fontenc") })
+        } finally {
+            cls.delete()
+        }
+    }
 }

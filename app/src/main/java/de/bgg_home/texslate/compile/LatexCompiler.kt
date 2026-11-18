@@ -231,8 +231,12 @@ object LatexCompiler {
         // einmal ohne fontenc nachkompilieren – deutsche Dokumente bleiben unberührt.
         val lost = EngineCompat.missingBeyondLatin1(result.log)
         if (lost.isNotEmpty()) {
-            EngineCompat.dropT1Fontenc(current)?.let { adapted ->
-                current = adapted
+            // Das Paket steht im Hauptdokument oder in der Dokumentklasse (bzw. einem
+            // Paket) – beides bereinigen, in der Kompilierkopie.
+            val adaptedMain = EngineCompat.dropT1Fontenc(current)
+            val adaptedFiles = EngineCompat.dropT1FontencInFiles(jobDir)
+            if (adaptedMain != null || adaptedFiles.isNotEmpty()) {
+                adaptedMain?.let { current = it }
                 notes += context.getString(R.string.compat_fontenc_removed, lost.take(8).joinToString(" "))
                 result = runEngine(current, jobDir, fontConfig, continueOnErrors)
             }

@@ -117,4 +117,40 @@ class EngineCompatTest {
         assertNull(EngineCompat.dropT1Fontenc("\\usepackage{fontspec}"))
         assertNull(EngineCompat.dropT1Fontenc("\\usepackage{fontenc}"))
     }
+
+    // ── Issue #13, zweiter Teil: fontenc steht in der Dokumentklasse ──
+
+    @get:org.junit.Rule
+    val tmp = org.junit.rules.TemporaryFolder()
+
+    @Test
+    fun fontencInKlasse_wirdEntfernt_dateienAnderswoBleiben() {
+        val dir = tmp.newFolder("job")
+        val cls = java.io.File(dir, "brief.cls").apply {
+            writeText("\\LoadClass{letter}\n\\RequirePackage[T1]{fontenc}\n\\RequirePackage[croatian]{babel}\n")
+        }
+        val sub = java.io.File(dir, "teile").apply { mkdirs() }
+        val sty = java.io.File(sub, "extra.sty").apply { writeText("\\usepackage[T1]{fontenc}\n") }
+        val kyrill = java.io.File(dir, "ru.sty").apply { writeText("\\usepackage[T2A,T1]{fontenc}\n") }
+        val main = java.io.File(dir, "document.tex").apply { writeText("\\usepackage[T1]{fontenc}\n") }
+        val bild = java.io.File(dir, "bild.png").apply { writeBytes(byteArrayOf(1, 2, 3)) }
+
+        val geaendert = EngineCompat.dropT1FontencInFiles(dir)
+
+        assertEquals(setOf("brief.cls", "teile/extra.sty"), geaendert.toSet())
+        assertTrue(!cls.readText().contains("fontenc"))
+        assertTrue("babel bleibt", cls.readText().contains("[croatian]{babel}"))
+        assertEquals("Zeilenzahl bleibt", 4, cls.readText().lines().size)
+        assertEquals("", sty.readText().trim())
+        assertTrue("T2A bleibt", kyrill.readText().contains("T2A"))
+        assertTrue("document.tex ist Sache des Hauptdokuments", main.readText().contains("fontenc"))
+        assertEquals(3, bild.length())
+    }
+
+    @Test
+    fun ordnerOhneT1_nichtsZuTun() {
+        val dir = tmp.newFolder("job2")
+        java.io.File(dir, "x.cls").writeText("\\LoadClass{article}\n")
+        assertTrue(EngineCompat.dropT1FontencInFiles(dir).isEmpty())
+    }
 }

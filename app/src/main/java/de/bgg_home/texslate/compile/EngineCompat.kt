@@ -3,6 +3,8 @@
 
 package de.bgg_home.texslate.compile
 
+import java.io.File
+
 /**
  * Macht Dokumente kompilierbar, die für **pdfLaTeX** geschrieben wurden.
  *
@@ -116,6 +118,31 @@ object EngineCompat {
             }
         }
         return if (changed) out else null
+    }
+
+    /**
+     * Wie [dropT1Fontenc], aber für Klassen- und Paketdateien im Arbeitsordner
+     * (`.cls`, `.sty`, `.clo`, `.def` und eingebundene `.tex`, nicht `document.tex`).
+     * Dokumentklassen laden `fontenc` oft selbst (Issue #13: ein kroatischer Brief
+     * mit eigener `.cls`); das Hauptdokument allein zu bereinigen reicht dann nicht.
+     *
+     * Der Arbeitsordner enthält Kopien, die Dateien des Nutzers bleiben unberührt.
+     *
+     * @return Namen der geänderten Dateien relativ zu [jobDir], leer wenn nichts zu tun war.
+     */
+    fun dropT1FontencInFiles(jobDir: File): List<String> {
+        val changed = mutableListOf<String>()
+        jobDir.walkTopDown()
+            .filter { f ->
+                f.isFile && f.name != "document.tex" &&
+                    listOf(".cls", ".sty", ".clo", ".def", ".tex").any { f.name.endsWith(it, ignoreCase = true) }
+            }
+            .forEach { f ->
+                val text = runCatching { f.readText() }.getOrNull() ?: return@forEach
+                val out = dropT1Fontenc(text) ?: return@forEach
+                if (runCatching { f.writeText(out) }.isSuccess) changed += f.relativeTo(jobDir).path
+            }
+        return changed
     }
 
     /**
