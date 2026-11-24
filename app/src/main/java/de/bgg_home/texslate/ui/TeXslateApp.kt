@@ -976,7 +976,7 @@ fun TeXslateApp(
             return false
         }
         when (event.keyCode) {
-            KeyEvent.KEYCODE_S -> if (!compiling) saveDocument()
+            KeyEvent.KEYCODE_S -> saveDocument()
             KeyEvent.KEYCODE_O -> if (!compiling) openDocument()
             KeyEvent.KEYCODE_F -> if (showSearch) closeSearch() else showSearch = true
             KeyEvent.KEYCODE_G -> showGoToLine = true
@@ -1600,12 +1600,12 @@ private fun AppHeader(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 val tint = MaterialTheme.colorScheme.onPrimaryContainer
                 if (compact) {
-                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
+                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), true, tint, onSave)
                     ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
                     CompileIconButton(compiling = compiling, tint = tint, onCompile = onCompile, onStop = onStop)
                 } else {
                     ToolbarIcon(Icons.Filled.FolderOpen, stringResource(R.string.open), !compiling, tint, onOpen)
-                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), !compiling, tint, onSave)
+                    ToolbarIcon(Icons.Filled.Save, stringResource(R.string.save), true, tint, onSave)
                     ToolbarSeparator(tint)
                     ToolbarIcon(Icons.AutoMirrored.Filled.Undo, stringResource(R.string.undo), !compiling, tint, onUndo)
                     ToolbarIcon(Icons.AutoMirrored.Filled.Redo, stringResource(R.string.redo), !compiling, tint, onRedo)
