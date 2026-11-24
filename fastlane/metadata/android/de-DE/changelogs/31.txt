@@ -1,0 +1,2 @@
+* Erste Beta. Der Funktionsumfang für 1.0 ist komplett, ab jetzt überwiegend Fehlerkorrekturen und kleine Verbesserungen.
+* „Öffnen mit TeXslate“: .tex-, .sty-, .cls- und .bib-Dateien lassen sich jetzt aus anderen Apps wie Synology Drive, Dateimanagern oder Mail öffnen und in dieselbe Datei zurückspeichern (#15).

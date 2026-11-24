@@ -144,7 +144,7 @@ APK (ABI splits). `armeabi-v7a` (older 32-bit devices) is still open.
 
 ## Status
 
-🧪 **Alpha** — usable on real devices (Galaxy Tab S8 Ultra, S9, S5e; Android 11 &
+🧪 **Beta** — usable on real devices (Galaxy Tab S8 Ultra, S9, S5e; Android 11 &
 16). Roadmap and milestones: see [`PROJECT.md`](./PROJECT.md).
 
 - [x] **M0** — proof of concept (Rust↔Kotlin bridge, first PDF produced locally)
@@ -190,7 +190,7 @@ The current edition is available in code as `BuildConfig.HAS_BIBER`.
 
 _biber on the tablet (thesis edition): the bundled `Bibliography (biber)` template — `biblatex` with `backend=biber`, `\textcite`/`\parencite` and a sorted numeric bibliography, resolved on-device by the cross-compiled biber (Perl + biber 2.17)._
 
-## 🧪 Alpha testers wanted!
+## 🧪 Beta testers wanted!
 
 TeXslate works on the developer's devices — now it needs **yours**. If you write
 LaTeX and own an Android tablet or phone, five minutes of your time help a lot:
@@ -206,7 +206,7 @@ newer than the tablet split view), Android 8–10, and real-world documents (the
 Beamer decks, `biblatex` bibliographies). _Feedback auf Deutsch ist genauso
 willkommen._
 
-## Install (alpha)
+## Install (beta)
 
 - **[F-Droid](https://f-droid.org/packages/de.bgg_home.texslate/)** — the core edition
   (everything except biber), built from source by F-Droid and signed with the same key
@@ -217,7 +217,7 @@ The full edition (with biber) and all builds are on the
 
 - **Tablet/phone:** `…-arm64-v8a.apk` · **emulator:** `…-x86_64.apk`
 - **Auto-updates:** add this repo as a source in [Obtainium](https://github.com/ImranR98/Obtainium)
-  — the recommended install path during the alpha.
+  — the recommended install path during the beta.
 - Requirements: **Android 8.0+**, allow “install from unknown sources”.
 
 > The **first compile** downloads the TeX package bundle once over the network

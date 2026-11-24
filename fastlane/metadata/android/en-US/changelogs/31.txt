@@ -1,0 +1,2 @@
+* First beta. Feature set for 1.0 is complete; from here on mostly fixes and small improvements.
+* "Open with TeXslate": .tex, .sty, .cls and .bib files can now be opened from other apps such as Synology Drive, file managers or mail, and saved back to the same file (#15).
