@@ -307,6 +307,8 @@ fun TeXslateApp(
     windowSizeClass: WindowSizeClass,
     onRegisterDraftSaver: (() -> Unit) -> Unit = {},
     onRegisterShortcutHandler: ((KeyEvent) -> Boolean) -> Unit = {},
+    openRequest: android.net.Uri? = null,
+    onOpenRequestConsumed: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -522,32 +524,49 @@ fun TeXslateApp(
         }
     }
 
+    // Gemeinsamer Öffnen-Weg: SAF-Dialog (ACTION_OPEN_DOCUMENT) und „Öffnen mit“
+    // aus anderen Apps (ACTION_VIEW/EDIT). Bei „Öffnen mit“ gibt es oft nur ein
+    // vorübergehendes Recht – dann zählt, ob dieses das Schreiben erlaubt.
+    fun openFromUri(uri: android.net.Uri) {
+        val persisted = DocumentStore.takePersistablePermission(context, uri)
+        canWrite = persisted || context.checkUriPermission(
+            uri, android.os.Process.myPid(), android.os.Process.myUid(),
+            android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val tree = projectTree
+        val within = tree != null && ProjectStore.isWithinTree(uri, tree)
+        currentInProject = within
+        scope.launch {
+            val text = DocumentStore.read(context, uri)
+            editor?.setText(text)
+            currentUri = uri
+            currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
+            // Mehrteilige Datei außerhalb des Projekts geöffnet → \input & Co.
+            // finden ihre Geschwisterdateien nicht. Klar darauf hinweisen,
+            // statt den Nutzer später ins „File not found" laufen zu lassen.
+            if (!within && referencesExternalFiles(text)) {
+                snackbarHostState.showSnackbar(
+                    context.getString(R.string.snackbar_multifile_hint, currentName),
+                )
+            } else {
+                snackbarHostState.showSnackbar(context.getString(R.string.snackbar_opened, currentName))
+            }
+        }
+    }
+
     // SAF: Datei öffnen (ACTION_OPEN_DOCUMENT).
     val openLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
     ) { uri ->
-        if (uri != null) {
-            canWrite = DocumentStore.takePersistablePermission(context, uri)
-            val tree = projectTree
-            val within = tree != null && ProjectStore.isWithinTree(uri, tree)
-            currentInProject = within
-            scope.launch {
-                val text = DocumentStore.read(context, uri)
-                editor?.setText(text)
-                currentUri = uri
-                currentName = DocumentStore.displayName(context, uri) ?: "dokument.tex"
-                // Mehrteilige Datei außerhalb des Projekts geöffnet → \input & Co.
-                // finden ihre Geschwisterdateien nicht. Klar darauf hinweisen,
-                // statt den Nutzer später ins „File not found" laufen zu lassen.
-                if (!within && referencesExternalFiles(text)) {
-                    snackbarHostState.showSnackbar(
-                        context.getString(R.string.snackbar_multifile_hint, currentName),
-                    )
-                } else {
-                    snackbarHostState.showSnackbar(context.getString(R.string.snackbar_opened, currentName))
-                }
-            }
-        }
+        if (uri != null) openFromUri(uri)
+    }
+
+    // „Öffnen mit TeXslate“ aus einer anderen App: erst öffnen, wenn der Editor steht.
+    LaunchedEffect(openRequest, editor) {
+        val uri = openRequest ?: return@LaunchedEffect
+        if (editor == null) return@LaunchedEffect
+        openFromUri(uri)
+        onOpenRequestConsumed()
     }
 
     // Aktuelle Ordner-Ebene (Wurzel oder Unterordner) neu laden.
